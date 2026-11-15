@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- .avatar-large content box: 55px inside the 5px white border. -->
+<com.constanvel.hytracl.CircleFrame xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="55dp"
+    android:layout_height="55dp"
+    android:background="@drawable/bg_avatar"
+    android:importantForAccessibility="noHideDescendants">
+
+    <ImageView
+        android:layout_width="85dp"
+        android:layout_height="81dp"
+        android:layout_marginStart="-15dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/hya_avatar"
+        tools:ignore="ContentDescription" />
+</com.constanvel.hytracl.CircleFrame>

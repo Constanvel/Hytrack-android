@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Antrean & jadwal (features/help/help.tsx: QueueGuide). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        style="@style/Text.H2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:text="@string/ikuti_kunjungan_anda" />
+
+    <include
+        android:id="@+id/faq1"
+        layout="@layout/item_details" />
+
+    <include
+        android:id="@+id/faq2"
+        layout="@layout/item_details" />
+
+    <include
+        android:id="@+id/faq3"
+        layout="@layout/item_details" />
+
+    <TextView
+        android:id="@+id/openVisit"
+        style="@style/Widget.HyTrack.Button"
+        android:text="@string/buka_kunjungan" />
+
+    <include
+        android:id="@+id/hyaHelp"
+        layout="@layout/view_hya_help" />
+</merge>

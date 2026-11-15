@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hya (features/help/hya.tsx): introduction before the first question, then the conversation. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <LinearLayout
+        android:id="@+id/intro"
+        style="@style/Widget.HyTrack.Stack"
+        android:divider="@drawable/gap_20">
+
+        <TextView
+            style="@style/Text.Eyebrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/panduan_kunjungan_anda"
+            android:textColor="@color/primary" />
+
+        <ImageView
+            android:layout_width="144dp"
+            android:layout_height="155dp"
+            android:layout_gravity="center_horizontal"
+            android:contentDescription="@string/hya_asisten_layanan_rumah_sakit"
+            android:scaleType="fitXY"
+            android:src="@drawable/hya" />
+
+        <LinearLayout
+            style="@style/Widget.HyTrack.Stack"
+            android:divider="@drawable/gap_12">
+
+            <TextView
+                style="@style/Text.H2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:accessibilityHeading="true"
+                android:text="@string/halo_saya_hya" />
+
+            <TextView
+                style="@style/Text.Lead"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/saya_bantu_anda_mengikuti_antrean_ndan" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/visit"
+            style="@style/Widget.HyTrack.Notice"
+            tools:text="Belum ada kunjungan aktif. Anda tetap bisa bertanya tentang panduan layanan." />
+
+        <TextView
+            style="@style/Text.H3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/apa_yang_ingin_anda_ketahui" />
+
+        <LinearLayout
+            android:id="@+id/suggestions"
+            style="@style/Widget.HyTrack.Stack"
+            android:divider="@drawable/gap_14" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/chat"
+        style="@style/Widget.HyTrack.Stack"
+        android:divider="@drawable/gap_20"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/context"
+            style="@style/Widget.HyTrack.Notice"
+            tools:text="Panduan layanan" />
+
+        <LinearLayout
+            android:id="@+id/messages"
+            style="@style/Widget.HyTrack.Stack"
+            android:accessibilityLiveRegion="polite"
+            android:contentDescription="@string/percakapan_hya"
+            android:divider="@drawable/gap_16" />
+
+        <include
+            android:id="@+id/directions"
+            layout="@layout/view_row_link" />
+
+        <include
+            android:id="@+id/late"
+            layout="@layout/item_suggestion" />
+
+        <TextView
+            android:id="@+id/restart"
+            style="@style/Widget.HyTrack.TextButton"
+            android:text="@string/mulai_percakapan_baru" />
+    </LinearLayout>
+
+    <TextView
+        style="@style/Widget.HyTrack.Notice.Warning"
+        android:text="@string/untuk_keluhan_atau_pertanyaan_medis" />
+</merge>

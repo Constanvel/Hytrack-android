@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Notifikasi (features/help/help.tsx: Notifications). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <LinearLayout
+        android:id="@+id/empty"
+        style="@style/Widget.HyTrack.Card.Empty">
+
+        <TextView
+            style="@style/Text.H2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/belum_ada_notifikasi" />
+
+        <TextView
+            style="@style/Text.P.Muted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/pemberitahuan_muncul_saat_antrean_anda" />
+
+        <TextView
+            android:id="@+id/emptyAction"
+            style="@style/Widget.HyTrack.Button.Secondary"
+            android:text="@string/buka_kunjungan" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/list"
+        style="@style/Widget.HyTrack.Stack"
+        android:divider="@drawable/gap_12" />
+
+    <TextView
+        android:id="@+id/note"
+        style="@style/Text.Small.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/notifikasi_hanya_tampil_di_aplikasi_sms" />
+
+    <TextView
+        android:id="@+id/open"
+        style="@style/Widget.HyTrack.Button.Secondary"
+        android:text="@string/buka_kunjungan" />
+</merge>

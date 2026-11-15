@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Check-in kedatangan (features/patient/visit.tsx: CheckIn). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        style="@style/Text.H2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:text="@string/tunjukkan_qr_ini_nkepada_petugas" />
+
+    <TextView
+        style="@style/Text.P.Muted"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/meja_check_in_gedung_a_lantai_2" />
+
+    <!-- .card.qr-card -->
+    <LinearLayout
+        style="@style/Widget.HyTrack.Card"
+        android:gravity="center_horizontal"
+        android:tag="guide">
+
+        <TextView
+            android:id="@+id/who"
+            style="@style/Text.H3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            tools:text="A-027 · Siti Aminah" />
+
+        <ImageView
+            android:layout_width="232dp"
+            android:layout_height="232dp"
+            android:contentDescription="@string/gambar_qr_contoh_gunakan_nomor_check_in"
+            android:src="@drawable/qr_example" />
+
+        <TextView
+            android:id="@+id/code"
+            style="@style/Text.Small.Muted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            tools:text="HT-000126 · Nomor check-in" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/status"
+        style="@style/Widget.HyTrack.Notice.Warning"
+        tools:text="Belum check-in · Batas 08.45" />
+
+    <LinearLayout
+        android:id="@+id/route"
+        style="@style/Widget.HyTrack.Stack"
+        android:layout_marginTop="10dp" />
+
+    <TextView
+        style="@style/Text.P.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/gambar_qr_masih_contoh_dan_belum_dapat" />
+
+    <TextView
+        android:id="@+id/manual"
+        style="@style/Widget.HyTrack.Button.Secondary"
+        android:text="@string/nomor_check_in_manual" />
+
+    <TextView
+        android:id="@+id/manualCode"
+        style="@style/Widget.HyTrack.Notice"
+        android:visibility="gone"
+        tools:text="Nomor check-in: HT-000126. Sebutkan kepada petugas." />
+
+    <include
+        android:id="@+id/demo"
+        layout="@layout/view_demo_controls" />
+
+    <TextView
+        android:id="@+id/queue"
+        style="@style/Widget.HyTrack.Button"
+        android:text="@string/lihat_antrean_saya"
+        android:visibility="gone" />
+</merge>

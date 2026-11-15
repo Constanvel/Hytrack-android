@@ -1,5 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- HyTrack palette, from resources/css/app.css (:root) and auth.css of the web app. -->
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="bg">#F8F7F1</color>
+    <color name="text">#183D39</color>
+    <color name="muted">#566C65</color>
+    <color name="primary">#0B7268</color>
+    <color name="primary_hover">#085D55</color>
+    <color name="pale">#E1EFE9</color>
+    <color name="pale_hover">#CFE5DB</color>
+    <color name="white_hover">#EDF7F1</color>
+    <color name="border">#DCE3DD</color>
+    <color name="warning">#FFF0D1</color>
+    <color name="warning_text">#805216</color>
+    <color name="info">#E5EDF5</color>
+    <color name="info_text">#345978</color>
+
+    <color name="hero_eyebrow">#D4ECE3</color>
+    <color name="hero_text">#E2EFEA</color>
+    <color name="hero_rule">#55FFFFFF</color>
+
+    <!-- Brand lockup and sign-in / sign-up (Figma 00a, 00b). -->
+    <color name="brand">#086F65</color>
+    <color name="brand_muted">#5C706C</color>
+    <color name="auth_text">#173D3B</color>
+    <color name="auth_benefit">#E1EFE7</color>
+    <color name="auth_benefit_text">#5B6F6B</color>
+    <color name="error">#9B3B1F</color>
+
+    <color name="unread">#BC6748</color>
+    <color name="guide_outline">#E9A93B</color>
+    <color name="demo_border">#A4BCB0</color>
+    <color name="avatar_ring">#D6E6DE</color>
 </resources>

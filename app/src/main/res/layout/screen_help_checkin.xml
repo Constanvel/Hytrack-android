@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Panduan check-in (features/help/help.tsx: CheckInGuide). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <LinearLayout
+        style="@style/Widget.HyTrack.Stack"
+        android:divider="@drawable/gap_12">
+
+        <TextView
+            style="@style/Text.H2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:accessibilityHeading="true"
+            android:text="@string/cara_check_in_dengan_qr" />
+
+        <TextView
+            style="@style/Text.Lead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tunjukkan_qr_kunjungan_anda_kepada" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/steps"
+        style="@style/Widget.HyTrack.Card"
+        android:divider="@drawable/gap_18"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp" />
+
+    <LinearLayout style="@style/Widget.HyTrack.WarningCard">
+
+        <TextView
+            style="@style/Text.Strong"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/qr_sulit_dipindai"
+            android:textColor="@color/warning_text" />
+
+        <TextView
+            style="@style/Text.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tunjukkan_nomor_check_in_manual_atau"
+            android:textColor="@color/warning_text" />
+    </LinearLayout>
+
+    <!-- .button with a trailing (primary-on-primary) arrow, as on the web. -->
+    <LinearLayout
+        android:id="@+id/openVisit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_btn_primary"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:minHeight="52dp"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <TextView
+            style="@style/Text.Strong"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/buka_kunjungan_aktif"
+            android:textColor="@color/white" />
+
+        <FrameLayout
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="12dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_arrow"
+                tools:ignore="ContentDescription" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <include
+        android:id="@+id/hyaHelp"
+        layout="@layout/view_hya_help" />
+</merge>

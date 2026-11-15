@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Petunjuk ruangan (features/help/help.tsx: Directions). Static text, like the web. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        style="@style/Widget.HyTrack.Notice.Warning"
+        android:text="@string/denah_rumah_sakit_belum_tersedia_rute" />
+
+    <TextView
+        style="@style/Text.H2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:text="@string/poli_penyakit_dalam" />
+
+    <LinearLayout style="@style/Widget.HyTrack.Card">
+
+        <TextView
+            style="@style/Text.H3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ruang_a_204" />
+
+        <TextView
+            style="@style/Text.P.Muted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/gedung_a_lantai_2" />
+
+        <TextView
+            style="@style/Text.P"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/naik_ke_lantai_2_melalui_lift_gedung_a" />
+    </LinearLayout>
+
+    <TextView
+        style="@style/Text.H3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:text="@string/setelah_pemeriksaan" />
+
+    <LinearLayout
+        android:id="@+id/steps"
+        style="@style/Widget.HyTrack.Card"
+        android:divider="@drawable/gap_18"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp" />
+
+    <TextView
+        style="@style/Widget.HyTrack.Notice.Info"
+        android:text="@string/butuh_rute_aksesibel_minta_pendampingan" />
+
+    <TextView
+        android:id="@+id/help"
+        style="@style/Widget.HyTrack.Button.Secondary"
+        android:text="@string/bantuan_kunjungan" />
+</merge>

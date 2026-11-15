@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from public/assets/wave-mint.svg of the HyTrack web app. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="412dp"
+    android:height="170dp"
+    android:viewportWidth="412"
+    android:viewportHeight="170">
+    <path android:pathData="M0 76C52 54 91 65 133 89C181 117 221 111 267 83C318 52 359 56 412 82V170H0V76Z"
+        android:fillColor="#EBE9F6F1" />
+    <path android:pathData="M0 104C52 83 95 91 141 112C189 134 232 132 279 106C328 79 369 82 412 103V170H0V104Z"
+        android:fillColor="#ADD7EEE6" />
+    <path android:pathData="M0 130C57 112 102 119 151 137C205 157 256 154 303 131C345 111 379 113 412 127V170H0V130Z"
+        android:fillColor="#61BFE4D8" />
+    <path android:pathData="M-10 58C48 39 88 47 132 70C181 96 222 94 271 67C322 39 367 42 422 65"
+        android:strokeColor="#5772BFAE"
+        android:strokeWidth="1.4" />
+    <path android:pathData="M-10 72C47 53 88 61 132 84C181 110 222 108 271 81C322 53 367 56 422 79"
+        android:strokeColor="#5772BFAE"
+        android:strokeWidth="1.4" />
+    <path android:pathData="M34 147C35.1046 147 36 146.105 36 145C36 143.895 35.1046 143 34 143C32.8954 143 32 143.895 32 145C32 146.105 32.8954 147 34 147Z"
+        android:fillColor="#5C83C8B7" />
+    <path android:pathData="M48 138.6C48.8837 138.6 49.6 137.884 49.6 137C49.6 136.116 48.8837 135.4 48 135.4C47.1163 135.4 46.4 136.116 46.4 137C46.4 137.884 47.1163 138.6 48 138.6Z"
+        android:fillColor="#5C83C8B7" />
+    <path android:pathData="M63 149.4C63.7732 149.4 64.4 148.773 64.4 148C64.4 147.227 63.7732 146.6 63 146.6C62.2268 146.6 61.6 147.227 61.6 148C61.6 148.773 62.2268 149.4 63 149.4Z"
+        android:fillColor="#5C83C8B7" />
+    <path android:pathData="M370 144C371.105 144 372 143.105 372 142C372 140.895 371.105 140 370 140C368.895 140 368 140.895 368 142C368 143.105 368.895 144 370 144Z"
+        android:fillColor="#5C83C8B7" />
+    <path android:pathData="M383 133.5C383.828 133.5 384.5 132.828 384.5 132C384.5 131.172 383.828 130.5 383 130.5C382.172 130.5 381.5 131.172 381.5 132C381.5 132.828 382.172 133.5 383 133.5Z"
+        android:fillColor="#5C83C8B7" />
+    <path android:pathData="M397 147.3C397.718 147.3 398.3 146.718 398.3 146C398.3 145.282 397.718 144.7 397 144.7C396.282 144.7 395.7 145.282 395.7 146C395.7 146.718 396.282 147.3 397 147.3Z"
+        android:fillColor="#5C83C8B7" />
+</vector>

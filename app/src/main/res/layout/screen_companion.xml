@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Akses pendamping (features/patient/companion.tsx: CompanionAccess). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        style="@style/Text.H2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:text="@string/biar_keluarga_ikut_tenang" />
+
+    <TextView
+        style="@style/Text.P.Muted"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/bagikan_perkembangan_kunjungan_bukan" />
+
+    <LinearLayout style="@style/Widget.HyTrack.Hero">
+
+        <TextView
+            style="@style/Text.Hero.Eyebrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kunjungan_anda" />
+
+        <TextView
+            android:id="@+id/who"
+            style="@style/Text.Hero.H2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:lineHeight="32.2sp"
+            android:textSize="23sp"
+            tools:text="Siti Aminah · A-027" />
+
+        <TextView
+            android:id="@+id/when"
+            style="@style/Text.Hero.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Minggu, 15 November 2026 · RS Harapan Sehat" />
+    </LinearLayout>
+
+    <LinearLayout style="@style/Widget.HyTrack.Card">
+
+        <TextView
+            style="@style/Text.H3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/yang_bisa_dilihat_pendamping" />
+
+        <!-- .checklist resets the card's 12px margin, so it sits right under the heading. -->
+        <LinearLayout
+            style="@style/Widget.HyTrack.Stack"
+            android:layout_marginTop="-12dp"
+            android:divider="@drawable/gap_10">
+
+            <TextView
+                style="@style/Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/status_dan_nomor_antrean"
+                android:textColor="@color/primary" />
+
+            <TextView
+                style="@style/Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/perkiraan_waktu_tunggu"
+                android:textColor="@color/primary" />
+
+            <TextView
+                style="@style/Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lokasi_layanan_berikutnya"
+                android:textColor="@color/primary" />
+
+            <TextView
+                style="@style/Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/proses_penyiapan_obat"
+                android:textColor="@color/primary" />
+        </LinearLayout>
+
+        <View style="@style/Widget.HyTrack.Hr" />
+
+        <TextView
+            style="@style/Text.P.Muted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tidak_termasuk_diagnosis_hasil" />
+    </LinearLayout>
+
+    <LinearLayout style="@style/Widget.HyTrack.WarningCard">
+
+        <TextView
+            style="@style/Text.H3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/akses_otomatis_berakhir"
+            android:textColor="@color/warning_text" />
+
+        <TextView
+            style="@style/Text.P"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/saat_kunjungan_selesai_atau_pada_hari"
+            android:textColor="@color/warning_text" />
+    </LinearLayout>
+
+    <TextView
+        style="@style/Text.P.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/hanya_bagikan_kepada_orang_tepercaya" />
+
+    <!-- Shown once, right after the link is created. -->
+    <LinearLayout
+        android:id="@+id/linkCard"
+        style="@style/Widget.HyTrack.Card"
+        android:divider="@drawable/gap_14"
+        android:visibility="gone">
+
+        <TextView
+            style="@style/Text.H3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tautan_pendamping" />
+
+        <TextView
+            android:id="@+id/link"
+            style="@style/Text.Small"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:breakStrategy="simple"
+            android:textIsSelectable="true"
+            tools:text="https://hytrack.demo/pantauan/GG60EtnZF3jgOh3" />
+
+        <TextView
+            style="@style/Text.Small.Muted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/salin_sekarang_demi_keamanan_tautan_ini" />
+
+        <TextView
+            android:id="@+id/copy"
+            style="@style/Widget.HyTrack.Button.Secondary"
+            android:text="@string/salin_tautan" />
+
+        <TextView
+            android:id="@+id/openView"
+            style="@style/Widget.HyTrack.Button.Secondary"
+            android:text="@string/buka_pantauan_pendamping" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/activate"
+        style="@style/Widget.HyTrack.Button"
+        android:text="@string/aktifkan_akses_pendamping" />
+
+    <TextView
+        android:id="@+id/activeNotice"
+        style="@style/Widget.HyTrack.Notice.Info"
+        android:text="@string/akses_pendamping_aktif_tautan_lama_tidak" />
+
+    <TextView
+        android:id="@+id/renew"
+        style="@style/Widget.HyTrack.Button.Secondary"
+        android:text="@string/buat_tautan_baru" />
+
+    <TextView
+        android:id="@+id/revoke"
+        style="@style/Widget.HyTrack.Button.Danger"
+        android:text="@string/cabut_akses_pendamping" />
+</merge>

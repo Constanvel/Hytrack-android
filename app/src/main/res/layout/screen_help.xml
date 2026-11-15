@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bantuan (features/help/help.tsx: Help). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <!-- .support-card -->
+    <LinearLayout
+        android:id="@+id/support"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_support_card"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <include layout="@layout/view_avatar" />
+
+            <LinearLayout
+                style="@style/Widget.HyTrack.Stack"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="16dp"
+                android:divider="@drawable/gap_10">
+
+                <TextView
+                    style="@style/Text.H2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:lineHeight="28.4sp"
+                    android:text="@string/ask_hya"
+                    android:textSize="21sp" />
+
+                <TextView
+                    style="@style/Text.Small.Muted"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/asisten_digital_hytrack" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            style="@style/Text.P"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/bantu_cek_antrean_dan_arah_layanan" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="52dp"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Text.Link"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/mulai_percakapan" />
+
+            <FrameLayout
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_arrow"
+                    tools:ignore="ContentDescription" />
+            </FrameLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <include
+        android:id="@+id/search"
+        layout="@layout/view_search" />
+
+    <TextView
+        android:id="@+id/guideRestart"
+        style="@style/Widget.HyTrack.TextButton"
+        tools:text="Tampilkan panduan penggunaan" />
+
+    <TextView
+        style="@style/Text.H3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:text="@string/panduan_yang_sering_dicari" />
+
+    <LinearLayout
+        android:id="@+id/topics"
+        style="@style/Widget.HyTrack.Stack"
+        android:showDividers="none" />
+
+    <TextView
+        android:id="@+id/noTopic"
+        style="@style/Text.P.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:accessibilityLiveRegion="polite"
+        android:text="@string/topik_tidak_ditemukan_coba_kata_lain_atau"
+        android:visibility="gone" />
+
+    <LinearLayout style="@style/Widget.HyTrack.Card">
+
+        <TextView
+            style="@style/Text.H3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/butuh_bantuan_petugas" />
+
+        <TextView
+            style="@style/Text.P.Muted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/datangi_meja_check_in_rumah_sakit" />
+    </LinearLayout>
+</merge>

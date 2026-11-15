@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- .guide-active [data-guide]: 3px outline, 4px offset -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:inset="-7dp">
+    <shape>
+    <stroke android:width="3dp" android:color="@color/guide_outline" />
+    <corners android:radius="24dp" />
+</shape>
+</inset>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- CSS px map 1:1 to dp (the web layout is designed for a ~393-412px wide phone). -->
+<resources>
+    <dimen name="page_gutter">24dp</dimen>
+    <dimen name="radius">20dp</dimen>
+    <dimen name="header_min_height">72dp</dimen>
+    <dimen name="bottom_nav_height">80dp</dimen>
+    <!-- Bottom nav (80) + gap (16) + Hya bubble (76): keeps the last control clear of the bubble. -->
+    <dimen name="shell_bottom_space">172dp</dimen>
+    <dimen name="button_height">52dp</dimen>
+    <dimen name="touch_target">44dp</dimen>
+</resources>

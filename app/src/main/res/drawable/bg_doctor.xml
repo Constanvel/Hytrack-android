@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- .doctor-option (aria-pressed = selected) -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<item android:state_selected="true"><shape>
+    <solid android:color="#FFFFFF" />
+    <stroke android:width="2dp" android:color="@color/primary" />
+    <corners android:radius="20dp" />
+</shape></item>
+<item><shape>
+    <solid android:color="#FFFFFF" />
+    <stroke android:width="2dp" android:color="#00000000" />
+    <corners android:radius="20dp" />
+</shape></item>
+</selector>

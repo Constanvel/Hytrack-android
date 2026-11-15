@@ -5,14 +5,15 @@ plugins {
 android {
     namespace = "com.constanvel.hytracl"
     compileSdk {
-        version = release(36) {
+        version = release(37) {
             minorApiLevel = 1
         }
     }
 
     defaultConfig {
         applicationId = "com.constanvel.hytracl"
-        minSdk = 24
+        // 28: android:lineHeight, which the CSS line-heights are ported to.
+        minSdk = 28
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -26,6 +27,9 @@ android {
                 enable = false
             }
         }
+    }
+    buildFeatures {
+        viewBinding = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

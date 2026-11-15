@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from public/assets/send.svg of the HyTrack web app. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="19.8dp"
+    android:height="17.8dp"
+    android:viewportWidth="19.8"
+    android:viewportHeight="17.8">
+    <path android:pathData="M3.90003 8.90002L0.900032 16.9L18.9 8.90002L0.900032 0.90002L3.90003 8.90002ZM18.9 8.90002H3.90003"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

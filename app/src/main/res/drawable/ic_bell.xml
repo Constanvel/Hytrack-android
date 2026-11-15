@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from public/assets/bell.svg of the HyTrack web app. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="13.8dp"
+    android:height="16.8dp"
+    android:viewportWidth="13.8"
+    android:viewportHeight="16.8">
+    <path android:pathData="M4.9 15.9H8.9M0.900001 12.9H12.9L10.9 9.9V4.9C10.9 3.83913 10.4786 2.82172 9.72843 2.07157C8.97828 1.32143 7.96087 0.9 6.9 0.9C5.83914 0.9 4.82172 1.32143 4.07157 2.07157C3.32143 2.82172 2.9 3.83913 2.9 4.9V9.9L0.900001 12.9Z"
+        android:strokeColor="#0B7268"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

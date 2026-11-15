@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- .notification-list .unread: card with a 4px primary left border -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><shape>
+    <solid android:color="@color/primary" />
+    <corners android:radius="20dp" />
+</shape></item>
+    <item android:left="4dp"><shape>
+    <solid android:color="#FFFFFF" />
+    <corners android:topLeftRadius="16dp" android:topRightRadius="20dp" android:bottomRightRadius="20dp" android:bottomLeftRadius="16dp" />
+</shape></item>
+</layer-list>

@@ -1,8 +1,22 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Hytracl" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <!-- HyTrack is light-only on the web, so the app keeps one light theme. -->
+    <style name="Base.Theme.Hytracl" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/primary</item>
+        <item name="colorSurface">@color/bg</item>
+        <item name="colorOnSurface">@color/text</item>
+        <item name="colorControlActivated">@color/primary</item>
+        <item name="colorControlHighlight">#1F0B7268</item>
+        <item name="android:colorBackground">@color/bg</item>
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:fontFamily">@font/jakarta</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:textColorHighlight">#330B7268</item>
     </style>
 
     <style name="Theme.Hytracl" parent="Base.Theme.Hytracl" />

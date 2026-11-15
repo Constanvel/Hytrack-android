@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Typography and components ported from resources/css/app.css of the HyTrack web app.
+  Sizes are CSS px as sp/dp; line heights are CSS line-height × font size;
+  letter spacing is CSS px ÷ font size (em).
+-->
+<resources>
+    <!-- Implicit parent of the Widget.HyTrack.* styles. -->
+    <style name="Widget.HyTrack" parent="" />
+    <!-- Text ============================================================== -->
+    <style name="Text">
+        <item name="android:fontFamily">@font/jakarta_regular</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <!-- p { line-height: 1.65 } -->
+    <style name="Text.P">
+        <item name="android:lineHeight">23.1sp</item>
+    </style>
+    <style name="Text.P.Muted">
+        <item name="android:textColor">@color/muted</item>
+    </style>
+    <!-- .small { font-size: 12px; line-height: 1.6 } -->
+    <style name="Text.Small">
+        <item name="android:textSize">12sp</item>
+        <item name="android:lineHeight">19.2sp</item>
+    </style>
+    <style name="Text.Small.Muted">
+        <item name="android:textColor">@color/muted</item>
+    </style>
+    <style name="Text.Strong">
+        <item name="android:fontFamily">@font/jakarta_bold</item>
+    </style>
+    <style name="Text.H1">
+        <item name="android:fontFamily">@font/jakarta_bold</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:letterSpacing">-0.027</item>
+        <item name="android:lineHeight">32.4sp</item>
+    </style>
+    <style name="Text.H2">
+        <item name="android:fontFamily">@font/jakarta_bold</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:letterSpacing">-0.027</item>
+        <item name="android:lineHeight">35.1sp</item>
+    </style>
+    <style name="Text.H3">
+        <item name="android:fontFamily">@font/jakarta_bold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:letterSpacing">-0.0167</item>
+        <item name="android:lineHeight">24.3sp</item>
+    </style>
+    <style name="Text.Eyebrow">
+        <item name="android:fontFamily">@font/jakarta_bold</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">@color/muted</item>
+        <item name="android:lineHeight">16.5sp</item>
+    </style>
+    <!-- .intro p -->
+    <style name="Text.Lead">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/muted</item>
+        <item name="android:lineHeight">26.4sp</item>
+    </style>
+    <!-- .hero -->
+    <style name="Text.Hero.Eyebrow" parent="Text.Eyebrow">
+        <item name="android:textColor">@color/hero_eyebrow</item>
+    </style>
+    <style name="Text.Hero.H2" parent="Text.H2">
+        <item name="android:textSize">28sp</item>
+        <item name="android:letterSpacing">-0.025</item>
+        <item name="android:lineHeight">39.2sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+    <style name="Text.Hero.H3" parent="Text.H3">
+        <item name="android:textColor">@color/white</item>
+    </style>
+    <style name="Text.Hero.P" parent="Text.P">
+        <item name="android:textColor">@color/hero_text</item>
+    </style>
+    <style name="Text.Hero.Small" parent="Text.Small">
+        <item name="android:textColor">@color/hero_text</item>
+    </style>
+    <!-- .ticket-number -->
+    <style name="Text.Ticket">
+        <item name="android:fontFamily">@font/jakarta_bold</item>
+        <item name="android:textSize">72sp</item>
+        <item name="android:letterSpacing">-0.028</item>
+        <item name="android:lineHeight">93.6sp</item>
+    </style>
+    <!-- .metrics strong / small -->
+    <style name="Text.Metric">
+        <item name="android:fontFamily">@font/jakarta_bold</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:lineHeight">33.6sp</item>
+    </style>
+    <style name="Text.MetricLabel" parent="Text.Small.Muted">
+        <item name="android:layout_marginTop">5dp</item>
+    </style>
+    <style name="Text.Link">
+        <item name="android:fontFamily">@font/jakarta_bold</item>
+        <item name="android:textColor">@color/primary</item>
+    </style>
+
+    <!-- Buttons ============================================================ -->
+    <style name="Widget.HyTrack.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">13dp</item>
+        <item name="android:paddingBottom">13dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/bg_btn_primary</item>
+        <item name="android:fontFamily">@font/jakarta_bold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+    <style name="Widget.HyTrack.Button.Secondary">
+        <item name="android:background">@drawable/bg_btn_secondary</item>
+        <item name="android:textColor">@color/primary</item>
+    </style>
+    <style name="Widget.HyTrack.Button.White">
+        <item name="android:background">@drawable/bg_btn_white</item>
+        <item name="android:textColor">@color/primary</item>
+    </style>
+    <style name="Widget.HyTrack.Button.Danger">
+        <item name="android:background">@drawable/bg_btn_danger</item>
+        <item name="android:textColor">@color/warning_text</item>
+    </style>
+    <!-- .text-button -->
+    <style name="Widget.HyTrack.TextButton" parent="Text.Link">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">@dimen/touch_target</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:gravity">center_vertical|start</item>
+        <item name="android:background">@null</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <!-- Containers ========================================================= -->
+    <style name="Widget.HyTrack.Stack">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:showDividers">middle</item>
+    </style>
+    <!-- .card > * + * { margin-top: 12px } -->
+    <style name="Widget.HyTrack.Card" parent="Widget.HyTrack.Stack">
+        <item name="android:background">@drawable/bg_card</item>
+        <!-- Per side, not android:padding: that would override a layout's paddingTop/Bottom. -->
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:paddingTop">20dp</item>
+        <item name="android:paddingBottom">20dp</item>
+        <item name="android:divider">@drawable/gap_12</item>
+    </style>
+    <!-- .hero > * + * { margin-top: 16px } -->
+    <style name="Widget.HyTrack.Hero" parent="Widget.HyTrack.Stack">
+        <item name="android:background">@drawable/bg_hero</item>
+        <!-- Per side, not android:padding: that would override a layout's paddingTop/Bottom. -->
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:paddingTop">24dp</item>
+        <item name="android:paddingBottom">24dp</item>
+        <item name="android:divider">@drawable/gap_16</item>
+    </style>
+    <style name="Widget.HyTrack.WarningCard" parent="Widget.HyTrack.Stack">
+        <item name="android:background">@drawable/bg_warning_card</item>
+        <!-- Per side, not android:padding: that would override a layout's paddingTop/Bottom. -->
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">16dp</item>
+        <item name="android:divider">@drawable/gap_5</item>
+    </style>
+    <style name="Widget.HyTrack.InfoCard" parent="Widget.HyTrack.WarningCard">
+        <item name="android:background">@drawable/bg_info_card</item>
+    </style>
+    <!-- .empty -->
+    <style name="Widget.HyTrack.Card.Empty">
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">32dp</item>
+        <item name="android:paddingBottom">32dp</item>
+        <item name="android:gravity">center_horizontal</item>
+    </style>
+    <!-- .notice -->
+    <style name="Widget.HyTrack.Notice">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/bg_notice</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:fontFamily">@font/jakarta_semibold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:lineHeight">19.2sp</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Widget.HyTrack.Notice.Warning">
+        <item name="android:background">@drawable/bg_notice_warning</item>
+        <item name="android:textColor">@color/warning_text</item>
+    </style>
+    <style name="Widget.HyTrack.Notice.Info">
+        <item name="android:background">@drawable/bg_notice_info</item>
+        <item name="android:textColor">@color/info_text</item>
+    </style>
+    <style name="Widget.HyTrack.Hr">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/border</item>
+    </style>
+
+    <!-- Sign-in / sign-up (auth.css, Inter) ================================= -->
+    <style name="Text.Auth">
+        <item name="android:fontFamily">@font/inter_regular</item>
+        <item name="android:textColor">@color/auth_text</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Text.Auth.Label">
+        <item name="android:fontFamily">@font/inter_semibold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
+    </style>
+    <style name="Text.Auth.Link">
+        <item name="android:fontFamily">@font/inter_semibold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:textColor">@color/brand</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+    <style name="Widget.HyTrack.AuthField">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">52dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:background">@drawable/bg_auth_input</item>
+        <item name="android:addStatesFromChildren">true</item>
+    </style>
+    <style name="Widget.HyTrack.AuthInput">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@null</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:fontFamily">@font/inter_regular</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/auth_text</item>
+        <item name="android:textColorHint">@color/brand_muted</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:imeOptions">actionNext</item>
+    </style>
+    <style name="Widget.HyTrack.AuthSubmit" parent="Widget.HyTrack.Button">
+        <item name="android:background">@drawable/bg_auth_submit</item>
+        <item name="android:fontFamily">@font/inter_bold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:padding">0dp</item>
+    </style>
+</resources>

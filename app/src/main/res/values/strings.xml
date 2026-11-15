@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">Hytracl</string>
+    <string name="app_name">HyTrack</string>
+    <string name="demo_banner">Data contoh · Tidak terhubung ke sistem rumah sakit</string>
+    <string name="tagline">TEMAN PERJALANAN BEROBAT</string>
+    <string name="back">Kembali</string>
+    <string name="notifications">Notifikasi</string>
+    <string name="ask_hya">Tanya Hya</string>
+    <string name="close_hya">Tutup Hya</string>
+    <string name="account_help">Hubungi petugas pendaftaran rumah sakit untuk bantuan akun, termasuk mengatur ulang kata sandi.</string>
 </resources>

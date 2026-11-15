@@ -14,13 +14,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:accessibilityHeading="true"
-            android:text="Cara check-in dengan QR" />
+            android:text="@string/cara_check_in_dengan_qr" />
 
         <TextView
             style="@style/Text.Lead"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tunjukkan QR kunjungan Anda kepada petugas ketika tiba di rumah sakit." />
+            android:text="@string/tunjukkan_qr_kunjungan_anda_kepada" />
     </LinearLayout>
 
     <LinearLayout
@@ -36,14 +36,14 @@
             style="@style/Text.Strong"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="QR sulit dipindai?"
+            android:text="@string/qr_sulit_dipindai"
             android:textColor="@color/warning_text" />
 
         <TextView
             style="@style/Text.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tunjukkan nomor check-in manual atau minta bantuan petugas."
+            android:text="@string/tunjukkan_nomor_check_in_manual_atau"
             android:textColor="@color/warning_text" />
     </LinearLayout>
 
@@ -65,7 +65,7 @@
             style="@style/Text.Strong"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Buka kunjungan aktif"
+            android:text="@string/buka_kunjungan_aktif"
             android:textColor="@color/white" />
 
         <FrameLayout

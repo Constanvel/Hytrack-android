@@ -43,7 +43,7 @@
                     style="@style/Text.Small.Muted"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Asisten digital HyTrack" />
+                    android:text="@string/asisten_digital_hytrack" />
             </LinearLayout>
         </LinearLayout>
 
@@ -51,7 +51,7 @@
             style="@style/Text.P"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bantu cek antrean dan arah layanan." />
+            android:text="@string/bantu_cek_antrean_dan_arah_layanan" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -65,7 +65,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Mulai percakapan" />
+                android:text="@string/mulai_percakapan" />
 
             <FrameLayout
                 android:layout_width="24dp"
@@ -97,7 +97,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:accessibilityHeading="true"
-        android:text="Panduan yang sering dicari" />
+        android:text="@string/panduan_yang_sering_dicari" />
 
     <LinearLayout
         android:id="@+id/topics"
@@ -110,7 +110,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:accessibilityLiveRegion="polite"
-        android:text="Topik tidak ditemukan. Coba kata lain atau tanyakan kepada Hya."
+        android:text="@string/topik_tidak_ditemukan_coba_kata_lain_atau"
         android:visibility="gone" />
 
     <LinearLayout style="@style/Widget.HyTrack.Card">
@@ -119,12 +119,12 @@
             style="@style/Text.H3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Butuh bantuan petugas?" />
+            android:text="@string/butuh_bantuan_petugas" />
 
         <TextView
             style="@style/Text.P.Muted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Datangi meja check-in rumah sakit.\nSiapkan nomor antrean Anda." />
+            android:text="@string/datangi_meja_check_in_rumah_sakit" />
     </LinearLayout>
 </merge>

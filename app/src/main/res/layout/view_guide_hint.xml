@@ -61,12 +61,12 @@
             android:paddingTop="0dp"
             android:paddingEnd="24dp"
             android:paddingBottom="0dp"
-            android:text="Mengerti" />
+            android:text="@string/mengerti" />
 
         <TextView
             android:id="@+id/guideSkip"
             style="@style/Widget.HyTrack.TextButton"
             android:layout_marginStart="16dp"
-            android:text="Lewati panduan" />
+            android:text="@string/lewati_panduan" />
     </LinearLayout>
 </LinearLayout>

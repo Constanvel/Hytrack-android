@@ -19,7 +19,7 @@
         style="@style/Text.Strong"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ada yang bisa Hya bantu?" />
+        android:text="@string/ada_yang_bisa_hya_bantu" />
 
     <TextView
         style="@style/Text.Link"

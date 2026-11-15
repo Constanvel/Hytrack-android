@@ -14,7 +14,7 @@
         style="@style/Text.Eyebrow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="KUNJUNGAN KELUARGA" />
+        android:text="@string/kunjungan_keluarga" />
 
     <TextView
         android:id="@+id/patient"
@@ -61,7 +61,7 @@
             style="@style/Text.Eyebrow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="LOKASI SAAT INI" />
+            android:text="@string/lokasi_saat_ini" />
 
         <TextView
             android:id="@+id/room"
@@ -82,10 +82,10 @@
         style="@style/Text.Small.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hanya pantauan. Antrean tidak dapat diubah; informasi medis tetap privat." />
+        android:text="@string/hanya_pantauan_antrean_tidak_dapat_diubah" />
 
     <TextView
         android:id="@+id/stop"
         style="@style/Widget.HyTrack.TextButton"
-        android:text="Berhenti memantau" />
+        android:text="@string/berhenti_memantau" />
 </merge>

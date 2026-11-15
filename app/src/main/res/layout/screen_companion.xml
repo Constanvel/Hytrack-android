@@ -10,13 +10,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:accessibilityHeading="true"
-        android:text="Biar keluarga ikut tenang." />
+        android:text="@string/biar_keluarga_ikut_tenang" />
 
     <TextView
         style="@style/Text.P.Muted"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Bagikan perkembangan kunjungan, bukan informasi medis Anda." />
+        android:text="@string/bagikan_perkembangan_kunjungan_bukan" />
 
     <LinearLayout style="@style/Widget.HyTrack.Hero">
 
@@ -24,7 +24,7 @@
             style="@style/Text.Hero.Eyebrow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="KUNJUNGAN ANDA" />
+            android:text="@string/kunjungan_anda" />
 
         <TextView
             android:id="@+id/who"
@@ -49,7 +49,7 @@
             style="@style/Text.H3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Yang bisa dilihat pendamping" />
+            android:text="@string/yang_bisa_dilihat_pendamping" />
 
         <!-- .checklist resets the card's 12px margin, so it sits right under the heading. -->
         <LinearLayout
@@ -61,28 +61,28 @@
                 style="@style/Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="✓ Status dan nomor antrean"
+                android:text="@string/status_dan_nomor_antrean"
                 android:textColor="@color/primary" />
 
             <TextView
                 style="@style/Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="✓ Perkiraan waktu tunggu"
+                android:text="@string/perkiraan_waktu_tunggu"
                 android:textColor="@color/primary" />
 
             <TextView
                 style="@style/Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="✓ Lokasi layanan berikutnya"
+                android:text="@string/lokasi_layanan_berikutnya"
                 android:textColor="@color/primary" />
 
             <TextView
                 style="@style/Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="✓ Proses penyiapan obat"
+                android:text="@string/proses_penyiapan_obat"
                 android:textColor="@color/primary" />
         </LinearLayout>
 
@@ -92,7 +92,7 @@
             style="@style/Text.P.Muted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tidak termasuk diagnosis, hasil pemeriksaan, detail resep, nama lengkap, atau kontak Anda." />
+            android:text="@string/tidak_termasuk_diagnosis_hasil" />
     </LinearLayout>
 
     <LinearLayout style="@style/Widget.HyTrack.WarningCard">
@@ -101,14 +101,14 @@
             style="@style/Text.H3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Akses otomatis berakhir"
+            android:text="@string/akses_otomatis_berakhir"
             android:textColor="@color/warning_text" />
 
         <TextView
             style="@style/Text.P"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Saat kunjungan selesai atau pada hari layanan pukul 23.59, mana yang lebih dulu."
+            android:text="@string/saat_kunjungan_selesai_atau_pada_hari"
             android:textColor="@color/warning_text" />
     </LinearLayout>
 
@@ -116,7 +116,7 @@
         style="@style/Text.P.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hanya bagikan kepada orang tepercaya. Siapa pun yang memegang tautan dapat melihat pantauan sampai Anda mencabutnya." />
+        android:text="@string/hanya_bagikan_kepada_orang_tepercaya" />
 
     <!-- Shown once, right after the link is created. -->
     <LinearLayout
@@ -129,7 +129,7 @@
             style="@style/Text.H3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tautan pendamping" />
+            android:text="@string/tautan_pendamping" />
 
         <TextView
             android:id="@+id/link"
@@ -144,36 +144,36 @@
             style="@style/Text.Small.Muted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Salin sekarang. Demi keamanan, tautan ini hanya ditampilkan satu kali." />
+            android:text="@string/salin_sekarang_demi_keamanan_tautan_ini" />
 
         <TextView
             android:id="@+id/copy"
             style="@style/Widget.HyTrack.Button.Secondary"
-            android:text="Salin tautan" />
+            android:text="@string/salin_tautan" />
 
         <TextView
             android:id="@+id/openView"
             style="@style/Widget.HyTrack.Button.Secondary"
-            android:text="Buka pantauan pendamping" />
+            android:text="@string/buka_pantauan_pendamping" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/activate"
         style="@style/Widget.HyTrack.Button"
-        android:text="Aktifkan akses pendamping" />
+        android:text="@string/aktifkan_akses_pendamping" />
 
     <TextView
         android:id="@+id/activeNotice"
         style="@style/Widget.HyTrack.Notice.Info"
-        android:text="Akses pendamping aktif. Tautan lama tidak dapat ditampilkan lagi; buat tautan baru bila hilang." />
+        android:text="@string/akses_pendamping_aktif_tautan_lama_tidak" />
 
     <TextView
         android:id="@+id/renew"
         style="@style/Widget.HyTrack.Button.Secondary"
-        android:text="Buat tautan baru" />
+        android:text="@string/buat_tautan_baru" />
 
     <TextView
         android:id="@+id/revoke"
         style="@style/Widget.HyTrack.Button.Danger"
-        android:text="Cabut akses pendamping" />
+        android:text="@string/cabut_akses_pendamping" />
 </merge>

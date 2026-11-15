@@ -158,9 +158,9 @@ abstract class ShellActivity : AppCompatActivity() {
         shell = ActivityShellBinding.inflate(layoutInflater)
         setContentView(shell.root)
         applyInsets()
-        nav(shell.navHome, R.drawable.ic_home, "Beranda", Tab.HOME, HomeActivity::class.java)
-        nav(shell.navVisit, R.drawable.ic_ticket, "Kunjungan", Tab.VISIT, VisitActivity::class.java)
-        nav(shell.navAccount, R.drawable.ic_user, "Akun", Tab.ACCOUNT, AccountActivity::class.java)
+        nav(shell.navHome, R.drawable.ic_home, getString(R.string.beranda), Tab.HOME, HomeActivity::class.java)
+        nav(shell.navVisit, R.drawable.ic_ticket, getString(R.string.kunjungan), Tab.VISIT, VisitActivity::class.java)
+        nav(shell.navAccount, R.drawable.ic_user, getString(R.string.akun), Tab.ACCOUNT, AccountActivity::class.java)
         shell.fab.setOnClickListener { go(HyaActivity::class.java) }
         shell.bell.setOnClickListener { go(NotificationsActivity::class.java) }
         shell.close.setOnClickListener { go(VisitActivity::class.java) }
@@ -273,7 +273,7 @@ abstract class ShellActivity : AppCompatActivity() {
         shell.subtitle.isVisible = s.subtitle != null
         shell.bell.isVisible = !s.hya && s.back == null && !s.bare
         shell.unreadDot.isVisible = Demo.unread > 0
-        shell.bell.contentDescription = if (Demo.unread > 0) "Notifikasi, ${Demo.unread} belum dibaca" else getString(R.string.notifications)
+        shell.bell.contentDescription = if (Demo.unread > 0) getString(R.string.notifikasi_belum_dibaca, Demo.unread) else getString(R.string.notifications)
         shell.close.isVisible = s.hya
         shell.header.setBackgroundResource(if (s.hya) R.drawable.bg_header_rule else 0)
         shell.bottomNav.isVisible = !s.hya && !s.bare
@@ -298,14 +298,14 @@ abstract class ShellActivity : AppCompatActivity() {
     private fun guideHint(content: LinearLayout, step: GuideStep) {
         val hint = ViewGuideHintBinding.inflate(layoutInflater, content, true)
         val index = GuideStep.entries.indexOf(step)
-        hint.guideStep.text = "PANDUAN · LANGKAH ${index + 1} DARI ${GuideStep.entries.size}"
+        hint.guideStep.text = getString(R.string.panduan_langkah_dari, index + 1, GuideStep.entries.size)
         GuideStep.entries.forEachIndexed { i, _ ->
             hint.guideProgress.addView(View(this).apply {
                 setBackgroundResource(if (i <= index) R.drawable.bg_progress_done else R.drawable.bg_progress_todo)
             }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f))
         }
-        hint.guideTitle.text = step.title
-        hint.guideText.text = step.text
+        hint.guideTitle.setText(step.title)
+        hint.guideText.setText(step.text)
         hint.guideOk.setOnClickListener { Guide.dismiss(this, step); render() }
         hint.guideSkip.setOnClickListener { Guide.skip(this); render() }
     }

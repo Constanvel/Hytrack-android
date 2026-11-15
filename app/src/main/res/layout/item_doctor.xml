@@ -64,7 +64,7 @@
                 style="@style/Text.MetricLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Perkiraan tunggu" />
+                android:text="@string/perkiraan_tunggu" />
 
             <TextView
                 android:id="@+id/wait"
@@ -85,7 +85,7 @@
                 style="@style/Text.MetricLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sisa kuota" />
+                android:text="@string/sisa_kuota" />
 
             <TextView
                 android:id="@+id/quota"

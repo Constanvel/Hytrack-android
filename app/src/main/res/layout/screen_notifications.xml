@@ -14,19 +14,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Belum ada notifikasi" />
+            android:text="@string/belum_ada_notifikasi" />
 
         <TextView
             style="@style/Text.P.Muted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Pemberitahuan muncul saat antrean Anda berubah, misalnya ketika nomor Anda dipanggil." />
+            android:text="@string/pemberitahuan_muncul_saat_antrean_anda" />
 
         <TextView
             android:id="@+id/emptyAction"
             style="@style/Widget.HyTrack.Button.Secondary"
-            android:text="Buka kunjungan" />
+            android:text="@string/buka_kunjungan" />
     </LinearLayout>
 
     <LinearLayout
@@ -39,10 +39,10 @@
         style="@style/Text.Small.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Notifikasi hanya tampil di aplikasi; SMS, WhatsApp, dan push belum tersedia." />
+        android:text="@string/notifikasi_hanya_tampil_di_aplikasi_sms" />
 
     <TextView
         android:id="@+id/open"
         style="@style/Widget.HyTrack.Button.Secondary"
-        android:text="Buka kunjungan" />
+        android:text="@string/buka_kunjungan" />
 </merge>

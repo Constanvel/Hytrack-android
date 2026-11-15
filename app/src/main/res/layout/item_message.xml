@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="6dp"
         android:lineHeight="23.1sp"
-        android:text="Hya" />
+        android:text="@string/hya" />
 
     <TextView
         android:id="@+id/body"

@@ -70,7 +70,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
-                    android:text="Lupa kata sandi?" />
+                    android:text="@string/lupa_kata_sandi" />
 
                 <TextView
                     android:id="@+id/forgotNotice"
@@ -89,7 +89,7 @@
                         android:id="@+id/submit"
                         style="@style/Widget.HyTrack.AuthSubmit"
                         android:layout_height="52dp"
-                        android:text="Masuk" />
+                        android:text="@string/masuk" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -104,7 +104,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:lineHeight="20sp"
-                            android:text="Belum punya akun?"
+                            android:text="@string/belum_punya_akun"
                             android:textColor="@color/brand_muted"
                             android:textSize="14sp" />
 
@@ -114,7 +114,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="5dp"
-                            android:text="Daftar sekarang" />
+                            android:text="@string/daftar_sekarang" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
@@ -142,7 +142,7 @@
                         android:accessibilityHeading="true"
                         android:fontFamily="@font/inter_semibold"
                         android:lineHeight="20sp"
-                        android:text="Satu akun, perjalanan lebih tenang."
+                        android:text="@string/satu_akun_perjalanan_lebih_tenang"
                         android:textColor="@color/brand"
                         android:textSize="14sp" />
 
@@ -151,7 +151,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:lineHeight="18sp"
-                        android:text="Ambil antrean, pantau kunjungan, dan\ndampingi keluarga dalam satu aplikasi."
+                        android:text="@string/ambil_antrean_pantau_kunjungan_dan"
                         android:textColor="@color/auth_benefit_text"
                         android:textSize="13sp" />
                 </LinearLayout>
@@ -164,7 +164,7 @@
                     android:fontFamily="@font/inter_medium"
                     android:gravity="center"
                     android:lineHeight="18sp"
-                    android:text="Butuh bantuan? Hubungi petugas."
+                    android:text="@string/butuh_bantuan_hubungi_petugas"
                     android:textSize="13sp" />
 
                 <TextView
@@ -175,7 +175,7 @@
 
                 <TextView
                     style="@style/Widget.HyTrack.Notice.Info"
-                    android:text="Akun demo — pasien: 0812-5550-0842 · kata sandi: hytrack-demo" />
+                    android:text="@string/akun_demo_pasien_0812_5550_0842_kata" />
             </LinearLayout>
         </LinearLayout>
     </FrameLayout>

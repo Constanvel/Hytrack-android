@@ -36,7 +36,7 @@ private fun ViewAuthFieldBinding.setup(label: String, hint: String, phone: Boole
                 if (shown) InputType.TYPE_TEXT_VARIATION_PASSWORD else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             input.typeface = face
             input.setSelection(input.text.length)
-            eye.contentDescription = if (shown) "Tampilkan kata sandi" else "Sembunyikan kata sandi"
+            eye.contentDescription = root.context.getString(if (shown) R.string.tampilkan_kata_sandi else R.string.sembunyikan_kata_sandi)
         }
     }
 }
@@ -77,10 +77,10 @@ class LoginActivity : AppCompatActivity() {
         val b = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(b.root)
         authFrame(b.scroll, b.main)
-        b.identity.authTitle.text = "Selamat datang kembali."
-        b.identity.authIntro.text = "Masuk untuk melanjutkan kunjungan\ndan memantau antrean Anda."
-        b.phone.setup("Nomor ponsel", "+62 123-4567-8910", phone = true)
-        b.password.setup("Kata sandi", "Masukkan kata sandi", password = true)
+        b.identity.authTitle.text = getString(R.string.selamat_datang_kembali)
+        b.identity.authIntro.text = getString(R.string.masuk_untuk_melanjutkan_kunjungan_ndan)
+        b.phone.setup(getString(R.string.nomor_ponsel), getString(R.string.phone_hint), phone = true)
+        b.password.setup(getString(R.string.kata_sandi), getString(R.string.masukkan_kata_sandi), password = true)
         b.password.input.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_DONE
         b.forgot.setOnClickListener { b.forgotNotice.isVisible = true }
         b.contact.setOnClickListener { b.contactNotice.isVisible = true }
@@ -88,11 +88,11 @@ class LoginActivity : AppCompatActivity() {
         b.submit.setOnClickListener {
             val phone = b.phone.value.trim()
             val password = b.password.value
-            b.phone.error(if (phone.isEmpty()) "Nomor ponsel wajib diisi." else null)
-            b.password.error(if (password.isEmpty()) "Kata sandi wajib diisi." else null)
+            b.phone.error(if (phone.isEmpty()) getString(R.string.nomor_ponsel_wajib_diisi) else null)
+            b.password.error(if (password.isEmpty()) getString(R.string.kata_sandi_wajib_diisi) else null)
             if (phone.isEmpty() || password.isEmpty()) return@setOnClickListener
             if (!Demo.isDemoAccount(phone, password)) {
-                b.phone.error("Nomor ponsel atau kata sandi salah.")
+                b.phone.error(getString(R.string.nomor_ponsel_atau_kata_sandi_salah))
                 b.password.input.text.clear()
                 return@setOnClickListener
             }
@@ -107,17 +107,13 @@ class RegisterActivity : AppCompatActivity() {
         val b = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(b.root)
         authFrame(b.scroll, b.main)
-        b.identity.authTitle.text = "Mulai berobat lebih tenang."
-        b.identity.authIntro.text = "Buat akun untuk mengatur kunjungan Anda."
-        b.name.setup("Nama lengkap", "Sesuai identitas Anda")
-        b.phone.setup("Nomor ponsel", "+62 123-4567-8910", phone = true)
-        b.password.setup("Kata sandi", "Minimal 8 karakter", password = true)
-        b.confirm.setup("Konfirmasi kata sandi", "Ulangi kata sandi", password = true)
-        b.terms.text = Html.fromHtml(
-            "Saya menyetujui <font color='#086F65'><b>Syarat &amp; Ketentuan</b></font><br>" +
-                "dan <font color='#086F65'><b>Kebijakan Privasi</b></font> HyTrack.",
-            Html.FROM_HTML_MODE_LEGACY,
-        )
+        b.identity.authTitle.text = getString(R.string.mulai_berobat_lebih_tenang)
+        b.identity.authIntro.text = getString(R.string.buat_akun_untuk_mengatur_kunjungan_anda)
+        b.name.setup(getString(R.string.nama_lengkap), getString(R.string.sesuai_identitas_anda))
+        b.phone.setup(getString(R.string.nomor_ponsel), getString(R.string.phone_hint), phone = true)
+        b.password.setup(getString(R.string.kata_sandi), getString(R.string.minimal_8_karakter), password = true)
+        b.confirm.setup(getString(R.string.konfirmasi_kata_sandi), getString(R.string.ulangi_kata_sandi), password = true)
+        b.terms.text = Html.fromHtml(getString(R.string.terms_html), Html.FROM_HTML_MODE_LEGACY)
         b.contact.setOnClickListener { b.contactNotice.isVisible = true }
         b.switchLink.setOnClickListener { finish() }
         b.submit.setOnClickListener {
@@ -125,23 +121,23 @@ class RegisterActivity : AppCompatActivity() {
             val phone = Demo.normalizePhone(b.phone.value)
             val password = b.password.value
             b.name.error(when {
-                name.isEmpty() -> "Nama lengkap wajib diisi."
-                name.length > 100 -> "Nama lengkap maksimal 100 karakter."
+                name.isEmpty() -> getString(R.string.nama_lengkap_wajib_diisi)
+                name.length > 100 -> getString(R.string.nama_lengkap_maksimal_100_karakter)
                 else -> null
             })
             b.phone.error(when {
-                b.phone.value.isBlank() -> "Nomor ponsel wajib diisi."
-                !Regex("^628\\d{7,11}$").matches(phone) -> "Masukkan nomor ponsel yang valid, mis. 0812-3456-7890."
-                Demo.isDemoAccount(phone, Demo.DEMO_PASSWORD) -> "Nomor ponsel sudah terdaftar. Silakan masuk."
+                b.phone.value.isBlank() -> getString(R.string.nomor_ponsel_wajib_diisi)
+                !Regex("^628\\d{7,11}$").matches(phone) -> getString(R.string.phone_invalid)
+                Demo.isDemoAccount(phone, Demo.DEMO_PASSWORD) -> getString(R.string.nomor_ponsel_sudah_terdaftar_silakan)
                 else -> null
             })
             b.password.error(when {
-                password.isEmpty() -> "Kata sandi wajib diisi."
-                password.length < 8 -> "Kata sandi minimal 8 karakter."
-                password != b.confirm.value -> "Konfirmasi kata sandi tidak sama."
+                password.isEmpty() -> getString(R.string.kata_sandi_wajib_diisi)
+                password.length < 8 -> getString(R.string.kata_sandi_minimal_8_karakter)
+                password != b.confirm.value -> getString(R.string.konfirmasi_kata_sandi_tidak_sama)
                 else -> null
             })
-            val termsError = if (!b.terms.isChecked) "Setujui Syarat & Ketentuan dan Kebijakan Privasi untuk melanjutkan." else null
+            val termsError = if (!b.terms.isChecked) getString(R.string.setujui_syarat_ketentuan_dan_kebijakan) else null
             b.termsError.text = termsError
             b.termsError.isVisible = termsError != null
             val valid = listOf(b.name, b.phone, b.password).none { it.error.isVisible } && termsError == null

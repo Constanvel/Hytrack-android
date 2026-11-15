@@ -1,26 +1,20 @@
 package com.constanvel.hytracl
 
 import android.content.Context
+import androidx.annotation.StringRes
 
 /**
  * Interactive guide (features/guide/guide.tsx): one hint per screen, remembered per device.
  * Stores preferences only, never visit data.
  */
-enum class GuideStep(val title: String, val text: String) {
-    PASIEN("Pastikan nama pasien benar",
-        "Nama yang ditandai adalah pasien yang akan berobat. Jika sudah benar, tekan tombol Ambil antrean."),
-    POLI("Pilih poliklinik tujuan",
-        "Ketuk nama poliklinik yang ingin Anda tuju. Anda juga bisa mengetik namanya di kolom cari."),
-    DOKTER("Pilih tanggal dan dokter",
-        "Pilih tanggal, ketuk nama dokter, lalu tekan Ambil antrean. Nomor antrean baru keluar setelah tombol itu ditekan."),
-    TIKET("Perhatikan waktu berangkat",
-        "Kotak kuning memberi tahu kapan sebaiknya Anda berangkat. Setibanya di rumah sakit, tekan Tampilkan QR check-in."),
-    CHECKIN("Tunjukkan QR ke petugas",
-        "Bawa layar ini ke meja check-in. Jika QR sulit dipindai, tekan Nomor check-in manual."),
-    ANTREAN("Tunggu giliran Anda",
-        "Angka besar adalah nomor Anda. Di sini terlihat berapa pasien lagi sebelum Anda dan di ruang mana Anda menunggu."),
-    LAYANAN("Ikuti layanan berikutnya",
-        "Setelah diperiksa dokter, HyTrack menunjukkan tujuan berikutnya, misalnya laboratorium atau farmasi. Ikuti langkah di halaman ini."),
+enum class GuideStep(@StringRes val title: Int, @StringRes val text: Int) {
+    PASIEN(R.string.guide_pasien_title, R.string.guide_pasien_text),
+    POLI(R.string.guide_poli_title, R.string.guide_poli_text),
+    DOKTER(R.string.guide_dokter_title, R.string.guide_dokter_text),
+    TIKET(R.string.guide_tiket_title, R.string.guide_tiket_text),
+    CHECKIN(R.string.guide_checkin_title, R.string.guide_checkin_text),
+    ANTREAN(R.string.guide_antrean_title, R.string.guide_antrean_text),
+    LAYANAN(R.string.guide_layanan_title, R.string.guide_layanan_text),
 }
 
 object Guide {

@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:accessibilityHeading="true"
-        android:text="Ikuti kunjungan Anda" />
+        android:text="@string/ikuti_kunjungan_anda" />
 
     <include
         android:id="@+id/faq1"
@@ -27,7 +27,7 @@
     <TextView
         android:id="@+id/openVisit"
         style="@style/Widget.HyTrack.Button"
-        android:text="Buka kunjungan" />
+        android:text="@string/buka_kunjungan" />
 
     <include
         android:id="@+id/hyaHelp"

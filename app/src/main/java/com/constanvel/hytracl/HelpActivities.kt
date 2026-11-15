@@ -27,7 +27,7 @@ class HyaActivity : ShellActivity() {
     private var pending = false
     private lateinit var composer: ViewComposerBinding
 
-    override fun spec() = Spec("Hya", "Asisten digital HyTrack", back = VisitActivity::class.java, hya = true)
+    override fun spec() = Spec(getString(R.string.hya), getString(R.string.asisten_digital_hytrack), back = VisitActivity::class.java, hya = true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,11 +63,11 @@ class HyaActivity : ShellActivity() {
     }
 
     private fun summary(v: Demo.Visit) = when (v.stage) {
-        Stage.BOOKED -> "Belum check-in"
-        Stage.WAITING -> "${v.ahead} pasien lagi"
-        Stage.SERVING -> "Giliran Anda"
-        Stage.LABORATORY -> "Layanan laboratorium"
-        Stage.PHARMACY -> "Penyiapan obat"
+        Stage.BOOKED -> getString(R.string.belum_check_in_2)
+        Stage.WAITING -> getString(R.string.pasien_lagi, v.ahead)
+        Stage.SERVING -> getString(R.string.giliran_anda_2)
+        Stage.LABORATORY -> getString(R.string.layanan_laboratorium)
+        Stage.PHARMACY -> getString(R.string.penyiapan_obat)
         else -> ""
     }
 
@@ -79,9 +79,9 @@ class HyaActivity : ShellActivity() {
         b.chat.isVisible = chatting
         if (!chatting) {
             b.visit.text = if (v != null) HtmlCompat.fromHtml(
-                "KUNJUNGAN AKTIF · ${v.ticket}<br><b>${summary(v)} · Poli ${v.clinic.name}</b>", HtmlCompat.FROM_HTML_MODE_LEGACY,
-            ) else "Belum ada kunjungan aktif. Anda tetap bisa bertanya tentang panduan layanan."
-            listOf("Kapan giliran saya?", "Ke ruangan mana saya harus pergi?", "Bagaimana cara check-in?").forEach { q ->
+                getString(R.string.hya_active_visit, v.ticket, summary(v), v.clinic.name), HtmlCompat.FROM_HTML_MODE_LEGACY,
+            ) else getString(R.string.belum_ada_kunjungan_aktif_anda_tetap_bisa)
+            listOf(getString(R.string.kapan_giliran_saya), getString(R.string.ke_ruangan_mana_saya_harus_pergi), getString(R.string.bagaimana_cara_check_in)).forEach { q ->
                 ItemSuggestionBinding.inflate(layoutInflater, b.suggestions, true).apply {
                     question.text = q
                     root.setOnClickListener { ask(q) }
@@ -89,10 +89,10 @@ class HyaActivity : ShellActivity() {
             }
             return
         }
-        b.context.text = if (v != null) "${v.ticket} · Poli ${v.clinic.name}" else "Panduan layanan"
+        b.context.text = if (v != null) getString(R.string.poli_2, v.ticket, v.clinic.name) else getString(R.string.panduan_layanan)
         // .message { max-width: 94% } of the content column.
         val maxBubble = ((resources.displayMetrics.widthPixels - into.dp(48)) * 0.94f).toInt() - into.dp(32)
-        val bubbles = messages.map { it.user to it.text } + if (pending) listOf(false to "Menyiapkan jawaban…") else emptyList()
+        val bubbles = messages.map { it.user to it.text } + if (pending) listOf(false to getString(R.string.menyiapkan_jawaban)) else emptyList()
         bubbles.forEach { (user, text) ->
             ItemMessageBinding.inflate(layoutInflater, b.messages, false).apply {
                 body.text = text
@@ -107,11 +107,11 @@ class HyaActivity : ShellActivity() {
                 })
             }
         }
-        b.directions.bind("Buka petunjuk ruangan") { go(DirectionsActivity::class.java) }
-        b.late.question.text = "Bagaimana jika saya terlambat?"
+        b.directions.bind(getString(R.string.buka_petunjuk_ruangan)) { go(DirectionsActivity::class.java) }
+        b.late.question.text = getString(R.string.bagaimana_jika_saya_terlambat)
         b.late.arrow.isVisible = false
         b.late.root.isEnabled = !pending
-        b.late.root.setOnClickListener { ask("Bagaimana jika saya terlambat?") }
+        b.late.root.setOnClickListener { ask(getString(R.string.bagaimana_jika_saya_terlambat)) }
         b.restart.setOnClickListener { messages.clear(); render() }
         // scrollIntoView({ block: 'nearest' }) on the row under the messages: only if it is hidden.
         shell.scroll.post {
@@ -128,20 +128,22 @@ class HelpActivity : ShellActivity() {
 
     private class Topic(val title: String, val detail: String, val target: Class<out Activity>)
 
-    private val topics = listOf(
-        Topic("Antrean & jadwal dokter", "Nomor, perkiraan tunggu, dan perubahan jadwal", QueueGuideActivity::class.java),
-        Topic("Check-in dengan QR", "Cara konfirmasi kedatangan di rumah sakit", CheckInGuideActivity::class.java),
-        Topic("Arah layanan & pengambilan obat", "Temukan ruang tujuan dan loket farmasi", DirectionsActivity::class.java),
-        Topic("Akses pendamping", "Bagikan, pantau, dan cabut akses keluarga", CompanionAccessActivity::class.java),
-    )
+    private val topics by lazy {
+        listOf(
+        Topic(getString(R.string.antrean_jadwal_dokter), getString(R.string.nomor_perkiraan_tunggu_dan_perubahan), QueueGuideActivity::class.java),
+        Topic(getString(R.string.check_in_dengan_qr), getString(R.string.cara_konfirmasi_kedatangan_di_rumah_sakit), CheckInGuideActivity::class.java),
+        Topic(getString(R.string.arah_layanan_pengambilan_obat), getString(R.string.temukan_ruang_tujuan_dan_loket_farmasi), DirectionsActivity::class.java),
+        Topic(getString(R.string.akses_pendamping), getString(R.string.bagikan_pantau_dan_cabut_akses_keluarga), CompanionAccessActivity::class.java),
+        )
+    }
 
-    override fun spec() = Spec("Bantuan", "Panduan kunjungan Anda")
+    override fun spec() = Spec(getString(R.string.bantuan), getString(R.string.panduan_kunjungan_anda_2))
 
     override fun content(into: LinearLayout) {
         val b = ScreenHelpBinding.inflate(layoutInflater, into)
         b.support.setOnClickListener { go(HyaActivity::class.java) }
-        b.search.query.hint = "Cari topik bantuan"
-        b.search.query.contentDescription = "Cari topik bantuan"
+        b.search.query.hint = getString(R.string.cari_topik_bantuan)
+        b.search.query.contentDescription = getString(R.string.cari_topik_bantuan)
         guideRestart(b.guideRestart)
         fun filter(query: String) {
             b.topics.removeAllViews()
@@ -163,14 +165,14 @@ class HelpActivity : ShellActivity() {
 class CheckInGuideActivity : ShellActivity() {
     override val tab = Tab.ACCOUNT
 
-    override fun spec() = Spec("Panduan check-in", "BANTUAN · KEDATANGAN", back = HelpActivity::class.java)
+    override fun spec() = Spec(getString(R.string.panduan_check_in), getString(R.string.bantuan_kedatangan), back = HelpActivity::class.java)
 
     override fun content(into: LinearLayout) {
         val b = ScreenHelpCheckinBinding.inflate(layoutInflater, into)
         b.steps.steps(
-            "Buka tiket kunjungan" to "Pilih kunjungan aktif lalu tekan “Tampilkan QR check-in”.",
-            "Tunjukkan QR ke petugas" to "Gunakan QR dari tiket Anda. Petugas akan memindainya.",
-            "Periksa status kehadiran" to "Status menjadi “Sudah check-in” setelah konfirmasi diterima.",
+            getString(R.string.buka_tiket_kunjungan) to getString(R.string.pilih_kunjungan_aktif_lalu_tekan),
+            getString(R.string.tunjukkan_qr_ke_petugas) to getString(R.string.gunakan_qr_dari_tiket_anda_petugas_akan),
+            getString(R.string.periksa_status_kehadiran) to getString(R.string.status_menjadi_sudah_check_in_setelah),
         )
         b.openVisit.setOnClickListener { go(VisitActivity::class.java) }
     }
@@ -180,14 +182,14 @@ class QueueGuideActivity : ShellActivity() {
     override val tab = Tab.ACCOUNT
     private val open = booleanArrayOf(true, false, false) // <details open> on the first one
 
-    override fun spec() = Spec("Antrean & jadwal", "BANTUAN · RAWAT JALAN", back = HelpActivity::class.java)
+    override fun spec() = Spec(getString(R.string.antrean_jadwal), getString(R.string.bantuan_rawat_jalan), back = HelpActivity::class.java)
 
     override fun content(into: LinearLayout) {
         val b = ScreenHelpQueueBinding.inflate(layoutInflater, into)
         listOf(
-            b.faq1 to ("Bagaimana mengambil antrean?" to "Pilih poliklinik, dokter, dan jadwal. Tekan Ambil antrean untuk menerbitkan tiket. Maksimal satu kunjungan aktif."),
-            b.faq2 to ("Apakah waktu tunggu pasti?" to "Tidak. Estimasi berubah mengikuti pelayanan. Dengarkan juga panggilan petugas rumah sakit."),
-            b.faq3 to ("Bagaimana jika saya terlambat?" to "Hubungi petugas di meja check-in. Perubahan jadwal dan kebijakan keterlambatan harus dikonfirmasi kepada rumah sakit."),
+            b.faq1 to (getString(R.string.bagaimana_mengambil_antrean) to getString(R.string.pilih_poliklinik_dokter_dan_jadwal_tekan)),
+            b.faq2 to (getString(R.string.apakah_waktu_tunggu_pasti) to getString(R.string.tidak_estimasi_berubah_mengikuti)),
+            b.faq3 to (getString(R.string.bagaimana_jika_saya_terlambat) to getString(R.string.hubungi_petugas_di_meja_check_in)),
         ).forEachIndexed { i, (faq: ItemDetailsBinding, qa) ->
             faq.question.text = qa.first
             faq.answer.text = qa.second
@@ -200,13 +202,13 @@ class QueueGuideActivity : ShellActivity() {
 }
 
 class DirectionsActivity : ShellActivity() {
-    override fun spec() = Spec("Petunjuk ruangan", "GEDUNG A · RAWAT JALAN", back = VisitActivity::class.java)
+    override fun spec() = Spec(getString(R.string.petunjuk_ruangan), getString(R.string.gedung_a_rawat_jalan), back = VisitActivity::class.java)
 
     override fun content(into: LinearLayout) {
         val b = ScreenDirectionsBinding.inflate(layoutInflater, into)
         b.steps.steps(
-            "Laboratorium · A-108" to "Dari ruang A-204, gunakan lift di sebelah kanan. Turun ke lantai 1, keluar lift lalu belok kiri.",
-            "Farmasi · Loket F2" to "Gedung A, lantai 1. Ambil obat setelah nomor pengambilan dipanggil.",
+            getString(R.string.laboratorium_a_108) to getString(R.string.dari_ruang_a_204_gunakan_lift_di_sebelah),
+            getString(R.string.farmasi_loket_f2) to getString(R.string.gedung_a_lantai_1_ambil_obat_setelah),
         )
         b.help.setOnClickListener { go(HelpActivity::class.java) }
     }

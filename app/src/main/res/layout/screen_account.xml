@@ -11,7 +11,7 @@
             style="@style/Text.Eyebrow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="AKUN PASIEN" />
+            android:text="@string/akun_pasien" />
 
         <TextView
             android:id="@+id/name"
@@ -31,13 +31,13 @@
             style="@style/Text.P"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Satu akun untuk satu profil pasien. Hubungi petugas untuk memperbarui data Anda." />
+            android:text="@string/satu_akun_untuk_satu_profil_pasien" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/help"
         style="@style/Widget.HyTrack.Button.Secondary"
-        android:text="Bantuan &amp; panduan kunjungan" />
+        android:text="@string/bantuan_panduan_kunjungan" />
 
     <TextView
         android:id="@+id/askHya"
@@ -51,5 +51,5 @@
     <TextView
         android:id="@+id/signOut"
         style="@style/Widget.HyTrack.Button.Secondary"
-        android:text="Keluar" />
+        android:text="@string/keluar" />
 </merge>

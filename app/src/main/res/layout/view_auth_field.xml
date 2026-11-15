@@ -44,7 +44,7 @@
             android:layout_marginStart="2dp"
             android:layout_marginEnd="-6dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Tampilkan kata sandi"
+            android:contentDescription="@string/tampilkan_kata_sandi"
             android:paddingStart="6dp"
             android:paddingTop="12dp"
             android:paddingEnd="6dp"

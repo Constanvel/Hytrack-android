@@ -14,14 +14,14 @@
             style="@style/Text.Eyebrow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="PANDUAN KUNJUNGAN ANDA"
+            android:text="@string/panduan_kunjungan_anda"
             android:textColor="@color/primary" />
 
         <ImageView
             android:layout_width="144dp"
             android:layout_height="155dp"
             android:layout_gravity="center_horizontal"
-            android:contentDescription="Hya, asisten layanan rumah sakit, melambaikan tangan"
+            android:contentDescription="@string/hya_asisten_layanan_rumah_sakit"
             android:scaleType="fitXY"
             android:src="@drawable/hya" />
 
@@ -34,13 +34,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:accessibilityHeading="true"
-                android:text="Halo, saya Hya." />
+                android:text="@string/halo_saya_hya" />
 
             <TextView
                 style="@style/Text.Lead"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Saya bantu Anda mengikuti antrean\ndan menemukan layanan berikutnya." />
+                android:text="@string/saya_bantu_anda_mengikuti_antrean_ndan" />
         </LinearLayout>
 
         <TextView
@@ -52,7 +52,7 @@
             style="@style/Text.H3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Apa yang ingin Anda ketahui?" />
+            android:text="@string/apa_yang_ingin_anda_ketahui" />
 
         <LinearLayout
             android:id="@+id/suggestions"
@@ -75,7 +75,7 @@
             android:id="@+id/messages"
             style="@style/Widget.HyTrack.Stack"
             android:accessibilityLiveRegion="polite"
-            android:contentDescription="Percakapan Hya"
+            android:contentDescription="@string/percakapan_hya"
             android:divider="@drawable/gap_16" />
 
         <include
@@ -89,10 +89,10 @@
         <TextView
             android:id="@+id/restart"
             style="@style/Widget.HyTrack.TextButton"
-            android:text="Mulai percakapan baru" />
+            android:text="@string/mulai_percakapan_baru" />
     </LinearLayout>
 
     <TextView
         style="@style/Widget.HyTrack.Notice.Warning"
-        android:text="Untuk keluhan atau pertanyaan medis, silakan hubungi tenaga kesehatan." />
+        android:text="@string/untuk_keluhan_atau_pertanyaan_medis" />
 </merge>

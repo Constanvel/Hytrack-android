@@ -19,7 +19,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="● Terhubung"
+            android:text="@string/terhubung"
             android:textColor="@color/primary"
             android:textSize="12sp" />
 
@@ -115,7 +115,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="perkiraan tunggu"
+                    android:text="@string/perkiraan_tunggu_2"
                     android:textColor="@color/hero_eyebrow" />
             </LinearLayout>
 
@@ -141,7 +141,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="sedang dilayani"
+                    android:text="@string/sedang_dilayani"
                     android:textColor="@color/hero_eyebrow" />
             </LinearLayout>
         </LinearLayout>
@@ -197,7 +197,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Lihat petunjuk ruangan"
+                android:text="@string/lihat_petunjuk_ruangan"
                 android:textColor="@color/primary" />
 
             <FrameLayout
@@ -220,7 +220,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
-        android:text="Tetap di dekat ruang. Dengarkan juga\npanggilan petugas rumah sakit." />
+        android:text="@string/tetap_di_dekat_ruang_dengarkan_juga" />
 
     <include
         android:id="@+id/share"

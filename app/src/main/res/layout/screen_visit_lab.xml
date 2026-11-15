@@ -7,14 +7,14 @@
 
     <TextView
         style="@style/Widget.HyTrack.Notice"
-        android:text="✓ Pemeriksaan dokter selesai" />
+        android:text="@string/pemeriksaan_dokter_selesai" />
 
     <TextView
         style="@style/Text.H2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:accessibilityHeading="true"
-        android:text="Selanjutnya, ke\nlaboratorium" />
+        android:text="@string/selanjutnya_ke_nlaboratorium" />
 
     <LinearLayout
         style="@style/Widget.HyTrack.Hero"
@@ -24,7 +24,7 @@
             style="@style/Text.Hero.Eyebrow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="GEDUNG A" />
+            android:text="@string/gedung_a" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -37,7 +37,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="L1"
+                android:text="@string/l1"
                 android:textColor="@color/white"
                 android:textSize="58sp" />
 
@@ -46,8 +46,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:contentDescription="Turun"
-                android:text="↓"
+                android:contentDescription="@string/turun"
+                android:text="@string/screen_visit_lab_text"
                 android:textColor="@color/white"
                 android:textSize="56sp" />
         </LinearLayout>
@@ -56,13 +56,13 @@
             style="@style/Text.Hero.H3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Laboratorium · A-108" />
+            android:text="@string/laboratorium_a_108" />
 
         <TextView
             style="@style/Text.Hero.P"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Turun 1 lantai · ±3 menit berjalan" />
+            android:text="@string/turun_1_lantai_3_menit_berjalan" />
     </LinearLayout>
 
     <LinearLayout
@@ -78,19 +78,19 @@
             style="@style/Text.H3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Lapor dulu di meja laboratorium" />
+            android:text="@string/lapor_dulu_di_meja_laboratorium" />
 
         <TextView
             style="@style/Text.Small.Muted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Antrean laboratorium dimulai setelah Anda melapor." />
+            android:text="@string/antrean_laboratorium_dimulai_setelah_anda" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/directions"
         style="@style/Widget.HyTrack.Button.Secondary"
-        android:text="Lihat petunjuk ruangan" />
+        android:text="@string/lihat_petunjuk_ruangan" />
 
     <include
         android:id="@+id/demo"

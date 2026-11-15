@@ -7,14 +7,14 @@
 
     <TextView
         style="@style/Widget.HyTrack.Notice.Warning"
-        android:text="Denah rumah sakit belum tersedia. Rute berikut berupa petunjuk teks; konfirmasikan kepada petugas." />
+        android:text="@string/denah_rumah_sakit_belum_tersedia_rute" />
 
     <TextView
         style="@style/Text.H2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:accessibilityHeading="true"
-        android:text="Poli Penyakit Dalam" />
+        android:text="@string/poli_penyakit_dalam" />
 
     <LinearLayout style="@style/Widget.HyTrack.Card">
 
@@ -22,19 +22,19 @@
             style="@style/Text.H3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Ruang A-204" />
+            android:text="@string/ruang_a_204" />
 
         <TextView
             style="@style/Text.P.Muted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Gedung A, lantai 2" />
+            android:text="@string/gedung_a_lantai_2" />
 
         <TextView
             style="@style/Text.P"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Naik ke lantai 2 melalui lift Gedung A. Ikuti tanda menuju Poli Penyakit Dalam dan meja check-in." />
+            android:text="@string/naik_ke_lantai_2_melalui_lift_gedung_a" />
     </LinearLayout>
 
     <TextView
@@ -42,7 +42,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:accessibilityHeading="true"
-        android:text="Setelah pemeriksaan" />
+        android:text="@string/setelah_pemeriksaan" />
 
     <LinearLayout
         android:id="@+id/steps"
@@ -53,10 +53,10 @@
 
     <TextView
         style="@style/Widget.HyTrack.Notice.Info"
-        android:text="Butuh rute aksesibel? Minta pendampingan petugas. Denah, akses lift, dan kondisi rute belum diverifikasi." />
+        android:text="@string/butuh_rute_aksesibel_minta_pendampingan" />
 
     <TextView
         android:id="@+id/help"
         style="@style/Widget.HyTrack.Button.Secondary"
-        android:text="Bantuan kunjungan" />
+        android:text="@string/bantuan_kunjungan" />
 </merge>

@@ -10,13 +10,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:accessibilityHeading="true"
-        android:text="Tunjukkan QR ini\nkepada petugas" />
+        android:text="@string/tunjukkan_qr_ini_nkepada_petugas" />
 
     <TextView
         style="@style/Text.P.Muted"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Meja check-in · Gedung A, lantai 2" />
+        android:text="@string/meja_check_in_gedung_a_lantai_2" />
 
     <!-- .card.qr-card -->
     <LinearLayout
@@ -35,7 +35,7 @@
         <ImageView
             android:layout_width="232dp"
             android:layout_height="232dp"
-            android:contentDescription="Gambar QR contoh; gunakan nomor check-in di bawahnya"
+            android:contentDescription="@string/gambar_qr_contoh_gunakan_nomor_check_in"
             android:src="@drawable/qr_example" />
 
         <TextView
@@ -61,12 +61,12 @@
         style="@style/Text.P.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Gambar QR masih contoh dan belum dapat dipindai. Petugas mengonfirmasi kedatangan dengan nomor check-in." />
+        android:text="@string/gambar_qr_masih_contoh_dan_belum_dapat" />
 
     <TextView
         android:id="@+id/manual"
         style="@style/Widget.HyTrack.Button.Secondary"
-        android:text="Nomor check-in manual" />
+        android:text="@string/nomor_check_in_manual" />
 
     <TextView
         android:id="@+id/manualCode"
@@ -81,6 +81,6 @@
     <TextView
         android:id="@+id/queue"
         style="@style/Widget.HyTrack.Button"
-        android:text="Lihat antrean saya"
+        android:text="@string/lihat_antrean_saya"
         android:visibility="gone" />
 </merge>

@@ -15,13 +15,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:accessibilityHeading="true"
-            android:text="Berobat lebih tenang." />
+            android:text="@string/berobat_lebih_tenang" />
 
         <TextView
             style="@style/Text.Lead"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pantau antrean. Datang tepat waktu." />
+            android:text="@string/pantau_antrean_datang_tepat_waktu" />
     </LinearLayout>
 
     <LinearLayout style="@style/Widget.HyTrack.Hero">
@@ -30,7 +30,7 @@
             style="@style/Text.Hero.Eyebrow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="RAWAT JALAN" />
+            android:text="@string/rawat_jalan" />
 
         <TextView
             android:id="@+id/heroTitle"
@@ -70,7 +70,7 @@
                 style="@style/Text.Eyebrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="PASIEN TERPILIH" />
+                android:text="@string/pasien_terpilih" />
 
             <TextView
                 android:id="@+id/patientName"
@@ -91,7 +91,7 @@
             android:id="@+id/accountLink"
             style="@style/Widget.HyTrack.TextButton"
             android:layout_marginStart="16dp"
-            android:text="Akun" />
+            android:text="@string/akun" />
     </LinearLayout>
 
     <View style="@style/Widget.HyTrack.Hr" />
@@ -103,7 +103,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:accessibilityHeading="true"
-            android:text="Sebelum ke rumah sakit" />
+            android:text="@string/sebelum_ke_rumah_sakit" />
 
         <LinearLayout
             android:id="@+id/beforeList"
@@ -139,7 +139,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:text="Butuh bantuan? Hubungi petugas."
+            android:text="@string/butuh_bantuan_hubungi_petugas"
             android:textColor="@color/primary" />
     </LinearLayout>
 

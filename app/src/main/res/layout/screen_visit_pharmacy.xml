@@ -58,7 +58,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:text="Nomor\npengambilan" />
+                android:text="@string/nomor_npengambilan" />
         </LinearLayout>
     </LinearLayout>
 
@@ -92,7 +92,7 @@
         style="@style/Text.Small.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Perkiraan berubah jika ada obat racikan. Petugas akan memberi tahu bila ada kendala." />
+        android:text="@string/perkiraan_berubah_jika_ada_obat_racikan" />
 
     <include
         android:id="@+id/demo"

@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:accessibilityHeading="true"
-        android:text="Mau berobat ke mana?" />
+        android:text="@string/mau_berobat_ke_mana" />
 
     <include
         android:id="@+id/search"
@@ -26,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:accessibilityHeading="true"
-        android:text="Poliklinik tersedia hari ini" />
+        android:text="@string/poliklinik_tersedia_hari_ini" />
 
     <LinearLayout
         android:id="@+id/list"
@@ -44,23 +44,23 @@
             style="@style/Text.H3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Poliklinik tidak ditemukan" />
+            android:text="@string/poliklinik_tidak_ditemukan" />
 
         <TextView
             style="@style/Text.P.Muted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Coba kata pencarian lain." />
+            android:text="@string/coba_kata_pencarian_lain" />
 
         <TextView
             android:id="@+id/clear"
             style="@style/Widget.HyTrack.TextButton"
-            android:text="Hapus pencarian" />
+            android:text="@string/hapus_pencarian" />
     </LinearLayout>
 
     <TextView
         style="@style/Text.Small.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Perkiraan tunggu berubah mengikuti pelayanan." />
+        android:text="@string/perkiraan_tunggu_berubah_mengikuti" />
 </merge>

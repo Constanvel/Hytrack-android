@@ -33,7 +33,7 @@ fun TextView.tone(tone: Tone) {
 
 /** GuideRestart: shows the guide again from the first step. */
 fun ShellActivity.guideRestart(view: TextView) {
-    view.text = if (Guide.off(this)) "Tampilkan panduan penggunaan" else "Ulangi panduan dari awal"
+    view.text = if (Guide.off(this)) getString(R.string.tampilkan_panduan_penggunaan) else getString(R.string.ulangi_panduan_dari_awal)
     view.setOnClickListener {
         Guide.restart(this)
         render()
@@ -44,7 +44,7 @@ class HomeActivity : ShellActivity() {
     override val tab = Tab.HOME
 
     override fun spec() = Spec(
-        "HyTrack",
+        getString(R.string.app_name),
         brand = true,
         decor = Decor.CORNER,
         guide = if (Demo.activeVisit == null) GuideStep.PASIEN else null,
@@ -53,10 +53,10 @@ class HomeActivity : ShellActivity() {
     override fun content(into: LinearLayout) {
         val b = ScreenHomeBinding.inflate(layoutInflater, into)
         val visit = Demo.activeVisit
-        b.heroTitle.text = if (visit != null) "Kunjungan Anda\n${visit.ticket}" else "Belum ada\nkunjungan aktif"
+        b.heroTitle.text = if (visit != null) getString(R.string.kunjungan_anda_n, visit.ticket) else getString(R.string.belum_ada_nkunjungan_aktif)
         b.heroText.text = visit?.let { "${it.clinic.name} · ${it.doctor.name}" }
-            ?: "Ambil antrean untuk poliklinik dan dokter pilihan Anda."
-        b.heroAction.text = if (visit != null) "Lihat kunjungan" else "+ Ambil antrean"
+            ?: getString(R.string.ambil_antrean_untuk_poliklinik_dan_dokter)
+        b.heroAction.text = if (visit != null) getString(R.string.lihat_kunjungan) else getString(R.string.ambil_antrean)
         b.heroAction.setOnClickListener {
             go(if (visit != null) VisitActivity::class.java else ClinicsActivity::class.java)
         }
@@ -65,12 +65,12 @@ class HomeActivity : ShellActivity() {
             b.profile.tag = "guide"
         }
         b.patientName.text = Demo.patient
-        b.patientPhone.text = "Telp ${Demo.phone}"
+        b.patientPhone.text = getString(R.string.telp, Demo.phone)
         b.accountLink.setOnClickListener { go(AccountActivity::class.java) }
         b.beforeList.plainList(
-            "Siapkan kartu identitas dan rujukan.",
-            "Pilih poliklinik dan jadwal dokter.",
-            "Check-in saat tiba di rumah sakit.",
+            getString(R.string.siapkan_kartu_identitas_dan_rujukan),
+            getString(R.string.pilih_poliklinik_dan_jadwal_dokter),
+            getString(R.string.check_in_saat_tiba_di_rumah_sakit),
         )
         guideRestart(b.guideRestart)
         b.helpLink.setOnClickListener { go(HelpActivity::class.java) }
@@ -80,16 +80,16 @@ class HomeActivity : ShellActivity() {
 class AccountActivity : ShellActivity() {
     override val tab = Tab.ACCOUNT
 
-    override fun spec() = Spec("Akun", "Profil dan bantuan")
+    override fun spec() = Spec(getString(R.string.akun), getString(R.string.profil_dan_bantuan))
 
     override fun content(into: LinearLayout) {
         val b = ScreenAccountBinding.inflate(layoutInflater, into)
         b.name.text = Demo.patient
-        b.phone.text = "Telp ${Demo.phone}"
+        b.phone.text = getString(R.string.telp, Demo.phone)
         b.help.setOnClickListener { go(HelpActivity::class.java) }
         b.askHya.setOnClickListener { go(HyaActivity::class.java) }
         b.demo.root.isVisible = Demo.activeVisit != null
-        b.demo.bind("Kontrol demo", "Reset data kunjungan demo") {
+        b.demo.bind(getString(R.string.kontrol_demo), getString(R.string.reset_data_kunjungan_demo)) {
             visit { Demo.cancel() }
         }
         b.demo.demoAction.setBackgroundResource(R.drawable.bg_btn_danger)
@@ -102,7 +102,7 @@ class AccountActivity : ShellActivity() {
 }
 
 class NotificationsActivity : ShellActivity() {
-    override fun spec() = Spec("Notifikasi", back = HomeActivity::class.java)
+    override fun spec() = Spec(getString(R.string.notifications), back = HomeActivity::class.java)
 
     override fun content(into: LinearLayout) {
         val b = ScreenNotificationsBinding.inflate(layoutInflater, into)
@@ -114,7 +114,7 @@ class NotificationsActivity : ShellActivity() {
         items.forEach { item ->
             ItemNotificationBinding.inflate(layoutInflater, b.list, true).apply {
                 if (item.unread) root.setBackgroundResource(R.drawable.bg_card_unread)
-                time.text = item.time + if (item.unread) " · BARU" else ""
+                time.text = item.time + if (item.unread) getString(R.string.baru) else ""
                 message.text = item.message
                 action.text = item.action
                 action.isVisible = item.action != null
@@ -131,8 +131,8 @@ class NotificationsActivity : ShellActivity() {
 
 class ClinicsActivity : ShellActivity() {
     override fun spec() = Spec(
-        "Pilih poliklinik",
-        "KUNJUNGAN BARU · 1 / 2",
+        getString(R.string.pilih_poliklinik),
+        getString(R.string.kunjungan_baru_1_2),
         back = HomeActivity::class.java,
         decor = Decor.WAVES,
         guide = GuideStep.POLI,
@@ -140,9 +140,9 @@ class ClinicsActivity : ShellActivity() {
 
     override fun content(into: LinearLayout) {
         val b = ScreenClinicsBinding.inflate(layoutInflater, into)
-        b.search.query.hint = "Cari nama poliklinik"
-        b.search.query.contentDescription = "Cari nama poliklinik"
-        b.hospital.text = "${Demo.HOSPITAL} · Rawat jalan"
+        b.search.query.hint = getString(R.string.cari_nama_poliklinik)
+        b.search.query.contentDescription = getString(R.string.cari_nama_poliklinik)
+        b.hospital.text = getString(R.string.rawat_jalan_2, Demo.HOSPITAL)
         fun filter(query: String) {
             b.list.removeAllViews()
             val found = Demo.clinics.filter { it.name.contains(query.trim(), ignoreCase = true) }
@@ -150,7 +150,7 @@ class ClinicsActivity : ShellActivity() {
                 val doctors = Demo.doctorsOf(clinic).size
                 ItemClinicBinding.inflate(layoutInflater, b.list, true).apply {
                     name.text = clinic.name
-                    detail.text = if (doctors > 0) "$doctors dokter praktik · ${clinic.wait} menit" else "Jadwal belum tersedia"
+                    detail.text = if (doctors > 0) getString(R.string.dokter_praktik_menit, doctors, clinic.wait) else getString(R.string.jadwal_belum_tersedia)
                     root.setOnClickListener { go(DoctorsActivity::class.java) { putExtra(DoctorsActivity.CLINIC, clinic.id) } }
                 }
             }
@@ -174,10 +174,10 @@ class DoctorsActivity : ShellActivity() {
     private val clinic get() = Demo.clinic(intent.getIntExtra(CLINIC, 1))
 
     override fun spec(): Spec {
-        if (Demo.activeVisit != null) return Spec("Dokter & jadwal", back = ClinicsActivity::class.java)
+        if (Demo.activeVisit != null) return Spec(getString(R.string.dokter_jadwal), back = ClinicsActivity::class.java)
         return Spec(
-            "Dokter & jadwal",
-            "KUNJUNGAN BARU · 2 / 2",
+            getString(R.string.dokter_jadwal),
+            getString(R.string.kunjungan_baru_2_2),
             back = ClinicsActivity::class.java,
             decor = Decor.WAVES,
             guide = if (Demo.doctorsOf(clinic).isNotEmpty()) GuideStep.DOKTER else null,
@@ -190,10 +190,10 @@ class DoctorsActivity : ShellActivity() {
             m.card.isVisible = false
             m.hyaHelp.root.isVisible = false
             m.notice.isVisible = true
-            m.notice.text = "Anda sudah memiliki satu kunjungan aktif."
+            m.notice.text = getString(R.string.anda_sudah_memiliki_satu_kunjungan_aktif)
             m.notice.tone(Tone.WARNING)
             m.plainAction.isVisible = true
-            m.plainAction.text = "Buka kunjungan aktif"
+            m.plainAction.text = getString(R.string.buka_kunjungan_aktif)
             m.plainAction.setOnClickListener { go(VisitActivity::class.java) }
             return
         }
@@ -207,7 +207,7 @@ class DoctorsActivity : ShellActivity() {
         val day = Demo.days[dayIndex]
         val b = ScreenDoctorsBinding.inflate(layoutInflater, into)
         b.clinic.text = clinic.name + when {
-            doctors.isEmpty() -> " · Jadwal belum tersedia"
+            doctors.isEmpty() -> getString(R.string.jadwal_belum_tersedia_2)
             clinic.room != null -> " · ${clinic.room}"
             else -> ""
         }
@@ -237,16 +237,16 @@ class DoctorsActivity : ShellActivity() {
                 check.isVisible = selected
                 schedule.text = (if (selected) "${clinic.name}\n" else "") + "${day.weekday}, ${day.label} · ${doctor.time}"
                 listOf(rule, metrics, status).forEach { it.isVisible = selected }
-                wait.text = "${doctor.wait(day)} menit"
-                quota.text = "${doctor.quota(day)} pasien"
-                status.text = doctor.delay?.let { "Dokter terlambat ±$it" } ?: "Jadwal dipilih · ${doctor.time}"
+                wait.text = getString(R.string.menit, doctor.wait(day))
+                quota.text = getString(R.string.pasien, doctor.quota(day))
+                status.text = doctor.delay?.let { getString(R.string.dokter_terlambat, it) } ?: getString(R.string.jadwal_dipilih, doctor.time)
                 status.tone(if (doctor.delay != null) Tone.WARNING else Tone.GREEN)
                 root.setOnClickListener { doctorId = doctor.id; render() }
             }
         }
         val doctor = doctors.first { it.id == doctorId }
         val full = doctor.quota(day) < 1
-        b.bookLabel.text = if (full) "Kuota penuh" else "Ambil antrean"
+        b.bookLabel.text = if (full) getString(R.string.kuota_penuh) else getString(R.string.ambil_antrean_2)
         b.book.isEnabled = !full
         b.book.alpha = if (full) 0.55f else 1f
         b.book.setOnClickListener {

@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:accessibilityHeading="true"
-        android:text="Pilih dokter &amp; jadwal" />
+        android:text="@string/pilih_dokter_jadwal" />
 
     <LinearLayout
         android:id="@+id/empty"
@@ -26,19 +26,19 @@
             style="@style/Text.H3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Jadwal belum tersedia" />
+            android:text="@string/jadwal_belum_tersedia" />
 
         <TextView
             style="@style/Text.P.Muted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Belum ada dokter yang praktik di poliklinik ini." />
+            android:text="@string/belum_ada_dokter_yang_praktik_di" />
 
         <TextView
             android:id="@+id/otherClinic"
             style="@style/Widget.HyTrack.Button.Secondary"
-            android:text="Pilih poliklinik lain" />
+            android:text="@string/pilih_poliklinik_lain" />
     </LinearLayout>
 
     <!-- .date-grid: three columns, 12px gap. -->
@@ -63,14 +63,14 @@
             style="@style/Text.Strong"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Antrean belum diambil"
+            android:text="@string/antrean_belum_diambil"
             android:textColor="@color/warning_text" />
 
         <TextView
             style="@style/Text.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nomor diterbitkan setelah Anda menekan Ambil antrean. Maks. 1 kunjungan aktif."
+            android:text="@string/nomor_diterbitkan_setelah_anda_menekan"
             android:textColor="@color/warning_text" />
     </LinearLayout>
 

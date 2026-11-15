@@ -7,7 +7,7 @@
 
     <TextView
         style="@style/Widget.HyTrack.Notice"
-        android:text="✓ Antrean berhasil diambil" />
+        android:text="@string/antrean_berhasil_diambil" />
 
     <!-- .card.ticket-card -->
     <LinearLayout
@@ -21,7 +21,7 @@
             style="@style/Text.Eyebrow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="NOMOR ANTREAN ANDA" />
+            android:text="@string/nomor_antrean_anda" />
 
         <TextView
             android:id="@+id/ticket"
@@ -118,7 +118,7 @@
                     style="@style/Text.MetricLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="sedang menunggu" />
+                    android:text="@string/sedang_menunggu" />
             </LinearLayout>
 
             <LinearLayout
@@ -139,7 +139,7 @@
                     style="@style/Text.MetricLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="setelah check-in" />
+                    android:text="@string/setelah_check_in" />
             </LinearLayout>
         </LinearLayout>
     </FrameLayout>
@@ -148,13 +148,13 @@
         android:id="@+id/showQr"
         style="@style/Widget.HyTrack.Button"
         android:tag="guide"
-        android:text="Tampilkan QR check-in" />
+        android:text="@string/tampilkan_qr_check_in" />
 
     <TextView
         style="@style/Text.Small.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Gedung A, lantai 2 · Meja check-in\nEstimasi berubah mengikuti pelayanan." />
+        android:text="@string/gedung_a_lantai_2_meja_check_in_nestimasi" />
 
     <include
         android:id="@+id/hyaHelp"
@@ -163,5 +163,5 @@
     <TextView
         android:id="@+id/cancel"
         style="@style/Widget.HyTrack.TextButton"
-        android:text="Batalkan kunjungan" />
+        android:text="@string/batalkan_kunjungan" />
 </merge>

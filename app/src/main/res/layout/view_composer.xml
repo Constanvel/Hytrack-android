@@ -29,7 +29,7 @@
             android:layout_height="40dp"
             android:layout_weight="1"
             android:background="@null"
-            android:hint="Tulis pertanyaan Anda..."
+            android:hint="@string/tulis_pertanyaan_anda"
             android:imeOptions="actionSend"
             android:importantForAutofill="no"
             android:inputType="textCapSentences"
@@ -44,7 +44,7 @@
             android:layout_marginStart="8dp"
             android:background="@drawable/bg_composer_send"
             android:clickable="true"
-            android:contentDescription="Kirim pertanyaan"
+            android:contentDescription="@string/kirim_pertanyaan"
             android:focusable="true">
 
             <ImageView
@@ -63,7 +63,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="Respons terstruktur, bukan AI. Jangan masukkan data pribadi atau medis."
+        android:text="@string/respons_terstruktur_bukan_ai_jangan"
         android:textColor="@color/muted"
         android:textSize="10sp" />
 </LinearLayout>

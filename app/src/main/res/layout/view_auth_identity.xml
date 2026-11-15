@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- .auth-identity: HyTrack lockup above the screen title and intro. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:divider="@drawable/gap_20"
+    android:orientation="vertical"
+    android:showDividers="middle">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="72dp"
+            android:layout_height="54dp"
+            android:importantForAccessibility="no"
+            android:scaleType="fitCenter"
+            android:src="@drawable/logo_hytrack"
+            tools:ignore="ContentDescription" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/Text.Auth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/jakarta_bold"
+                android:lineHeight="32sp"
+                android:text="@string/app_name"
+                android:textColor="@color/brand"
+                android:textSize="23sp" />
+
+            <TextView
+                style="@style/Text.Auth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/jakarta_semibold"
+                android:lineHeight="13sp"
+                android:text="@string/tagline"
+                android:textColor="@color/brand_muted"
+                android:textSize="9sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/gap_8"
+        android:orientation="vertical"
+        android:showDividers="middle">
+
+        <TextView
+            android:id="@+id/authTitle"
+            style="@style/Text.Auth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:accessibilityHeading="true"
+            android:fontFamily="@font/inter_bold"
+            android:lineHeight="36sp"
+            android:textSize="26sp"
+            tools:text="Selamat datang kembali." />
+
+        <TextView
+            android:id="@+id/authIntro"
+            style="@style/Text.Auth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:lineHeight="21sp"
+            android:textColor="@color/brand_muted"
+            android:textSize="15sp"
+            tools:text="Masuk untuk melanjutkan kunjungan\ndan memantau antrean Anda." />
+    </LinearLayout>
+</LinearLayout>

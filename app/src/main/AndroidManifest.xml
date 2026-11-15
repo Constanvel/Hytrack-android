@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Hytracl">
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -21,6 +21,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".RegisterActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".HomeActivity" />
+        <activity android:name=".AccountActivity" />
+        <activity android:name=".NotificationsActivity" />
+        <activity android:name=".ClinicsActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".DoctorsActivity" />
+        <activity android:name=".VisitActivity" />
+        <activity android:name=".CheckInActivity" />
+        <activity android:name=".CompanionAccessActivity" />
+        <activity android:name=".CompanionViewActivity" />
+        <activity android:name=".HyaActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".HelpActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".CheckInGuideActivity" />
+        <activity android:name=".QueueGuideActivity" />
+        <activity android:name=".DirectionsActivity" />
     </application>
 
 </manifest>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pilih poliklinik (features/patient/booking.tsx: Clinics). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        style="@style/Text.H2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:text="Mau berobat ke mana?" />
+
+    <include
+        android:id="@+id/search"
+        layout="@layout/view_search" />
+
+    <TextView
+        android:id="@+id/hospital"
+        style="@style/Widget.HyTrack.Notice"
+        tools:text="RS Harapan Sehat · Rawat jalan" />
+
+    <TextView
+        style="@style/Text.H3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:text="Poliklinik tersedia hari ini" />
+
+    <LinearLayout
+        android:id="@+id/list"
+        style="@style/Widget.HyTrack.Stack"
+        android:divider="@drawable/gap_20"
+        android:tag="guide" />
+
+    <LinearLayout
+        android:id="@+id/empty"
+        style="@style/Widget.HyTrack.Card.Empty"
+        android:accessibilityLiveRegion="polite"
+        android:visibility="gone">
+
+        <TextView
+            style="@style/Text.H3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Poliklinik tidak ditemukan" />
+
+        <TextView
+            style="@style/Text.P.Muted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Coba kata pencarian lain." />
+
+        <TextView
+            android:id="@+id/clear"
+            style="@style/Widget.HyTrack.TextButton"
+            android:text="Hapus pencarian" />
+    </LinearLayout>
+
+    <TextView
+        style="@style/Text.Small.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Perkiraan tunggu berubah mengikuti pelayanan." />
+</merge>

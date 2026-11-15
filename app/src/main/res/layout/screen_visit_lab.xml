@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Layanan berikutnya (features/patient/visit.tsx: NextService, stage "laboratory"). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        style="@style/Widget.HyTrack.Notice"
+        android:text="✓ Pemeriksaan dokter selesai" />
+
+    <TextView
+        style="@style/Text.H2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:text="Selanjutnya, ke\nlaboratorium" />
+
+    <LinearLayout
+        style="@style/Widget.HyTrack.Hero"
+        android:tag="guide">
+
+        <TextView
+            style="@style/Text.Hero.Eyebrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GEDUNG A" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Text.Strong"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="L1"
+                android:textColor="@color/white"
+                android:textSize="58sp" />
+
+            <TextView
+                style="@style/Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:contentDescription="Turun"
+                android:text="↓"
+                android:textColor="@color/white"
+                android:textSize="56sp" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/Text.Hero.H3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Laboratorium · A-108" />
+
+        <TextView
+            style="@style/Text.Hero.P"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Turun 1 lantai · ±3 menit berjalan" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/steps"
+        style="@style/Widget.HyTrack.Card"
+        android:divider="@drawable/gap_18"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp" />
+
+    <LinearLayout style="@style/Widget.HyTrack.Stack">
+
+        <TextView
+            style="@style/Text.H3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lapor dulu di meja laboratorium" />
+
+        <TextView
+            style="@style/Text.Small.Muted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Antrean laboratorium dimulai setelah Anda melapor." />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/directions"
+        style="@style/Widget.HyTrack.Button.Secondary"
+        android:text="Lihat petunjuk ruangan" />
+
+    <include
+        android:id="@+id/demo"
+        layout="@layout/view_demo_controls" />
+</merge>

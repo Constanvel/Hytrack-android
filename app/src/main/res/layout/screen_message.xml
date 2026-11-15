@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Notice + centred empty card + action: the "no active visit", "visit completed",
+  "already booked" and "nothing to share" states of the visit screens.
+-->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        android:id="@+id/notice"
+        style="@style/Widget.HyTrack.Notice"
+        android:visibility="gone"
+        tools:text="Kunjungan selesai. Akses pendamping telah berakhir."
+        tools:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/card"
+        style="@style/Widget.HyTrack.Card.Empty">
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/Text.H2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            tools:text="Belum ada kunjungan aktif" />
+
+        <TextView
+            android:id="@+id/text"
+            style="@style/Text.P.Muted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            tools:text="Pilih poliklinik dan jadwal dokter untuk memulai." />
+
+        <TextView
+            android:id="@+id/action"
+            style="@style/Widget.HyTrack.Button"
+            tools:text="Ambil antrean" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/plainAction"
+        style="@style/Widget.HyTrack.Button"
+        android:visibility="gone"
+        tools:text="Buka kunjungan aktif" />
+
+    <include
+        android:id="@+id/hyaHelp"
+        layout="@layout/view_hya_help" />
+</merge>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Beranda (features/patient/home.tsx: Home). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <!-- .intro -->
+    <LinearLayout
+        style="@style/Widget.HyTrack.Stack"
+        android:divider="@drawable/gap_12">
+
+        <TextView
+            style="@style/Text.H2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:accessibilityHeading="true"
+            android:text="Berobat lebih tenang." />
+
+        <TextView
+            style="@style/Text.Lead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pantau antrean. Datang tepat waktu." />
+    </LinearLayout>
+
+    <LinearLayout style="@style/Widget.HyTrack.Hero">
+
+        <TextView
+            style="@style/Text.Hero.Eyebrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="RAWAT JALAN" />
+
+        <TextView
+            android:id="@+id/heroTitle"
+            style="@style/Text.Hero.H2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Belum ada\nkunjungan aktif" />
+
+        <TextView
+            android:id="@+id/heroText"
+            style="@style/Text.Hero.P"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Ambil antrean untuk poliklinik dan dokter pilihan Anda." />
+
+        <TextView
+            android:id="@+id/heroAction"
+            style="@style/Widget.HyTrack.Button.White"
+            tools:text="+ Ambil antrean" />
+    </LinearLayout>
+
+    <!-- .profile-row -->
+    <LinearLayout
+        android:id="@+id/profile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            style="@style/Widget.HyTrack.Stack"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:divider="@drawable/gap_10">
+
+            <TextView
+                style="@style/Text.Eyebrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PASIEN TERPILIH" />
+
+            <TextView
+                android:id="@+id/patientName"
+                style="@style/Text.H3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Siti Aminah" />
+
+            <TextView
+                android:id="@+id/patientPhone"
+                style="@style/Text.P.Muted"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Telp •••• 0842" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/accountLink"
+            style="@style/Widget.HyTrack.TextButton"
+            android:layout_marginStart="16dp"
+            android:text="Akun" />
+    </LinearLayout>
+
+    <View style="@style/Widget.HyTrack.Hr" />
+
+    <LinearLayout style="@style/Widget.HyTrack.Stack">
+
+        <TextView
+            style="@style/Text.H3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:accessibilityHeading="true"
+            android:text="Sebelum ke rumah sakit" />
+
+        <LinearLayout
+            android:id="@+id/beforeList"
+            style="@style/Widget.HyTrack.Stack"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:id="@+id/guideRestart"
+            style="@style/Widget.HyTrack.TextButton"
+            tools:text="Ulangi panduan dari awal" />
+    </LinearLayout>
+
+    <!-- .inline-link -->
+    <LinearLayout
+        android:id="@+id/helpLink"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:minHeight="44dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_heart"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="Butuh bantuan? Hubungi petugas."
+            android:textColor="@color/primary" />
+    </LinearLayout>
+
+    <include
+        android:id="@+id/hyaHelp"
+        layout="@layout/view_hya_help" />
+</merge>

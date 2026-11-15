@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Akun (features/patient/home.tsx: Account). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <LinearLayout style="@style/Widget.HyTrack.Card">
+
+        <TextView
+            style="@style/Text.Eyebrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AKUN PASIEN" />
+
+        <TextView
+            android:id="@+id/name"
+            style="@style/Text.H2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Siti Aminah" />
+
+        <TextView
+            android:id="@+id/phone"
+            style="@style/Text.P.Muted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Telp •••• 0842" />
+
+        <TextView
+            style="@style/Text.P"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Satu akun untuk satu profil pasien. Hubungi petugas untuk memperbarui data Anda." />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/help"
+        style="@style/Widget.HyTrack.Button.Secondary"
+        android:text="Bantuan &amp; panduan kunjungan" />
+
+    <TextView
+        android:id="@+id/askHya"
+        style="@style/Widget.HyTrack.Button.Secondary"
+        android:text="@string/ask_hya" />
+
+    <include
+        android:id="@+id/demo"
+        layout="@layout/view_demo_controls" />
+
+    <TextView
+        android:id="@+id/signOut"
+        style="@style/Widget.HyTrack.Button.Secondary"
+        android:text="Keluar" />
+</merge>

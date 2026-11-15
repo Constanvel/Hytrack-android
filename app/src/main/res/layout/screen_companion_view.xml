@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pantauan keluarga (features/patient/companion.tsx: CompanionView): read-only, limited. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        android:id="@+id/access"
+        style="@style/Widget.HyTrack.Notice.Info"
+        tools:text="Akses terbatas · Hanya pantauan · Diperbarui 16.47" />
+
+    <TextView
+        style="@style/Text.Eyebrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="KUNJUNGAN KELUARGA" />
+
+    <TextView
+        android:id="@+id/patient"
+        style="@style/Text.H2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Siti A." />
+
+    <LinearLayout style="@style/Widget.HyTrack.Hero">
+
+        <TextView
+            android:id="@+id/stage"
+            style="@style/Text.Hero.Eyebrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="MENUNGGU GILIRAN" />
+
+        <TextView
+            android:id="@+id/ticket"
+            style="@style/Text.Ticket"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            tools:text="A-027" />
+
+        <TextView
+            android:id="@+id/headline"
+            style="@style/Text.Hero.H3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="3 pasien lagi · 15–25 menit" />
+
+        <TextView
+            android:id="@+id/clinic"
+            style="@style/Text.Hero.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Poli Penyakit Dalam · Estimasi dapat berubah." />
+    </LinearLayout>
+
+    <LinearLayout style="@style/Widget.HyTrack.Card">
+
+        <TextView
+            style="@style/Text.Eyebrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LOKASI SAAT INI" />
+
+        <TextView
+            android:id="@+id/room"
+            style="@style/Text.H2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Ruang A-204" />
+
+        <TextView
+            android:id="@+id/building"
+            style="@style/Text.P.Muted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Gedung A, lantai 2 · RS Harapan Sehat" />
+    </LinearLayout>
+
+    <TextView
+        style="@style/Text.Small.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Hanya pantauan. Antrean tidak dapat diubah; informasi medis tetap privat." />
+
+    <TextView
+        android:id="@+id/stop"
+        style="@style/Widget.HyTrack.TextButton"
+        android:text="Berhenti memantau" />
+</merge>

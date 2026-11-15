@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status obat (features/patient/visit.tsx: Pharmacy, stage "pharmacy"). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        android:id="@+id/status"
+        style="@style/Widget.HyTrack.Notice"
+        tools:text="● Status farmasi · Resep diterima" />
+
+    <LinearLayout
+        style="@style/Widget.HyTrack.Hero"
+        android:tag="guide">
+
+        <TextView
+            android:id="@+id/eyebrow"
+            style="@style/Text.Hero.Eyebrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="OBAT SEDANG DISIAPKAN" />
+
+        <TextView
+            android:id="@+id/headline"
+            style="@style/Text.Hero.H2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Resep diterima" />
+
+        <TextView
+            android:id="@+id/instruction"
+            style="@style/Text.Hero.P"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Tunggu sampai nomor Anda dipanggil." />
+
+        <View style="@style/Widget.HyTrack.Hr" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/pickup"
+                style="@style/Text.Strong"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/white"
+                android:textSize="38sp"
+                tools:text="F-091" />
+
+            <TextView
+                style="@style/Text.Hero.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Nomor\npengambilan" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/steps"
+        style="@style/Widget.HyTrack.Card"
+        android:divider="@drawable/gap_18"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp" />
+
+    <LinearLayout style="@style/Widget.HyTrack.InfoCard">
+
+        <TextView
+            android:id="@+id/where"
+            style="@style/Text.H3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/info_text"
+            tools:text="Tunggu di area Farmasi" />
+
+        <TextView
+            android:id="@+id/whereText"
+            style="@style/Text.P"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/info_text"
+            tools:text="Gedung A, lantai 1 · Loket F2\nAmbil obat setelah nomor F-091 dipanggil." />
+    </LinearLayout>
+
+    <TextView
+        style="@style/Text.Small.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Perkiraan berubah jika ada obat racikan. Petugas akan memberi tahu bila ada kendala." />
+
+    <include
+        android:id="@+id/demo"
+        layout="@layout/view_demo_controls" />
+</merge>

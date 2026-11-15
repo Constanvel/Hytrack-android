@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <details>: white 14px card, bold summary with a disclosure triangle, answer below. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_details"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:id="@+id/summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:minHeight="32dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/marker"
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:importantForAccessibility="no"
+            android:lineHeight="23.1sp"
+            android:textSize="13sp"
+            tools:text="▼" />
+
+        <TextView
+            android:id="@+id/question"
+            style="@style/Text.Strong"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            tools:text="Bagaimana mengambil antrean?" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/answer"
+        style="@style/Text.P"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        tools:text="Pilih poliklinik, dokter, dan jadwal." />
+</LinearLayout>

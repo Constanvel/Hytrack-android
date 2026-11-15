@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Petunjuk ruangan (features/help/help.tsx: Directions). Static text, like the web. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        style="@style/Widget.HyTrack.Notice.Warning"
+        android:text="Denah rumah sakit belum tersedia. Rute berikut berupa petunjuk teks; konfirmasikan kepada petugas." />
+
+    <TextView
+        style="@style/Text.H2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:text="Poli Penyakit Dalam" />
+
+    <LinearLayout style="@style/Widget.HyTrack.Card">
+
+        <TextView
+            style="@style/Text.H3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ruang A-204" />
+
+        <TextView
+            style="@style/Text.P.Muted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gedung A, lantai 2" />
+
+        <TextView
+            style="@style/Text.P"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Naik ke lantai 2 melalui lift Gedung A. Ikuti tanda menuju Poli Penyakit Dalam dan meja check-in." />
+    </LinearLayout>
+
+    <TextView
+        style="@style/Text.H3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:text="Setelah pemeriksaan" />
+
+    <LinearLayout
+        android:id="@+id/steps"
+        style="@style/Widget.HyTrack.Card"
+        android:divider="@drawable/gap_18"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp" />
+
+    <TextView
+        style="@style/Widget.HyTrack.Notice.Info"
+        android:text="Butuh rute aksesibel? Minta pendampingan petugas. Denah, akses lift, dan kondisi rute belum diverifikasi." />
+
+    <TextView
+        android:id="@+id/help"
+        style="@style/Widget.HyTrack.Button.Secondary"
+        android:text="Bantuan kunjungan" />
+</merge>

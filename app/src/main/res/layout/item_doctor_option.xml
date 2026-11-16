@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pilihan dokter lain (Figma 22:73): name, practice hours and remaining quota. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_doctor"
+    android:clickable="true"
+    android:divider="@drawable/gap_4"
+    android:focusable="true"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:showDividers="middle">
+
+    <TextView
+        android:id="@+id/name"
+        style="@style/Text.Figma"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/inter_semibold"
+        android:lineHeight="22.4sp"
+        android:textSize="16sp"
+        tools:text="dr. Budi Santoso, Sp.PD" />
+
+    <TextView
+        android:id="@+id/detail"
+        style="@style/Text.Figma.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lineHeight="19.6sp"
+        tools:text="13.00–16.00 · 25 kuota tersisa" />
+</LinearLayout>

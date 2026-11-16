@@ -5,8 +5,12 @@
     <dimen name="radius">20dp</dimen>
     <dimen name="header_min_height">72dp</dimen>
     <dimen name="bottom_nav_height">80dp</dimen>
-    <!-- Bottom nav (80) + gap (16) + Hya bubble (76): keeps the last control clear of the bubble. -->
-    <dimen name="shell_bottom_space">172dp</dimen>
+    <!--
+      Space under the page content (which adds its own 28dp): bottom nav (80) plus room for the
+      Hya bubble, whose top sits 82dp above the nav. 144 + 28 leaves a 92dp strip above the nav,
+      enough for the bubble with a 10dp margin, without the extra empty band at the page end.
+    -->
+    <dimen name="shell_bottom_space">144dp</dimen>
     <dimen name="button_height">52dp</dimen>
     <dimen name="touch_target">44dp</dimen>
 </resources>

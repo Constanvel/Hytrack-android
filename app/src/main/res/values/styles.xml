@@ -270,4 +270,40 @@
         <item name="android:textSize">16sp</item>
         <item name="android:padding">0dp</item>
     </style>
+
+    <!-- Dokter & jadwal (Figma node 22:2, Inter, line-height 1.4) ========== -->
+    <style name="Text.Figma">
+        <item name="android:fontFamily">@font/inter_regular</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">19.6sp</item>
+        <item name="android:textColor">@color/auth_text</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Text.Figma.Muted">
+        <item name="android:textColor">@color/brand_muted</item>
+    </style>
+    <style name="Text.Figma.Notice">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/bg_figma_notice</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingEnd">10dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:fontFamily">@font/inter_semibold</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:lineHeight">18.2sp</item>
+        <item name="android:textColor">@color/brand</item>
+    </style>
+    <!-- Month arrows and "Kalender lengkap": white 36dp buttons. -->
+    <style name="Text.Figma.DateNav">
+        <item name="android:layout_height">36dp</item>
+        <item name="android:background">@drawable/bg_date_nav</item>
+        <item name="android:gravity">center</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:fontFamily">@font/inter_semibold</item>
+        <item name="android:textColor">@color/brand</item>
+        <item name="android:lineHeight">18sp</item>
+    </style>
 </resources>

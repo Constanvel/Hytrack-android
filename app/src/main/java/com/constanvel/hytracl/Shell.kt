@@ -44,6 +44,8 @@ class Spec(
     val bare: Boolean = false,
     val decor: Decor? = null,
     val guide: GuideStep? = null,
+    /** The screen pins its own action bar in the footer in place of the bottom nav. */
+    val action: Boolean = false,
 )
 
 /** Navigates like a web link: returns to the screen if it is already in the stack. */
@@ -276,9 +278,9 @@ abstract class ShellActivity : AppCompatActivity() {
         shell.bell.contentDescription = if (Demo.unread > 0) getString(R.string.notifikasi_belum_dibaca, Demo.unread) else getString(R.string.notifications)
         shell.close.isVisible = s.hya
         shell.header.setBackgroundResource(if (s.hya) R.drawable.bg_header_rule else 0)
-        shell.bottomNav.isVisible = !s.hya && !s.bare
+        shell.bottomNav.isVisible = !s.hya && !s.bare && !s.action
         shell.fab.isVisible = !s.hya && !s.bare
-        shell.footer.isVisible = s.hya
+        shell.footer.isVisible = s.hya || s.action
         decor = s.decor
         placeDecor()
 
@@ -291,7 +293,10 @@ abstract class ShellActivity : AppCompatActivity() {
         if (guiding) guideHint(content, s.guide!!)
         content(content)
         content.findViewById<View>(R.id.hyaHelp)?.setOnClickListener { go(HyaActivity::class.java) }
-        if (guiding) highlight(content)
+        if (guiding) {
+            highlight(content)
+            highlight(shell.footer)
+        }
         cssLeading(shell.root)
     }
 
@@ -315,7 +320,7 @@ abstract class ShellActivity : AppCompatActivity() {
         if (root.tag == "guide") {
             // The outline sits 7dp outside the view (outline-offset), so ancestors must not clip it.
             var parent = root.parent
-            while (parent is ViewGroup && parent !== shell.scroll) {
+            while (parent is ViewGroup && parent !== shell.scroll && parent !== shell.root) {
                 parent.clipChildren = false
                 parent.clipToPadding = false
                 parent = parent.parent

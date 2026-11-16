@@ -1,14 +1,22 @@
 package com.constanvel.hytracl
 
+import android.app.DatePickerDialog
 import android.content.Intent
+import android.content.res.Configuration
+import android.os.Bundle
+import android.view.ContextThemeWrapper
+import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import com.constanvel.hytracl.databinding.ItemClinicBinding
 import com.constanvel.hytracl.databinding.ItemDateBinding
 import com.constanvel.hytracl.databinding.ItemDoctorBinding
+import com.constanvel.hytracl.databinding.ItemDoctorOptionBinding
 import com.constanvel.hytracl.databinding.ItemNotificationBinding
 import com.constanvel.hytracl.databinding.ScreenAccountBinding
 import com.constanvel.hytracl.databinding.ScreenClinicsBinding
@@ -16,6 +24,8 @@ import com.constanvel.hytracl.databinding.ScreenDoctorsBinding
 import com.constanvel.hytracl.databinding.ScreenHomeBinding
 import com.constanvel.hytracl.databinding.ScreenMessageBinding
 import com.constanvel.hytracl.databinding.ScreenNotificationsBinding
+import com.constanvel.hytracl.databinding.ViewBookBarBinding
+import java.util.Locale
 
 /** Notice tone switch for an existing notice view. */
 fun TextView.tone(tone: Tone) {
@@ -170,8 +180,23 @@ class DoctorsActivity : ShellActivity() {
     private var clinicId = 0
     private var dayIndex = 0
     private var doctorId = 0
+    private lateinit var bar: ViewBookBarBinding
 
     private val clinic get() = Demo.clinic(intent.getIntExtra(CLINIC, 1))
+    private val booking get() = Demo.activeVisit == null && Demo.doctorsOf(clinic).isNotEmpty()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (isFinishing) return
+        // Figma 22:2 sets the header in Inter (21sp bold / 10sp medium) and pins the button bar.
+        shell.title.typeface = ResourcesCompat.getFont(this, R.font.inter_bold)
+        shell.title.textSize = 21f
+        shell.title.lineHeight = shell.root.dp(29.4)
+        shell.subtitle.typeface = ResourcesCompat.getFont(this, R.font.inter_medium)
+        shell.subtitle.textSize = 10f
+        bar = ViewBookBarBinding.inflate(layoutInflater, shell.footer, true)
+        shell.footer.setBackgroundResource(R.color.bg) // also behind the system navigation bar
+    }
 
     override fun spec(): Spec {
         if (Demo.activeVisit != null) return Spec(getString(R.string.dokter_jadwal), back = ClinicsActivity::class.java)
@@ -180,8 +205,36 @@ class DoctorsActivity : ShellActivity() {
             getString(R.string.kunjungan_baru_2_2),
             back = ClinicsActivity::class.java,
             decor = Decor.WAVES,
-            guide = if (Demo.doctorsOf(clinic).isNotEmpty()) GuideStep.DOKTER else null,
+            guide = if (booking) GuideStep.DOKTER else null,
+            action = booking,
         )
+    }
+
+    /** Kalender lengkap: the platform date picker, limited to the booking window. */
+    private fun pickDate() {
+        val day = Demo.days[dayIndex]
+        // Indonesian month and day names, like the rest of the app, whatever the device language.
+        // The picker's header formats with the default locale, so it is switched while the dialog is open.
+        val id = Locale.forLanguageTag("id-ID")
+        val previous = Locale.getDefault()
+        Locale.setDefault(id)
+        val indonesian = ContextThemeWrapper(this, R.style.Theme_Hytracl).apply {
+            applyOverrideConfiguration(Configuration().apply { setLocale(id) })
+        }
+        DatePickerDialog(indonesian, { _, year, month, dom ->
+            val index = Demo.days.indexOfFirst { it.year == year && it.month == month && it.dom == dom }
+            if (index >= 0) { dayIndex = index; render() }
+        }, day.year, day.month, day.dom).apply {
+            datePicker.minDate = Demo.days.first().millis
+            datePicker.maxDate = Demo.days.last().millis
+            setOnDismissListener { Locale.setDefault(previous) }
+        }.show()
+    }
+
+    private fun TextView.enable(enabled: Boolean, action: () -> Unit) {
+        isEnabled = enabled
+        alpha = if (enabled) 1f else 0.4f
+        setOnClickListener { action() }
     }
 
     override fun content(into: LinearLayout) {
@@ -205,7 +258,7 @@ class DoctorsActivity : ShellActivity() {
             doctorId = doctors.firstOrNull()?.id ?: 0
         }
         val day = Demo.days[dayIndex]
-        val b = ScreenDoctorsBinding.inflate(layoutInflater, into)
+        val b = ScreenDoctorsBinding.inflate(layoutInflater, into, true)
         b.clinic.text = clinic.name + when {
             doctors.isEmpty() -> getString(R.string.jadwal_belum_tersedia_2)
             clinic.room != null -> " · ${clinic.room}"
@@ -213,43 +266,66 @@ class DoctorsActivity : ShellActivity() {
         }
         val none = doctors.isEmpty()
         b.empty.isVisible = none
-        listOf(b.dates, b.doctors, b.notYet, b.book).forEach { it.isVisible = !none }
+        listOf(b.dateSection, b.doctors, b.notYet).forEach { it.isVisible = !none }
         b.otherClinic.setOnClickListener { go(ClinicsActivity::class.java) }
         if (none) return
 
+        // Month navigation: the strip shows the selected day's month; the arrows jump to the
+        // first open day of the previous / next month inside the booking window.
+        val months = Demo.days.map { it.monthKey }.distinct()
+        val month = months.indexOf(day.monthKey)
+        fun jump(to: Int) { dayIndex = Demo.days.indexOfFirst { it.monthKey == months[to] }; render() }
+        b.month.text = day.monthTitle
+        b.prevMonth.enable(month > 0) { jump(month - 1) }
+        b.nextMonth.enable(month < months.lastIndex) { jump(month + 1) }
+        b.calendar.setOnClickListener { pickDate() }
+
+        // Three dates fill the column (Figma 22:46); the rest of the month scrolls sideways.
+        val column = minOf(resources.displayMetrics.widthPixels, into.dp(540)) - into.dp(48)
+        val chipWidth = (column - into.dp(24)) / 3
+        var selectedChip: View? = null
         Demo.days.forEachIndexed { index, item ->
-            ItemDateBinding.inflate(layoutInflater, b.dates, true).apply {
+            if (item.monthKey != day.monthKey) return@forEachIndexed
+            ItemDateBinding.inflate(layoutInflater, b.dates, false).apply {
                 this.day.text = item.day
                 label.text = item.label
+                root.contentDescription = item.long
                 val selected = index == dayIndex
                 root.isSelected = selected
-                val color = ContextCompat.getColor(this@DoctorsActivity, if (selected) R.color.white else R.color.text)
-                this.day.setTextColor(color)
-                label.setTextColor(color)
+                if (selected) {
+                    val white = ContextCompat.getColor(this@DoctorsActivity, R.color.white)
+                    this.day.setTextColor(white)
+                    label.setTextColor(white)
+                    selectedChip = root
+                }
                 root.setOnClickListener { dayIndex = index; render() }
+                b.dates.addView(root, LinearLayout.LayoutParams(chipWidth, ViewGroup.LayoutParams.WRAP_CONTENT))
             }
         }
+        b.dateScroll.post { selectedChip?.let { b.dateScroll.scrollTo(it.left, 0) } }
+
         doctors.forEach { doctor ->
-            val selected = doctor.id == doctorId
-            ItemDoctorBinding.inflate(layoutInflater, b.doctors, true).apply {
-                root.isSelected = selected
+            if (doctor.id == doctorId) ItemDoctorBinding.inflate(layoutInflater, b.doctors, true).apply {
+                root.isSelected = true
                 name.text = doctor.name
-                check.isVisible = selected
-                schedule.text = (if (selected) "${clinic.name}\n" else "") + "${day.weekday}, ${day.label} · ${doctor.time}"
-                listOf(rule, metrics, status).forEach { it.isVisible = selected }
+                schedule.text = "${clinic.name}\n${day.medium} · ${doctor.time}"
                 wait.text = getString(R.string.menit, doctor.wait(day))
                 quota.text = getString(R.string.pasien, doctor.quota(day))
                 status.text = doctor.delay?.let { getString(R.string.dokter_terlambat, it) } ?: getString(R.string.jadwal_dipilih, doctor.time)
-                status.tone(if (doctor.delay != null) Tone.WARNING else Tone.GREEN)
+                if (doctor.delay != null) status.tone(Tone.WARNING)
+            } else ItemDoctorOptionBinding.inflate(layoutInflater, b.doctors, true).apply {
+                name.text = doctor.name
+                detail.text = getString(R.string.jam_kuota_tersisa, doctor.time, doctor.quota(day))
                 root.setOnClickListener { doctorId = doctor.id; render() }
             }
         }
+
         val doctor = doctors.first { it.id == doctorId }
         val full = doctor.quota(day) < 1
-        b.bookLabel.text = if (full) getString(R.string.kuota_penuh) else getString(R.string.ambil_antrean_2)
-        b.book.isEnabled = !full
-        b.book.alpha = if (full) 0.55f else 1f
-        b.book.setOnClickListener {
+        bar.label.text = if (full) getString(R.string.kuota_penuh) else getString(R.string.ambil_antrean_2)
+        bar.book.isEnabled = !full
+        bar.book.alpha = if (full) 0.55f else 1f
+        bar.book.setOnClickListener {
             Demo.book(doctor, day)
             go(VisitActivity::class.java)
         }

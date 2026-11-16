@@ -86,19 +86,31 @@ object Demo {
     private val monthsShort = listOf("Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu",
         "Sep", "Okt", "Nov", "Des")
 
-    /** One of the three bookable days (booking window: today + 2). */
+    /** One bookable day, [offset] days after today. */
     class Day(val offset: Int) {
         private val cal = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, offset) }
         private val dow = cal.get(Calendar.DAY_OF_WEEK) - 1
-        private val dom = cal.get(Calendar.DAY_OF_MONTH)
-        private val month = cal.get(Calendar.MONTH)
+        val dom = cal.get(Calendar.DAY_OF_MONTH)
+        val month = cal.get(Calendar.MONTH)
+        val year = cal.get(Calendar.YEAR)
         val day get() = weekdaysShort[dow]
         val weekday get() = weekdays[dow]
         val label get() = "$dom ${monthsShort[month]}"
-        val long get() = "$weekday, $dom ${months[month]} ${cal.get(Calendar.YEAR)}"
+        val medium get() = "$weekday, $dom ${monthsShort[month]} $year"
+        val long get() = "$weekday, $dom ${months[month]} $year"
+        val monthTitle get() = "${months[month]} $year"
+        val monthKey get() = year * 12 + month
+        val millis: Long get() = cal.timeInMillis
     }
 
-    val days = listOf(Day(0), Day(1), Day(2))
+    /**
+     * Booking window. The web app opens today + 2 (config/hytrack.php booking_days); the Android
+     * revision lets patients book further ahead. Every doctor practises daily at the same hours,
+     * so a later day only differs in quota/estimate, which follow the same rules as today + 1.
+     * ponytail: fixed window, read it from the backend once the app talks to one.
+     */
+    const val BOOKING_DAYS = 60
+    val days = List(BOOKING_DAYS) { Day(it) }
 
     fun clock(minutes: Int) = String.format(Locale.ROOT, "%02d.%02d", minutes / 60 % 24, minutes % 60)
     fun now(): String = Calendar.getInstance().let { clock(it.get(Calendar.HOUR_OF_DAY) * 60 + it.get(Calendar.MINUTE)) }
@@ -117,10 +129,11 @@ object Demo {
         var stage = Stage.BOOKED
         var rx: Rx? = null
         var companionActive = false
-        val ticket = "A-%03d".format(Locale.ROOT, doctor.issued + 1)
-        val ahead = doctor.ahead
+        // The seeded queue is today's; a later day has no tickets yet (same rule as quota()).
+        val ticket = "A-%03d".format(Locale.ROOT, (if (day.offset == 0) doctor.issued else 0) + 1)
+        val ahead = if (day.offset == 0) doctor.ahead else 0
         val waitRange: String? = doctor.wait(day).takeIf { it.isNotEmpty() }
-        val serving = doctor.serving
+        val serving = if (day.offset == 0) doctor.serving else null
         val checkInCode = "HT-000126"
         val pickupNumber = "F-091"
         val isToday get() = day.offset == 0

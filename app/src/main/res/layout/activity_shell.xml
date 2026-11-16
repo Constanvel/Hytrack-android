@@ -10,23 +10,28 @@
     android:layout_height="match_parent"
     android:background="@color/bg">
 
-    <!-- .decor-waves / .decor-corner: pinned to the bottom, behind content and nav. -->
-    <ImageView
-        android:id="@+id/decor"
-        android:layout_width="match_parent"
-        android:layout_height="170dp"
-        android:layout_gravity="bottom"
-        android:importantForAccessibility="no"
-        android:scaleType="fitXY"
-        android:visibility="gone"
-        tools:ignore="ContentDescription" />
-
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:fillViewport="true">
+
+        <!-- The page plus its decoration: the accent sits at the end of the page and scrolls with it. -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <!-- .decor-waves / .decor-corner: behind the content, above the bottom bar. -->
+        <ImageView
+            android:id="@+id/decor"
+            android:layout_width="match_parent"
+            android:layout_height="170dp"
+            android:layout_gravity="bottom"
+            android:importantForAccessibility="no"
+            android:scaleType="fitXY"
+            android:visibility="gone"
+            tools:ignore="ContentDescription" />
 
         <LinearLayout
             android:id="@+id/page"
@@ -210,6 +215,7 @@
                 android:paddingBottom="28dp"
                 android:showDividers="middle" />
         </LinearLayout>
+        </FrameLayout>
     </androidx.core.widget.NestedScrollView>
 
     <!-- .hya-fab -->

@@ -57,6 +57,7 @@
         android:showDividers="middle">
 
         <LinearLayout
+            android:id="@+id/navRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:divider="@drawable/gap_8"
@@ -93,7 +94,7 @@
                 android:text="@string/chevron_next"
                 android:textSize="24sp" />
 
-            <!-- Shares the row with the month label (Figma 134 / 142dp), so both wrap by word when narrow. -->
+            <!-- Shares the row with the month label (Figma 134 / 142dp); DoctorsActivity moves it to its own line when the text is too large for one row. -->
             <TextView
                 android:id="@+id/calendar"
                 style="@style/Text.Figma.DateNav"

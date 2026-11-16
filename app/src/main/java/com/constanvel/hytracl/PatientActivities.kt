@@ -280,12 +280,24 @@ class DoctorsActivity : ShellActivity() {
         b.nextMonth.enable(month < months.lastIndex) { jump(month + 1) }
         b.calendar.setOnClickListener { pickDate() }
 
-        // Three dates fill the column (Figma 22:46); the rest of the month scrolls sideways.
+        // Figma's one-line nav row (arrows, month, button) only holds while its two flexible
+        // parts fit their longest word each; with larger text or a narrow screen the button
+        // takes its own line instead of the month being cut mid-word.
         val column = minOf(resources.displayMetrics.widthPixels, into.dp(540)) - into.dp(48)
-        val chipWidth = (column - into.dp(24)) / 3
+        val longestMonth = Demo.days.flatMap { it.monthTitle.split(' ') }.distinct().maxOf { b.month.paint.measureText(it) }
+        val calendarMin = b.calendar.paint.measureText(b.calendar.text.toString().substringBefore(' ')) + b.calendar.paddingStart + b.calendar.paddingEnd
+        val chrome = b.prevMonth.layoutParams.width + b.nextMonth.layoutParams.width + into.dp(24)
+        if (2 * maxOf(longestMonth, calendarMin) + chrome > column) {
+            b.navRow.removeView(b.calendar)
+            b.dateSection.addView(b.calendar, 1, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+        }
+
+        // Three dates fill the column (Figma 22:46); the rest of the month scrolls sideways.
+        // A chip never goes narrower than its text, so a larger font widens every chip equally
+        // instead of wrapping one label, which would make that chip (and the row) taller.
+        var chipWidth = (column - into.dp(24)) / 3
         var selectedChip: View? = null
-        Demo.days.forEachIndexed { index, item ->
-            if (item.monthKey != day.monthKey) return@forEachIndexed
+        val chips = Demo.days.withIndex().filter { it.value.monthKey == day.monthKey }.map { (index, item) ->
             ItemDateBinding.inflate(layoutInflater, b.dates, false).apply {
                 this.day.text = item.day
                 label.text = item.label
@@ -299,9 +311,11 @@ class DoctorsActivity : ShellActivity() {
                     selectedChip = root
                 }
                 root.setOnClickListener { dayIndex = index; render() }
-                b.dates.addView(root, LinearLayout.LayoutParams(chipWidth, ViewGroup.LayoutParams.WRAP_CONTENT))
+                val text = maxOf(this.day.paint.measureText(item.day), label.paint.measureText(item.label))
+                chipWidth = maxOf(chipWidth, kotlin.math.ceil(text).toInt() + root.paddingStart + root.paddingEnd)
             }
         }
+        chips.forEach { b.dates.addView(it.root, LinearLayout.LayoutParams(chipWidth, ViewGroup.LayoutParams.MATCH_PARENT)) }
         b.dateScroll.post { selectedChip?.let { b.dateScroll.scrollTo(it.left, 0) } }
 
         doctors.forEach { doctor ->

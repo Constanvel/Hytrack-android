@@ -70,6 +70,11 @@ private fun AppCompatActivity.authFrame(scroll: View, main: LinearLayout) {
 private fun AppCompatActivity.enterApp() {
     Demo.signedIn = true
     startActivity(Intent(this, HomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
+    // An invitation link opened while signed out continues once signed in.
+    Demo.pendingInvite?.takeIf { Api.online }?.let { token ->
+        Demo.pendingInvite = null
+        startActivity(Intent(this, CompanionInviteActivity::class.java).putExtra(CompanionInviteActivity.TOKEN, token))
+    }
 }
 
 class LoginActivity : AppCompatActivity() {
@@ -93,12 +98,29 @@ class LoginActivity : AppCompatActivity() {
             b.phone.error(if (phone.isEmpty()) getString(R.string.nomor_ponsel_wajib_diisi) else null)
             b.password.error(if (password.isEmpty()) getString(R.string.kata_sandi_wajib_diisi) else null)
             if (phone.isEmpty() || password.isEmpty()) return@setOnClickListener
-            if (!Demo.isDemoAccount(phone, password)) {
-                b.phone.error(getString(R.string.nomor_ponsel_atau_kata_sandi_salah))
-                b.password.input.text.clear()
-                return@setOnClickListener
+            b.submit.isEnabled = false
+            b.submit.text = getString(R.string.memeriksa)
+            // The Laravel API first; without a connection the app falls back to the offline demo.
+            request({ Api.login(phone, password) }) { result ->
+                b.submit.isEnabled = true
+                b.submit.text = getString(R.string.masuk)
+                val failure = result.exceptionOrNull() as? Api.Failure
+                when {
+                    result.isSuccess && Api.role != "patient" -> {
+                        Api.logout()
+                        b.phone.error(getString(R.string.server_staff_only))
+                    }
+                    result.isSuccess -> result.getOrThrow().let { account ->
+                        Demo.signedInAs(account.getString("name"), account.str("phone"))
+                        enterApp()
+                    }
+                    failure?.status == 0 && Demo.isDemoAccount(phone, password) -> enterApp()
+                    else -> {
+                        b.phone.error(if (failure?.status == 0) Api.OFFLINE else getString(R.string.nomor_ponsel_atau_kata_sandi_salah))
+                        b.password.input.text.clear()
+                    }
+                }
             }
-            enterApp()
         }
     }
 }

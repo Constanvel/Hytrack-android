@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Akses pendamping (features/patient/companion.tsx: CompanionAccess). -->
+<!-- Akses pendamping (features/patient/companion.tsx: CompanionAccess): invite, list, revoke. -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:orientation="vertical"
@@ -112,12 +112,6 @@
             android:textColor="@color/warning_text" />
     </LinearLayout>
 
-    <TextView
-        style="@style/Text.P.Muted"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/hanya_bagikan_kepada_orang_tepercaya" />
-
     <!-- Shown once, right after the link is created. -->
     <LinearLayout
         android:id="@+id/linkCard"
@@ -152,28 +146,28 @@
             android:text="@string/salin_tautan" />
 
         <TextView
-            android:id="@+id/openView"
+            android:id="@+id/share"
             style="@style/Widget.HyTrack.Button.Secondary"
-            android:text="@string/buka_pantauan_pendamping" />
+            android:text="@string/bagikan_tautan" />
     </LinearLayout>
 
     <TextView
-        android:id="@+id/activate"
+        android:id="@+id/invite"
         style="@style/Widget.HyTrack.Button"
-        android:text="@string/aktifkan_akses_pendamping" />
+        android:text="@string/undang_pendamping" />
 
-    <TextView
-        android:id="@+id/activeNotice"
-        style="@style/Widget.HyTrack.Notice.Info"
-        android:text="@string/akses_pendamping_aktif_tautan_lama_tidak" />
+    <!-- One row per invitation: who accepted, its status, and revoke while it is live. -->
+    <LinearLayout
+        android:id="@+id/invitations"
+        style="@style/Widget.HyTrack.Stack"
+        android:divider="@drawable/gap_12"
+        android:visibility="gone">
 
-    <TextView
-        android:id="@+id/renew"
-        style="@style/Widget.HyTrack.Button.Secondary"
-        android:text="@string/buat_tautan_baru" />
-
-    <TextView
-        android:id="@+id/revoke"
-        style="@style/Widget.HyTrack.Button.Danger"
-        android:text="@string/cabut_akses_pendamping" />
+        <TextView
+            style="@style/Text.H3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:accessibilityHeading="true"
+            android:text="@string/undangan_untuk_kunjungan_ini" />
+    </LinearLayout>
 </merge>

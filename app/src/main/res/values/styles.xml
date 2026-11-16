@@ -128,10 +128,6 @@
         <item name="android:background">@drawable/bg_btn_white</item>
         <item name="android:textColor">@color/primary</item>
     </style>
-    <style name="Widget.HyTrack.Button.Danger">
-        <item name="android:background">@drawable/bg_btn_danger</item>
-        <item name="android:textColor">@color/warning_text</item>
-    </style>
     <!-- .text-button -->
     <style name="Widget.HyTrack.TextButton" parent="Text.Link">
         <item name="android:layout_width">wrap_content</item>

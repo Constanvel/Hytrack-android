@@ -38,6 +38,16 @@ object Demo {
         phone = "•••• " + normalizePhone(phoneNumber).takeLast(4)
         signedIn = true
     }
+
+    /** The account as the server knows it ([Api.login], or after editing the own data pasien). */
+    fun signedInAs(name: String, phoneNumber: String?) {
+        patient = name.trim()
+        phone = phoneNumber?.let { "•••• " + normalizePhone(it).takeLast(4) } ?: phone
+        signedIn = true
+    }
+
+    /** An invitation link opened before signing in; [LoginActivity] continues to it. */
+    var pendingInvite: String? = null
     private const val CHECK_IN_LEAD = 15
     private const val TRAVEL = 25
 
@@ -155,6 +165,13 @@ object Demo {
 
     /** One-shot status line shown at the top of the next screen (Inertia flash). */
     var flash: String? = null
+    var flashTone = Tone.GREEN
+
+    /** A failed request: shown like a flash, in the warning tone. */
+    fun warn(message: String?) {
+        flash = message
+        flashTone = Tone.WARNING
+    }
     /** The valid companion link, if any. */
     var companionLink: String? = null
         private set
@@ -178,6 +195,7 @@ object Demo {
     }
 
     fun signOut() {
+        Api.logout()
         signedIn = false
         visit = null
         notifications.clear()

@@ -1,15 +1,11 @@
 package com.constanvel.hytracl
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.constanvel.hytracl.Demo.Rx
 import com.constanvel.hytracl.Demo.Stage
 import com.constanvel.hytracl.databinding.ScreenCheckinBinding
-import com.constanvel.hytracl.databinding.ScreenCompanionBinding
-import com.constanvel.hytracl.databinding.ScreenCompanionViewBinding
 import com.constanvel.hytracl.databinding.ScreenMessageBinding
 import com.constanvel.hytracl.databinding.ScreenVisitLabBinding
 import com.constanvel.hytracl.databinding.ScreenVisitPharmacyBinding
@@ -156,97 +152,6 @@ class CheckInActivity : ShellActivity() {
             }
             queue.isVisible = !booked
             queue.setOnClickListener { go(VisitActivity::class.java) }
-        }
-    }
-}
-
-class CompanionAccessActivity : ShellActivity() {
-    override fun spec() = if (Demo.activeVisit == null) Spec(getString(R.string.akses_pendamping), back = VisitActivity::class.java)
-    else Spec(getString(R.string.akses_pendamping), getString(R.string.kelola_akses_kunjungan), back = VisitActivity::class.java)
-
-    override fun content(into: LinearLayout) {
-        val v = Demo.activeVisit
-        if (v == null) {
-            ScreenMessageBinding.inflate(layoutInflater, into).apply {
-                card.isVisible = false
-                hyaHelp.root.isVisible = false
-                notice.isVisible = true
-                notice.text = getString(R.string.tidak_ada_kunjungan_aktif_untuk_dibagikan)
-                notice.tone(Tone.WARNING)
-                plainAction.isVisible = true
-                plainAction.text = getString(R.string.buka_kunjungan)
-                plainAction.setOnClickListener { go(VisitActivity::class.java) }
-            }
-            return
-        }
-        val link = Demo.companionLink.takeIf { Demo.revealLink }
-        Demo.revealLink = false // shown once, like the web flash
-        ScreenCompanionBinding.inflate(layoutInflater, into).apply {
-            who.text = "${Demo.patient} · ${v.ticket}"
-            `when`.text = "${v.day.long} · ${Demo.HOSPITAL}"
-            linkCard.isVisible = link != null
-            this.link.text = link
-            copy.setOnClickListener {
-                getSystemService(ClipboardManager::class.java).setPrimaryClip(ClipData.newPlainText(getString(R.string.tautan_pendamping), link))
-                copy.text = getString(R.string.tautan_disalin)
-            }
-            openView.setOnClickListener { go(CompanionViewActivity::class.java) { putExtra(CompanionViewActivity.TOKEN, link) } }
-            activate.isVisible = !v.companionActive
-            activeNotice.isVisible = v.companionActive && link == null
-            renew.isVisible = v.companionActive && link == null
-            revoke.isVisible = v.companionActive
-            activate.setOnClickListener { visit { Demo.shareCompanion() } }
-            renew.setOnClickListener { visit { Demo.shareCompanion() } }
-            revoke.setOnClickListener { visit { Demo.revokeCompanion() } }
-        }
-    }
-}
-
-/** Public page behind the companion link: read-only and limited. */
-class CompanionViewActivity : ShellActivity() {
-    companion object {
-        const val TOKEN = "token"
-    }
-
-    override val requiresSignIn = false
-
-    override fun spec() = Spec(getString(R.string.pantauan_keluarga), getString(R.string.akses_pendamping_2), bare = true)
-
-    override fun content(into: LinearLayout) {
-        val v = Demo.activeVisit?.takeIf { it.companionActive && Demo.companionLink == intent.getStringExtra(TOKEN) }
-        if (v == null) {
-            ScreenMessageBinding.inflate(layoutInflater, into).apply {
-                card.isVisible = false
-                hyaHelp.root.isVisible = false
-                notice.isVisible = true
-                notice.text = getString(R.string.akses_pendamping_tidak_aktif_atau_telah)
-                notice.tone(Tone.WARNING)
-            }
-            into.text(R.style.Text_P_Muted, getString(R.string.minta_tautan_baru_kepada_pasien_bila))
-            return
-        }
-        val (eyebrow, headline) = when (v.stage) {
-            Stage.BOOKED -> getString(R.string.belum_check_in) to getString(R.string.menunggu_kedatangan)
-            Stage.WAITING -> getString(R.string.menunggu_giliran_2) to getString(R.string.pasien_lagi, v.ahead) + (v.waitRange?.let { getString(R.string.menit_2, it) } ?: "")
-            Stage.SERVING -> getString(R.string.giliran_dipanggil) to getString(R.string.sedang_menuju_ruang_pemeriksaan)
-            Stage.LABORATORY -> getString(R.string.laboratorium) to getString(R.string.menuju_atau_sedang_di_laboratorium)
-            else -> getString(R.string.farmasi) to getString(R.string.medicine_status, v.rx?.label ?: getString(R.string.menunggu_resep_lower))
-        }
-        val (room, building) = when (v.stage) {
-            Stage.PHARMACY -> getString(R.string.loket_f2) to getString(R.string.gedung_a_lantai_1)
-            Stage.LABORATORY -> getString(R.string.ruang_a_108) to getString(R.string.gedung_a_lantai_1)
-            else -> Demo.splitRoom(v.clinic.room)
-        }
-        ScreenCompanionViewBinding.inflate(layoutInflater, into).apply {
-            access.text = getString(R.string.akses_terbatas_hanya_pantauan_diperbarui, Demo.now())
-            patient.text = Demo.patientShort
-            stage.text = eyebrow
-            ticket.text = v.ticket
-            this.headline.text = headline
-            clinic.text = getString(R.string.poli_estimasi_dapat_berubah, v.clinic.name)
-            this.room.text = room
-            this.building.text = listOf(building, Demo.HOSPITAL).filter { it.isNotEmpty() }.joinToString(" · ")
-            stop.setOnClickListener { visit { Demo.revokeCompanion(byCompanion = true) } }
         }
     }
 }

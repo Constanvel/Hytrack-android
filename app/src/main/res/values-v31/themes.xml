@@ -1,0 +1,10 @@
+<resources>
+    <!--
+      Android 12+ always draws a system splash first. Give it the app background and no icon, so
+      SplashActivity's own lockup is the only logo on screen and does not appear twice.
+    -->
+    <style name="Theme.Hytracl.Splash" parent="Theme.Hytracl">
+        <item name="android:windowSplashScreenBackground">@color/bg</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
+    </style>
+</resources>

@@ -11,16 +11,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Hytracl">
+        <!-- Launcher entry; noHistory so it never sits in the back stack. -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".SplashActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustResize">
+            android:noHistory="true"
+            android:theme="@style/Theme.Hytracl.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".LoginActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".RegisterActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".HomeActivity" />
         <activity android:name=".AccountActivity" />

@@ -165,6 +165,13 @@ object Demo {
 
     /** One-shot status line shown at the top of the next screen (Inertia flash). */
     var flash: String? = null
+    var flashTone = Tone.GREEN
+
+    /** A failed request: shown like a flash, in the warning tone. */
+    fun warn(message: String?) {
+        flash = message
+        flashTone = Tone.WARNING
+    }
     /** The valid companion link, if any. */
     var companionLink: String? = null
         private set

@@ -143,7 +143,7 @@ fun ViewDemoControlsBinding.bind(legend: String, label: String, secondary: Boole
  * screen fill `content`. Screens re-render on resume and after actions, like Inertia props.
  */
 abstract class ShellActivity : AppCompatActivity() {
-    protected lateinit var shell: ActivityShellBinding
+    lateinit var shell: ActivityShellBinding
     protected open val tab = Tab.VISIT
     protected open val requiresSignIn = true
     protected abstract fun spec(): Spec
@@ -287,8 +287,9 @@ abstract class ShellActivity : AppCompatActivity() {
         val content = shell.content
         content.removeAllViews()
         content.dividerDrawable = if (s.queue) null else ContextCompat.getDrawable(this, R.drawable.gap_20)
-        Demo.flash?.let { content.notice(it) }
+        Demo.flash?.let { content.notice(it, Demo.flashTone) }
         Demo.flash = null
+        Demo.flashTone = Tone.GREEN
         val guiding = Guide.visible(this, s.guide)
         if (guiding) guideHint(content, s.guide!!)
         content(content)

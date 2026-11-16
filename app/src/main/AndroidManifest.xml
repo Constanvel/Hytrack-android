@@ -37,6 +37,8 @@
         <activity android:name=".CheckInActivity" />
         <activity android:name=".CompanionAccessActivity" />
         <activity android:name=".CompanionViewActivity" />
+        <activity android:name=".PatientDataActivity" />
+        <activity android:name=".PatientFormActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".HyaActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".HelpActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".CheckInGuideActivity" />

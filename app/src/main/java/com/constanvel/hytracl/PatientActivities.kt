@@ -18,13 +18,13 @@ import com.constanvel.hytracl.databinding.ItemDateBinding
 import com.constanvel.hytracl.databinding.ItemDoctorBinding
 import com.constanvel.hytracl.databinding.ItemDoctorOptionBinding
 import com.constanvel.hytracl.databinding.ItemNotificationBinding
-import com.constanvel.hytracl.databinding.ScreenAccountBinding
 import com.constanvel.hytracl.databinding.ScreenClinicsBinding
 import com.constanvel.hytracl.databinding.ScreenDoctorsBinding
 import com.constanvel.hytracl.databinding.ScreenHomeBinding
 import com.constanvel.hytracl.databinding.ScreenMessageBinding
 import com.constanvel.hytracl.databinding.ScreenNotificationsBinding
 import com.constanvel.hytracl.databinding.ViewBookBarBinding
+import com.constanvel.hytracl.databinding.ViewDemoControlsBinding
 import java.util.Locale
 
 /** Notice tone switch for an existing notice view. */
@@ -87,26 +87,45 @@ class HomeActivity : ShellActivity() {
     }
 }
 
+/** Akun (Figma 27:248): the account card, then Data pasien first among the actions. */
 class AccountActivity : ShellActivity() {
     override val tab = Tab.ACCOUNT
 
     override fun spec() = Spec(getString(R.string.akun), getString(R.string.profil_dan_bantuan))
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (isFinishing) return
+        interHeader(28f, 41f)
+        shell.subtitle.typeface = ResourcesCompat.getFont(this, R.font.inter_regular)
+        shell.subtitle.textSize = 14f
+    }
+
     override fun content(into: LinearLayout) {
-        val b = ScreenAccountBinding.inflate(layoutInflater, into)
-        b.name.text = Demo.patient
-        b.phone.text = getString(R.string.telp, Demo.phone)
-        b.help.setOnClickListener { go(HelpActivity::class.java) }
-        b.askHya.setOnClickListener { go(HyaActivity::class.java) }
-        b.demo.root.isVisible = Demo.activeVisit != null
-        b.demo.bind(getString(R.string.kontrol_demo), getString(R.string.reset_data_kunjungan_demo)) {
-            visit { Demo.cancel() }
+        into.dividerDrawable = ContextCompat.getDrawable(this, R.drawable.gap_24)
+        (into.layoutParams as? ViewGroup.MarginLayoutParams)?.topMargin = into.dp(12)
+        into.column(12, R.color.white, 22).apply {
+            setPadding(dp(22), dp(20), dp(22), dp(20))
+            inter(getString(R.string.akun_pasien), 12f, 17f, Weight.SEMIBOLD, R.color.brand_muted)
+            inter(Demo.patient, 26f, 38f, Weight.BOLD)
+            inter(getString(R.string.telp, Demo.phone), 16f, 23f, color = R.color.brand_muted)
+            inter(getString(R.string.kelola_data_anda), 15f, 22f)
         }
-        b.demo.demoAction.setBackgroundResource(R.drawable.bg_btn_danger)
-        b.demo.demoAction.setTextColor(ContextCompat.getColor(this, R.color.warning_text))
-        b.signOut.setOnClickListener {
-            Demo.signOut()
-            startActivity(Intent(this, LoginActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
+        into.column(16).apply {
+            button(getString(R.string.data_pasien), height = 56, radius = 12) { go(PatientDataActivity::class.java) }
+            button(getString(R.string.bantuan_panduan_kunjungan), Look.PALE, 56, 12) { go(HelpActivity::class.java) }
+            button(getString(R.string.ask_hya), Look.PALE, 56, 12) { go(HyaActivity::class.java) }
+            if (Demo.activeVisit != null) {
+                ViewDemoControlsBinding.inflate(layoutInflater, this, true).apply {
+                    bind(getString(R.string.kontrol_demo), getString(R.string.reset_data_kunjungan_demo)) { visit { Demo.cancel() } }
+                    demoAction.setBackgroundResource(R.drawable.bg_btn_danger)
+                    demoAction.setTextColor(ContextCompat.getColor(this@AccountActivity, R.color.warning_text))
+                }
+            }
+            button(getString(R.string.keluar), Look.PALE, 56, 12) {
+                Demo.signOut()
+                startActivity(Intent(this@AccountActivity, LoginActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
+            }
         }
     }
 }

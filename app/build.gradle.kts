@@ -18,6 +18,12 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        // The Laravel API; 10.0.2.2 is the host machine from the emulator. Override with -PapiUrl=….
+        // Invitation links are built on the same host, so the deep link follows it.
+        val apiUrl = providers.gradleProperty("apiUrl").getOrElse("http://10.0.2.2:8000/api/")
+        buildConfigField("String", "API_URL", "\"$apiUrl\"")
+        manifestPlaceholders["inviteHost"] = apiUrl.substringAfter("://").substringBefore("/").substringBefore(":")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -30,6 +36,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

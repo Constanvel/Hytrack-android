@@ -38,6 +38,16 @@ object Demo {
         phone = "•••• " + normalizePhone(phoneNumber).takeLast(4)
         signedIn = true
     }
+
+    /** The account as the server knows it ([Api.login], or after editing the own data pasien). */
+    fun signedInAs(name: String, phoneNumber: String?) {
+        patient = name.trim()
+        phone = phoneNumber?.let { "•••• " + normalizePhone(it).takeLast(4) } ?: phone
+        signedIn = true
+    }
+
+    /** An invitation link opened before signing in; [LoginActivity] continues to it. */
+    var pendingInvite: String? = null
     private const val CHECK_IN_LEAD = 15
     private const val TRAVEL = 25
 
@@ -178,6 +188,7 @@ object Demo {
     }
 
     fun signOut() {
+        Api.logout()
         signedIn = false
         visit = null
         notifications.clear()

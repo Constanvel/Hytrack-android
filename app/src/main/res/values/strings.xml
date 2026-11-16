@@ -356,4 +356,6 @@
     <string name="kalender_lengkap">Kalender lengkap</string>
     <string name="pilih_bulan_atau_tanggal_lain">Pilih bulan atau tanggal lain untuk booking lebih awal.</string>
     <string name="jam_kuota_tersisa">%1$s · %2$s kuota tersisa</string>
+    <string name="memeriksa">Memeriksa…</string>
+    <string name="server_staff_only">Akun petugas memakai dashboard petugas di web. Masuk dengan akun pasien di aplikasi ini.</string>
 </resources>

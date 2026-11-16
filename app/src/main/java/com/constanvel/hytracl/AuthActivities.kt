@@ -70,6 +70,11 @@ private fun AppCompatActivity.authFrame(scroll: View, main: LinearLayout) {
 private fun AppCompatActivity.enterApp() {
     Demo.signedIn = true
     startActivity(Intent(this, HomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
+    // An invitation link opened while signed out continues once signed in.
+    Demo.pendingInvite?.takeIf { Api.online }?.let { token ->
+        Demo.pendingInvite = null
+        startActivity(Intent(this, CompanionInviteActivity::class.java).putExtra(CompanionInviteActivity.TOKEN, token))
+    }
 }
 
 class LoginActivity : AppCompatActivity() {

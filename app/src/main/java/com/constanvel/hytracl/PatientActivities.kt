@@ -25,6 +25,7 @@ import com.constanvel.hytracl.databinding.ScreenMessageBinding
 import com.constanvel.hytracl.databinding.ScreenNotificationsBinding
 import com.constanvel.hytracl.databinding.ViewBookBarBinding
 import com.constanvel.hytracl.databinding.ViewDemoControlsBinding
+import com.constanvel.hytracl.databinding.ViewRowLinkBinding
 import java.util.Locale
 
 /** Notice tone switch for an existing notice view. */
@@ -84,6 +85,22 @@ class HomeActivity : ShellActivity() {
         )
         guideRestart(b.guideRestart)
         b.helpLink.setOnClickListener { go(HelpActivity::class.java) }
+        // Visits this account accompanies (web Home: "Pantauan keluarga" when following > 0).
+        if (following > 0) {
+            val card = LinearLayout(this, null, 0, R.style.Widget_HyTrack_Card)
+            into.addView(card, 1, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+            ViewRowLinkBinding.bind(card.add(R.layout.view_row_link))
+                .bind(getString(R.string.pantauan_keluarga), getString(R.string.pantauan_keluarga_detail, following)) { go(CompanionListActivity::class.java) }
+        }
+    }
+
+    private var following = 0
+
+    override fun onResume() {
+        super.onResume()
+        if (Api.online) request({ Api.call("GET", "pendampingan").getJSONArray("patients").length() }) { result ->
+            result.onSuccess { if (it != following) { following = it; render() } }
+        }
     }
 }
 

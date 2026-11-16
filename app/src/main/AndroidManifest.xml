@@ -36,7 +36,24 @@
         <activity android:name=".VisitActivity" />
         <activity android:name=".CheckInActivity" />
         <activity android:name=".CompanionAccessActivity" />
-        <activity android:name=".CompanionViewActivity" />
+        <activity android:name=".CompanionListActivity" />
+        <activity android:name=".CompanionMonitorActivity" />
+        <!-- Invitation links from the web app open here. -->
+        <activity
+            android:name=".CompanionInviteActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="${inviteHost}" />
+                <data android:pathPrefix="/pantauan/" />
+            </intent-filter>
+        </activity>
         <activity android:name=".PatientDataActivity" />
         <activity android:name=".PatientFormActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".HyaActivity" android:windowSoftInputMode="adjustResize" />

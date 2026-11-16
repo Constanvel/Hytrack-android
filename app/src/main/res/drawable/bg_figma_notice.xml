@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma notice: pale mint, 9dp corners. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/auth_benefit" />
+    <corners android:radius="9dp" />
+</shape>

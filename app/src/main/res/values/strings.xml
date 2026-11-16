@@ -349,4 +349,11 @@
     <string name="guide_antrean_text">Angka besar adalah nomor Anda. Di sini terlihat berapa pasien lagi sebelum Anda dan di ruang mana Anda menunggu.</string>
     <string name="guide_layanan_title">Ikuti layanan berikutnya</string>
     <string name="guide_layanan_text">Setelah diperiksa dokter, HyTrack menunjukkan tujuan berikutnya, misalnya laboratorium atau farmasi. Ikuti langkah di halaman ini.</string>
+    <string name="bulan_sebelumnya">Bulan sebelumnya</string>
+    <string name="bulan_berikutnya">Bulan berikutnya</string>
+    <string name="chevron_prev">‹</string>
+    <string name="chevron_next">›</string>
+    <string name="kalender_lengkap">Kalender lengkap</string>
+    <string name="pilih_bulan_atau_tanggal_lain">Pilih bulan atau tanggal lain untuk booking lebih awal.</string>
+    <string name="jam_kuota_tersisa">%1$s · %2$s kuota tersisa</string>
 </resources>

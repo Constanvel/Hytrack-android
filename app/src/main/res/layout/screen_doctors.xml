@@ -1,21 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Dokter & jadwal (features/patient/booking.tsx: DoctorSchedule). -->
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Dokter & jadwal (Figma 03 · Dokter dan jadwal, node 22:2): one column with a 10dp gap. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:orientation="vertical"
-    tools:parentTag="android.widget.LinearLayout">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:divider="@drawable/gap_10"
+    android:orientation="vertical"
+    android:showDividers="middle">
 
     <TextView
         android:id="@+id/clinic"
-        style="@style/Widget.HyTrack.Notice"
+        style="@style/Text.Figma.Notice"
         tools:text="Penyakit Dalam · Ruang A-204 · Gedung A, lantai 2" />
 
     <TextView
-        style="@style/Text.H2"
-        android:layout_width="wrap_content"
+        style="@style/Text.Figma"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:accessibilityHeading="true"
-        android:text="@string/pilih_dokter_jadwal" />
+        android:fontFamily="@font/inter_bold"
+        android:lineHeight="36.4sp"
+        android:text="@string/pilih_dokter_jadwal"
+        android:textSize="26sp" />
 
     <LinearLayout
         android:id="@+id/empty"
@@ -41,76 +47,129 @@
             android:text="@string/pilih_poliklinik_lain" />
     </LinearLayout>
 
-    <!-- .date-grid: three columns, 12px gap. -->
+    <!-- Tanggal kunjungan: month navigation, the month's dates (swipe for more), hint. -->
     <LinearLayout
-        android:id="@+id/dates"
+        android:id="@+id/dateSection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:divider="@drawable/gap_12"
-        android:orientation="horizontal"
-        android:showDividers="middle" />
+        android:divider="@drawable/gap_8"
+        android:orientation="vertical"
+        android:showDividers="middle">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@drawable/gap_8"
+            android:minHeight="36dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:showDividers="middle">
+
+            <TextView
+                android:id="@+id/prevMonth"
+                style="@style/Text.Figma.DateNav"
+                android:layout_width="32dp"
+                android:contentDescription="@string/bulan_sebelumnya"
+                android:text="@string/chevron_prev"
+                android:textSize="24sp" />
+
+            <!-- Wraps to two lines on narrow screens or large font sizes instead of clipping. -->
+            <TextView
+                android:id="@+id/month"
+                style="@style/Text.Figma"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:accessibilityLiveRegion="polite"
+                android:fontFamily="@font/inter_semibold"
+                android:lineHeight="20sp"
+                tools:text="Desember 2026" />
+
+            <TextView
+                android:id="@+id/nextMonth"
+                style="@style/Text.Figma.DateNav"
+                android:layout_width="32dp"
+                android:contentDescription="@string/bulan_berikutnya"
+                android:text="@string/chevron_next"
+                android:textSize="24sp" />
+
+            <!-- Shares the row with the month label (Figma 134 / 142dp), so both wrap by word when narrow. -->
+            <TextView
+                android:id="@+id/calendar"
+                style="@style/Text.Figma.DateNav"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="36dp"
+                android:paddingStart="10dp"
+                android:paddingTop="6dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="6dp"
+                android:text="@string/kalender_lengkap"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:id="@+id/dateScroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:overScrollMode="never"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/dates"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:divider="@drawable/gap_12"
+                android:orientation="horizontal"
+                android:showDividers="middle" />
+        </HorizontalScrollView>
+
+        <TextView
+            style="@style/Text.Figma.Muted"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineHeight="18sp"
+            android:text="@string/pilih_bulan_atau_tanggal_lain"
+            android:textSize="12sp" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/doctors"
-        style="@style/Widget.HyTrack.Stack"
-        android:divider="@drawable/gap_14" />
-
-    <LinearLayout
-        android:id="@+id/notYet"
-        style="@style/Widget.HyTrack.WarningCard">
-
-        <TextView
-            style="@style/Text.Strong"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/antrean_belum_diambil"
-            android:textColor="@color/warning_text" />
-
-        <TextView
-            style="@style/Text.Small"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/nomor_diterbitkan_setelah_anda_menekan"
-            android:textColor="@color/warning_text" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/book"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_btn_primary"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center"
-        android:minHeight="52dp"
-        android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:tag="guide">
+        android:divider="@drawable/gap_10"
+        android:orientation="vertical"
+        android:showDividers="middle" />
+
+    <!-- Persetujuan pengambilan -->
+    <LinearLayout
+        android:id="@+id/notYet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_warning_card"
+        android:divider="@drawable/gap_4"
+        android:orientation="vertical"
+        android:padding="14dp"
+        android:showDividers="middle">
 
         <TextView
-            android:id="@+id/bookLabel"
-            style="@style/Text.Strong"
-            android:layout_width="wrap_content"
+            style="@style/Text.Figma"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            tools:text="Ambil antrean" />
+            android:fontFamily="@font/inter_semibold"
+            android:lineHeight="21sp"
+            android:text="@string/antrean_belum_diambil"
+            android:textColor="@color/warning_text"
+            android:textSize="15sp" />
 
-        <!-- <Icon name="arrow" className="on-dark" />: the arrow inverted to white. -->
-        <FrameLayout
-            android:id="@+id/bookArrow"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginStart="12dp">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:importantForAccessibility="no"
-                android:src="@drawable/ic_arrow"
-                android:tint="@color/white"
-                tools:ignore="ContentDescription,UseAppTint" />
-        </FrameLayout>
+        <TextView
+            style="@style/Text.Figma"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineHeight="18.2sp"
+            android:text="@string/nomor_diterbitkan_setelah_anda_menekan"
+            android:textColor="@color/warning_text"
+            android:textSize="13sp" />
     </LinearLayout>
-</merge>
+</LinearLayout>

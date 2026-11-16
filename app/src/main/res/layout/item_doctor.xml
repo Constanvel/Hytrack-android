@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- .doctor-option: 2px primary border and details when selected (aria-pressed). -->
+<!-- Dokter terpilih (Figma 22:57): 2dp primary border, schedule, estimates and status. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_doctor"
-    android:clickable="true"
-    android:divider="@drawable/gap_14"
-    android:focusable="true"
+    android:divider="@drawable/gap_10"
     android:orientation="vertical"
-    android:padding="18dp"
+    android:padding="20dp"
     android:showDividers="middle">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/name"
-            style="@style/Text.Strong"
+            style="@style/Text.Figma"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="18sp"
+            android:fontFamily="@font/inter_bold"
+            android:lineHeight="26.6sp"
+            android:textSize="19sp"
             tools:text="dr. Rina Kusuma, Sp.PD" />
 
         <ImageView
-            android:id="@+id/check"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="12dp"
             android:importantForAccessibility="no"
             android:src="@drawable/ic_check"
             tools:ignore="ContentDescription" />
@@ -38,66 +38,83 @@
 
     <TextView
         android:id="@+id/schedule"
-        style="@style/Text.P.Muted"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:text="Penyakit Dalam\nMinggu, 15 Nov · 09.00–12.00" />
-
-    <View
-        android:id="@+id/rule"
-        style="@style/Widget.HyTrack.Hr" />
-
-    <!-- .metrics: two columns, 18px gap. -->
-    <LinearLayout
-        android:id="@+id/metrics"
+        style="@style/Text.Figma.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:lineHeight="21sp"
+        android:textSize="15sp"
+        tools:text="Penyakit Dalam\nJumat, 4 Des 2026 · 09.00–12.00" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/border" />
+
+    <!-- Estimasi jadwal: two columns, 12dp gap. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/gap_12"
+        android:orientation="horizontal"
+        android:showDividers="middle">
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:divider="@drawable/gap_12"
+            android:orientation="vertical"
+            android:showDividers="middle">
 
             <TextView
-                style="@style/Text.MetricLabel"
-                android:layout_width="wrap_content"
+                style="@style/Text.Figma.Muted"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/perkiraan_tunggu" />
+                android:lineHeight="16.8sp"
+                android:text="@string/perkiraan_tunggu"
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/wait"
-                style="@style/Text.Metric"
-                android:layout_width="wrap_content"
+                style="@style/Text.Figma"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="15–25 menit" />
+                android:fontFamily="@font/inter_bold"
+                android:lineHeight="26.6sp"
+                android:textSize="19sp"
+                tools:text="35–50 menit" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="18dp"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:divider="@drawable/gap_12"
+            android:orientation="vertical"
+            android:showDividers="middle">
 
             <TextView
-                style="@style/Text.MetricLabel"
-                android:layout_width="wrap_content"
+                style="@style/Text.Figma.Muted"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/sisa_kuota" />
+                android:lineHeight="16.8sp"
+                android:text="@string/sisa_kuota"
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/quota"
-                style="@style/Text.Metric"
-                android:layout_width="wrap_content"
+                style="@style/Text.Figma"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="4 pasien" />
+                android:fontFamily="@font/inter_bold"
+                android:lineHeight="26.6sp"
+                android:textSize="19sp"
+                tools:text="18 pasien" />
         </LinearLayout>
     </LinearLayout>
 
     <TextView
         android:id="@+id/status"
-        style="@style/Widget.HyTrack.Notice"
+        style="@style/Text.Figma.Notice"
         tools:text="Jadwal dipilih · 09.00–12.00" />
 </LinearLayout>

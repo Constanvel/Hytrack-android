@@ -33,6 +33,7 @@ class HyaActivity : ShellActivity() {
         super.onCreate(savedInstanceState)
         if (isFinishing) return
         composer = ViewComposerBinding.inflate(layoutInflater, shell.footer, true)
+        shell.footer.setBackgroundResource(R.color.white) // also behind the system navigation bar
         composer.input.doAfterTextChanged { syncSend() }
         composer.input.setOnEditorActionListener { _, id, _ -> (id == EditorInfo.IME_ACTION_SEND).also { if (it) ask(composer.input.text.toString()) } }
         composer.send.setOnClickListener { ask(composer.input.text.toString()) }

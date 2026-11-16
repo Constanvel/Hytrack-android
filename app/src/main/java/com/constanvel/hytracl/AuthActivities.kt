@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Html
 import android.text.InputType
+import android.text.method.PasswordTransformationMethod
 import android.view.View
 import android.widget.LinearLayout
 import androidx.activity.enableEdgeToEdge
@@ -30,12 +31,13 @@ private fun ViewAuthFieldBinding.setup(label: String, hint: String, phone: Boole
     input.typeface = face
     eye.isVisible = password
     if (password) {
+        // Swap only the masking, so the input type, typeface and cursor stay as they are.
         eye.setOnClickListener {
-            val shown = input.inputType and InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD != 0
-            input.inputType = InputType.TYPE_CLASS_TEXT or
-                if (shown) InputType.TYPE_TEXT_VARIATION_PASSWORD else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-            input.typeface = face
-            input.setSelection(input.text.length)
+            val shown = input.transformationMethod !is PasswordTransformationMethod
+            val start = input.selectionStart
+            val end = input.selectionEnd
+            input.transformationMethod = if (shown) PasswordTransformationMethod.getInstance() else null
+            input.setSelection(start, end)
             eye.contentDescription = root.context.getString(if (shown) R.string.tampilkan_kata_sandi else R.string.sembunyikan_kata_sandi)
         }
     }

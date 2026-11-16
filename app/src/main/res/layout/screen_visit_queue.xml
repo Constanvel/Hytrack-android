@@ -229,9 +229,13 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp" />
 
+    <!-- This screen has no page gap, so it supplies the spacing the other screens get from it. -->
     <include
         android:id="@+id/hyaHelp"
-        layout="@layout/view_hya_help" />
+        layout="@layout/view_hya_help"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="22dp" />
 
     <include
         android:id="@+id/demo"

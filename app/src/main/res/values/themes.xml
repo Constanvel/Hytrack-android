@@ -20,4 +20,7 @@
     </style>
 
     <style name="Theme.Hytracl" parent="Base.Theme.Hytracl" />
+
+    <!-- Launcher window: plain app background, so it hands over to SplashActivity without a flash. -->
+    <style name="Theme.Hytracl.Splash" parent="Theme.Hytracl" />
 </resources>

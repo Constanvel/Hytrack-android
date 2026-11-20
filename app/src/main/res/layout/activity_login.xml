@@ -48,6 +48,34 @@
                 android:orientation="vertical"
                 android:showDividers="middle">
 
+                <!-- Masuk sebagai: two role cards, filled in by LoginActivity. -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:divider="@drawable/gap_8"
+                    android:orientation="vertical"
+                    android:showDividers="middle">
+
+                    <TextView
+                        style="@style/Text.Auth"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:accessibilityHeading="true"
+                        android:fontFamily="@font/inter_semibold"
+                        android:lineHeight="20sp"
+                        android:text="@string/masuk_sebagai"
+                        android:textSize="14sp" />
+
+                    <LinearLayout
+                        android:id="@+id/roles"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:divider="@drawable/gap_12"
+                        android:orientation="horizontal"
+                        android:showDividers="middle" />
+                </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

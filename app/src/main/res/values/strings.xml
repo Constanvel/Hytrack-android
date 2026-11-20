@@ -280,7 +280,7 @@
     <string name="farmasi_loket_f2">Farmasi · Loket F2</string>
     <string name="gedung_a_lantai_1_ambil_obat_setelah">Gedung A, lantai 1. Ambil obat setelah nomor pengambilan dipanggil.</string>
     <string name="sembunyikan_kata_sandi">Sembunyikan kata sandi</string>
-    <string name="selamat_datang_kembali">Selamat datang kembali.</string>
+    <string name="selamat_datang_kembali">Selamat datang di Hytrack</string>
     <string name="masuk_untuk_melanjutkan_kunjungan_ndan">Masuk untuk melanjutkan kunjungan\ndan memantau antrean Anda.</string>
     <string name="nomor_ponsel">Nomor ponsel</string>
     <string name="kata_sandi">Kata sandi</string>
@@ -440,4 +440,11 @@
     <string name="belum_tiba_di_meja_check_in">Belum tiba di meja check-in</string>
     <string name="memeriksa">Memeriksa…</string>
     <string name="server_staff_only">Akun petugas memakai dashboard petugas di web. Masuk dengan akun pasien di aplikasi ini.</string>
+
+    <!-- Masuk sebagai (Figma 31:2). -->
+    <string name="masuk_sebagai">Masuk sebagai</string>
+    <string name="role_pasien">Pasien</string>
+    <string name="pendamping">Pendamping</string>
+    <string name="berobat_untuk_diri_sendiri">Berobat untuk\ndiri sendiri</string>
+    <string name="membantu_kunjungan_keluarga">Membantu kunjungan\nkeluarga atau pasien</string>
 </resources>

@@ -3,6 +3,7 @@ package com.constanvel.hytracl
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -192,17 +193,20 @@ abstract class ShellActivity : AppCompatActivity() {
 
     private fun applyInsets() {
         val navBase = resources.getDimensionPixelSize(R.dimen.bottom_nav_height)
-        val pageBottom = shell.page.paddingBottom
         ViewCompat.setOnApplyWindowInsetsListener(shell.root) { _, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
             val bottom = maxOf(bars.bottom, ime.bottom)
             // Margin, not padding: content must not scroll under the transparent status bar.
             shell.scroll.updateLayoutParams<FrameLayout.LayoutParams> { topMargin = bars.top }
-            // Room for the bottom nav and the Hya bubble (or the pinned footer) only while one shows:
-            // a bare page ends at its own padding, so no empty band sits above the accents.
-            val reserve = if (shell.fab.isVisible || shell.footer.isVisible) pageBottom else 0
-            shell.page.updatePadding(bottom = reserve + bars.bottom)
+            // Room for the bottom nav or the pinned footer only, none for the Hya bubble: the last
+            // section ends at the content's own 28dp above the bar. The bubble tucks away instead.
+            val bar = when {
+                shell.bottomNav.isVisible -> navBase + bars.bottom
+                shell.footer.isVisible -> maxOf(shell.footer.height, bottom)
+                else -> bars.bottom
+            }
+            shell.page.updatePadding(bottom = bar)
             shell.bottomNav.updateLayoutParams { height = navBase + bars.bottom }
             shell.bottomNav.updatePadding(bottom = shell.root.dp(6) + bars.bottom)
             shell.fab.updateLayoutParams<FrameLayout.LayoutParams> { bottomMargin = shell.root.dp(95) + bars.bottom }
@@ -220,6 +224,38 @@ abstract class ShellActivity : AppCompatActivity() {
             insets
         }
         shell.root.addOnLayoutChangeListener { v, l, _, r, _, ol, _, or, _ -> if (r - l != or - ol) ViewCompat.requestApplyInsets(v) }
+        shell.footer.addOnLayoutChangeListener { _, _, t, _, b, _, ot, _, ob -> if (b - t != ob - ot) ViewCompat.requestApplyInsets(shell.root) }
+        shell.scroll.setOnScrollChangeListener { _: View, _: Int, _: Int, _: Int, _: Int -> tuckFab() }
+        shell.content.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> tuckFab() }
+    }
+
+    private var tucked = false
+
+    /** At the page end the Hya bubble gives way to the link or button under it. */
+    private fun tuckFab() {
+        val fab = shell.fab
+        if (fab.visibility == View.GONE) return
+        val box = fab.screenRect()
+        val covers = !shell.scroll.canScrollVertically(1) &&
+            shell.content.controls().any { Rect.intersects(it.screenRect(), box) }
+        if (covers == tucked) return
+        tucked = covers
+        fab.animate().cancel()
+        if (!covers) fab.visibility = View.VISIBLE
+        fab.animate().alpha(if (covers) 0f else 1f).setDuration(180)
+            .withEndAction { if (covers) fab.visibility = View.INVISIBLE }
+    }
+
+    private fun View.screenRect(): Rect {
+        val at = IntArray(2).also(::getLocationOnScreen)
+        return Rect(at[0], at[1], at[0] + width, at[1] + height)
+    }
+
+    private fun View.controls(): Sequence<View> = when {
+        !isShown -> emptySequence()
+        isClickable -> sequenceOf(this)
+        this is ViewGroup -> (0 until childCount).asSequence().flatMap { getChildAt(it).controls() }
+        else -> emptySequence()
     }
 
     private var decorInset = 0
@@ -282,6 +318,9 @@ abstract class ShellActivity : AppCompatActivity() {
         shell.close.isVisible = s.hya
         shell.header.setBackgroundResource(if (s.hya) R.drawable.bg_header_rule else 0)
         shell.bottomNav.isVisible = !s.hya && !s.bare && !s.action
+        shell.fab.animate().cancel()
+        shell.fab.alpha = 1f
+        tucked = false
         shell.fab.isVisible = !s.hya && !s.bare
         shell.footer.isVisible = s.hya || s.action
         ViewCompat.requestApplyInsets(shell.root)

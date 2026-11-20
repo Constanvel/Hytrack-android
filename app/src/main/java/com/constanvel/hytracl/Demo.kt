@@ -158,6 +158,8 @@ object Demo {
     class Notification(val message: String, val action: String?, val time: String, var unread: Boolean = true)
 
     var signedIn = false
+    /** Signed in as Pendamping: reopening the app returns to the companion view. */
+    var companion = false
     var visit: Visit? = null
         private set
     val notifications = mutableListOf<Notification>()
@@ -197,6 +199,7 @@ object Demo {
     fun signOut() {
         Api.logout()
         signedIn = false
+        companion = false
         visit = null
         notifications.clear()
         companionLink = null

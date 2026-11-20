@@ -34,4 +34,9 @@
     <color name="guide_outline">#E9A93B</color>
     <color name="demo_border">#A4BCB0</color>
     <color name="avatar_ring">#D6E6DE</color>
+
+    <!-- Antrean pasien (Figma 31:136, companion.css). -->
+    <color name="companion_line">#DCE8E1</color>
+    <color name="companion_soft">#D7EEE6</color>
+    <color name="companion_rule">#418F81</color>
 </resources>

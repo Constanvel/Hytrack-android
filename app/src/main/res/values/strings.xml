@@ -447,4 +447,29 @@
     <string name="pendamping">Pendamping</string>
     <string name="berobat_untuk_diri_sendiri">Berobat untuk\ndiri sendiri</string>
     <string name="membantu_kunjungan_keluarga">Membantu kunjungan\nkeluarga atau pasien</string>
+
+    <!-- Antrean pasien (Figma 31:136). -->
+    <string name="antrean_pasien">Antrean pasien</string>
+    <string name="pantau_giliran_pasien">Pantau giliran pasien yang Anda dampingi.</string>
+    <string name="pasien_yang_didampingi_upper">PASIEN YANG DIDAMPINGI</string>
+    <string name="keluarga_pasien_terhubung">Keluarga · Pasien terhubung</string>
+    <string name="nomor_antrean_pasien">Nomor antrean pasien</string>
+    <string name="poli_x">Poli %1$s</string>
+    <string name="dipanggil">Dipanggil</string>
+    <string name="di_depan_anda">Di depan Anda</string>
+    <string name="estimasi">Estimasi</string>
+    <string name="kira_menit">±%1$s mnt</string>
+    <string name="perbarui_antrean">Perbarui antrean</string>
+    <string name="memperbarui">Memperbarui…</string>
+    <string name="informasi_kunjungan">Informasi kunjungan</string>
+    <string name="akses_pendamping_hanya_lihat">Akses pendamping · Hanya lihat</string>
+    <string name="hanya_dapat_memantau">Anda hanya dapat memantau antrean pasien.\nPendaftaran antrean dilakukan oleh pasien.</string>
+    <string name="diperbarui_pukul">Diperbarui pukul %1$s</string>
+    <string name="koneksi_terputus_data_pukul">Koneksi terputus · data pukul %1$s</string>
+    <string name="pantauan_berakhir">Pantauan berakhir</string>
+    <string name="stage_belum_check_in">Belum check-in</string>
+    <string name="stage_menunggu">Menunggu</string>
+    <string name="stage_diperiksa">Diperiksa</string>
+    <string name="stage_laboratorium">Laboratorium</string>
+    <string name="stage_farmasi">Farmasi</string>
 </resources>

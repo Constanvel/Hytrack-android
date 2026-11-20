@@ -76,6 +76,9 @@ private fun AppCompatActivity.authFrame(scroll: View, main: LinearLayout) {
     cssLeading(main)
 }
 
+/** Opens where this session belongs: the companion view when signed in as Pendamping, else the home. */
+fun AppCompatActivity.enterSignedIn() = if (Demo.companion) enterCompanion() else enterApp()
+
 private fun AppCompatActivity.enterApp() {
     Demo.signedIn = true
     startActivity(Intent(this, HomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
@@ -154,7 +157,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (Demo.signedIn) return enterApp()
+        if (Demo.signedIn) return enterSignedIn()
         val b = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(b.root)
         authFrame(b.scroll, b.main)
@@ -195,9 +198,13 @@ class LoginActivity : AppCompatActivity() {
                     }
                     result.isSuccess -> result.getOrThrow().let { account ->
                         Demo.signedInAs(account.getString("name"), account.str("phone"))
-                        if (role == "companion") enterCompanion() else enterApp()
+                        Demo.companion = role == "companion"
+                        enterSignedIn()
                     }
-                    failure?.status == 0 && Demo.isDemoAccount(phone, password) -> if (role == "companion") enterCompanion() else enterApp()
+                    failure?.status == 0 && Demo.isDemoAccount(phone, password) -> {
+                        Demo.companion = role == "companion"
+                        enterSignedIn()
+                    }
                     else -> {
                         b.phone.error(if (failure?.status == 0) Api.OFFLINE else getString(R.string.nomor_ponsel_atau_kata_sandi_salah))
                         b.password.input.text.clear()

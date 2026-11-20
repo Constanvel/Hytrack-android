@@ -39,4 +39,5 @@
     <color name="companion_line">#DCE8E1</color>
     <color name="companion_soft">#D7EEE6</color>
     <color name="companion_rule">#418F81</color>
+    <color name="soft_bg">#F6F8F4</color>
 </resources>

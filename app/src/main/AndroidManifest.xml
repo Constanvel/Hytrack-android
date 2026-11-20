@@ -30,6 +30,7 @@
         <activity android:name=".RegisterActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".HomeActivity" />
         <activity android:name=".AccountActivity" />
+        <activity android:name=".HistoryActivity" />
         <activity android:name=".NotificationsActivity" />
         <activity android:name=".ClinicsActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".DoctorsActivity" />

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Splash icon: the logo at its splash size (132×97dp) on the 288dp canvas the system expects,
+  inside the 192dp circle Android 12+ masks the icon with.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:width="288dp"
+        android:height="288dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+    <item
+        android:width="132dp"
+        android:height="97dp"
+        android:drawable="@drawable/logo_hytrack"
+        android:gravity="center" />
+</layer-list>

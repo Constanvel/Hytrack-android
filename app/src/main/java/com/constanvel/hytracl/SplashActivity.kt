@@ -8,56 +8,54 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.constanvel.hytracl.databinding.ActivitySplashBinding
 
 /**
- * Launcher screen: the lockup fades in, holds for a beat, then hands over to [LoginActivity]
- * with a cross-fade. It is the only launcher entry, so it shows once per cold start and never
- * when navigating (sign-out goes straight to the login screen). Nothing is loaded here.
+ * Launcher entry. The system splash (androidx SplashScreen) shows the logo while the app starts;
+ * this screen continues it with the same logo in the same place while the name and tagline fade
+ * in, then opens where the session belongs: sign-in, or the patient or companion home when this
+ * process is still signed in. Staff accounts cannot sign in on Android, so there is no staff home.
+ * Nothing is loaded here and nothing waits beyond the short entrance.
  */
 class SplashActivity : AppCompatActivity() {
-    private lateinit var b: ActivitySplashBinding
     private var done = false
-    private val advance = Runnable { next() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
+        // Already signed in (the app was only closed): no brand moment, straight back in.
+        if (Demo.signedIn) return route()
         enableEdgeToEdge()
-        b = ActivitySplashBinding.inflate(layoutInflater)
+        val b = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(b.root)
 
         // Recreated (rotation, font change) or animations turned off: go straight on.
         val noMotion = Settings.Global.getFloat(contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
-        if (savedInstanceState != null || noMotion) return next()
+        if (savedInstanceState != null || noMotion) return route()
 
-        fun View.enter(delay: Long, duration: Long) = animate().alpha(1f).translationY(0f).scaleX(1f).scaleY(1f)
-            .setStartDelay(delay).setDuration(duration).setInterpolator(DecelerateInterpolator(2f))
+        fun View.enter(delay: Long) = animate().alpha(1f).translationY(0f)
+            .setStartDelay(delay).setDuration(ENTER).setInterpolator(DecelerateInterpolator(2f))
 
-        b.logo.scaleX = 0.88f
-        b.logo.scaleY = 0.88f
-        b.name.translationY = b.name.dp(12).toFloat()
-        b.tagline.translationY = b.tagline.dp(12).toFloat()
-        b.wave.translationY = b.wave.dp(24).toFloat()
-        b.wave.enter(0, 700)
-        b.logo.enter(0, 600)
-        b.name.enter(200, 450)
-        b.tagline.enter(320, 450).withEndAction { b.root.postDelayed(advance, HOLD) }
+        b.name.translationY = b.name.dp(8).toFloat()
+        b.tagline.translationY = b.tagline.dp(8).toFloat()
+        b.wave.translationY = b.wave.dp(16).toFloat()
+        b.wave.enter(0)
+        b.name.enter(0)
+        b.tagline.enter(STAGGER).withEndAction { route() }
     }
 
-    private fun next() {
+    private fun route() {
         if (done || isFinishing) return
         done = true
+        if (Demo.signedIn) return enterSignedIn()
         val fade = ActivityOptions.makeCustomAnimation(this, android.R.anim.fade_in, android.R.anim.fade_out)
         startActivity(Intent(this, LoginActivity::class.java), fade.toBundle())
         finish()
     }
 
-    override fun onStop() {
-        super.onStop()
-        b.root.removeCallbacks(advance)
-    }
-
     private companion object {
-        const val HOLD = 450L // ms the finished lockup stays before the hand-over
+        const val ENTER = 320L // ms each line takes to fade in
+        const val STAGGER = 80L // ms the tagline follows the name
     }
 }

@@ -40,4 +40,8 @@
     <color name="companion_soft">#D7EEE6</color>
     <color name="companion_rule">#418F81</color>
     <color name="soft_bg">#F6F8F4</color>
+
+    <!-- Hapus data pasien (Figma 31:273). -->
+    <color name="danger">#B63832</color>
+    <color name="danger_soft">#FCEBE9</color>
 </resources>

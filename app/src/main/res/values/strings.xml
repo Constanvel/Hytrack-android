@@ -493,4 +493,15 @@
     <string name="belum_ada_kunjungan">Belum ada kunjungan</string>
     <string name="tiket_akan_tercatat">Tiket yang Anda ambil akan tercatat di sini.</string>
     <string name="ambil_antrean_plain">Ambil antrean</string>
+
+    <!-- Hapus data pasien (Figma 31:273). -->
+    <string name="hapus_data_pasien">Hapus data pasien</string>
+    <string name="hapus_data_pasien_tanya">Hapus data pasien?</string>
+    <string name="hapus_data_pasien_detail">Data pasien berikut akan dihapus dari daftar Anda. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="belum_ada_no_rm">Belum ada No. RM</string>
+    <string name="pastikan_data_pasien_benar">Pastikan data pasien yang dipilih sudah benar.</string>
+    <string name="hapus_data">Hapus data</string>
+    <string name="menghapus">Menghapus…</string>
+    <string name="data_x_dihapus">Data %1$s dihapus dari daftar Anda.</string>
+    <string name="koneksi_terputus_belum_dihapus">Koneksi ke server terputus. Data belum dihapus; coba lagi.</string>
 </resources>

@@ -1,8 +1,11 @@
 package com.constanvel.hytracl
 
 import android.app.AlertDialog
+import android.app.Dialog
 import android.app.DatePickerDialog
 import android.content.res.Configuration
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.InputFilter
 import android.text.InputType
@@ -12,10 +15,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.view.setPadding
 import androidx.core.view.updatePadding
 import androidx.core.widget.doAfterTextChanged
 import org.json.JSONObject
@@ -99,6 +104,89 @@ class PatientDataActivity : ShellActivity() {
         button(getString(R.string.ubah_data_pasien), Look.OUTLINE) {
             go(PatientFormActivity::class.java) { putExtra(PatientFormActivity.PATIENT, patient.toString()) }
         }
+        // Only family records can go; the account's own record stays.
+        if (!patient.optBoolean("self")) inter(getString(R.string.hapus_data_pasien), 14f, 20f, Weight.SEMIBOLD, R.color.danger).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+                setMargins(0, dp(-8), 0, dp(-10))
+            }
+            setPadding(dp(12))
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { confirmDelete(patient) }
+        }
+    }
+
+    /** Hapus data pasien (Figma 31:273): confirm, then DELETE /api/data-pasien/{id}; Laravel refuses the owner's record. */
+    private fun confirmDelete(patient: JSONObject) {
+        val dialog = Dialog(this)
+        val box = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            setPadding(dp(24))
+            background = rounded(R.color.white, 22)
+        }
+        box.addView(FrameLayout(this).apply {
+            background = rounded(R.color.danger_soft, 18)
+            addView(ImageView(context).apply { setImageResource(R.drawable.ic_trash); importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO },
+                FrameLayout.LayoutParams(dp(28), dp(28), Gravity.CENTER))
+        }, LinearLayout.LayoutParams(box.dp(56), box.dp(56)))
+        fun TextView.centered(top: Int) = apply {
+            gravity = Gravity.CENTER
+            (layoutParams as LinearLayout.LayoutParams).topMargin = dp(top)
+        }
+        box.inter(getString(R.string.hapus_data_pasien_tanya), 22f, 31f, Weight.BOLD).centered(16).isAccessibilityHeading = true
+        box.inter(getString(R.string.hapus_data_pasien_detail), 14f, 20f, color = R.color.brand_muted).centered(12)
+        box.column(5, R.color.soft_bg, 12, stroke = R.color.companion_line).apply {
+            setPadding(dp(15), dp(9), dp(15), dp(9))
+            (layoutParams as LinearLayout.LayoutParams).topMargin = dp(36)
+            inter(patient.getString("name"), 15f, 21f, Weight.SEMIBOLD)
+            inter(patient.str("recordNumber")?.let { getString(R.string.no_rm, it) } ?: getString(R.string.belum_ada_no_rm), 12f, 18f, color = R.color.brand_muted)
+        }
+        box.inter(getString(R.string.pastikan_data_pasien_benar), 12f, 18f, color = R.color.brand_muted).centered(18)
+        val error = box.inter(null, 13f, 18f, color = R.color.error).centered(12).apply {
+            isVisible = false
+            accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE
+        }
+        val actions = LinearLayout(this)
+        box.addView(actions, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { topMargin = box.dp(32) })
+        val cancel = actions.button(getString(R.string.batal), Look.OUTLINE, 52, 12) { dialog.cancel() }
+        lateinit var remove: TextView
+        remove = actions.button(getString(R.string.hapus_data), height = 52, radius = 12) {
+            dialog.setCancelable(false)
+            cancel.isEnabled = false
+            remove.isEnabled = false
+            remove.text = getString(R.string.menghapus)
+            error.isVisible = false
+            request({ Api.call("DELETE", "data-pasien/${patient.getInt("id")}") }) { result ->
+                result.onSuccess {
+                    dialog.dismiss()
+                    Demo.flash = getString(R.string.data_x_dihapus, patient.getString("name"))
+                    load()
+                }.onFailure {
+                    dialog.setCancelable(true)
+                    cancel.isEnabled = true
+                    remove.isEnabled = true
+                    remove.text = getString(R.string.hapus_data)
+                    error.text = if ((it as? Api.Failure)?.status == 0) getString(R.string.koneksi_terputus_belum_dihapus) else it.message
+                    error.isVisible = true
+                }
+            }
+        }
+        remove.background = remove.rounded(R.color.danger, 12)
+        listOf(cancel, remove).forEachIndexed { i, b ->
+            b.textSize = 15f
+            b.layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply { if (i > 0) marginStart = box.dp(12) }
+        }
+        dialog.setContentView(box)
+        dialog.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setDimAmount(0.48f)
+            val width = minOf(box.dp(364), resources.displayMetrics.widthPixels - box.dp(48))
+            setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
+        dialog.show()
+        cancel.requestFocus()
     }
 
     private fun ViewGroup.detail(label: String, value: String?) = column(3).apply {

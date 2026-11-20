@@ -5,13 +5,16 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.ContextThemeWrapper
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.core.widget.doAfterTextChanged
 import com.constanvel.hytracl.databinding.ItemClinicBinding
 import com.constanvel.hytracl.databinding.ItemDateBinding
@@ -26,6 +29,9 @@ import com.constanvel.hytracl.databinding.ScreenNotificationsBinding
 import com.constanvel.hytracl.databinding.ViewBookBarBinding
 import com.constanvel.hytracl.databinding.ViewDemoControlsBinding
 import com.constanvel.hytracl.databinding.ViewRowLinkBinding
+import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 /** Notice tone switch for an existing notice view. */
@@ -130,6 +136,7 @@ class AccountActivity : ShellActivity() {
         }
         into.column(16).apply {
             button(getString(R.string.data_pasien), height = 56, radius = 12) { go(PatientDataActivity::class.java) }
+            button(getString(R.string.riwayat_kunjungan), Look.PALE, 56, 12) { go(HistoryActivity::class.java) }
             button(getString(R.string.bantuan_panduan_kunjungan), Look.PALE, 56, 12) { go(HelpActivity::class.java) }
             button(getString(R.string.ask_hya), Look.PALE, 56, 12) { go(HyaActivity::class.java) }
             if (Demo.activeVisit != null) {
@@ -144,6 +151,114 @@ class AccountActivity : ShellActivity() {
                 startActivity(Intent(this@AccountActivity, LoginActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
             }
         }
+    }
+}
+
+/** Riwayat kunjungan (Figma 31:3): every ticket of this account, from GET /api/riwayat. */
+class HistoryActivity : ShellActivity() {
+    override val tab = Tab.ACCOUNT
+    private var items: List<JSONObject>? = null
+    private var problem: String? = null
+    private var open: Int? = null
+
+    override fun spec() = Spec(getString(R.string.riwayat_kunjungan),
+        SimpleDateFormat("EEEE, d MMMM yyyy", Locale.forLanguageTag("id-ID")).format(Date()).uppercase(),
+        back = AccountActivity::class.java, bare = true)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (isFinishing) return
+        interHeader()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (Api.online) load()
+    }
+
+    private fun load() = request({ Api.call("GET", "riwayat").getJSONArray("items").objects() }) { result ->
+        result.onSuccess { items = it; problem = null }.onFailure { problem = it.message }
+        render()
+    }
+
+    override fun content(into: LinearLayout) {
+        into.dividerDrawable = ContextCompat.getDrawable(this, R.drawable.gap_16)
+        into.updatePadding(top = into.dp(19), bottom = into.dp(32))
+        if (!Api.online || problem != null) return into.serverNeeded(problem) { load() }
+        val list = items ?: return run { into.inter(getString(R.string.memuat), 14f, 20f, color = R.color.brand_muted) }
+        if (list.isEmpty()) {
+            into.column(8, R.color.white, 22, 20).apply {
+                inter(getString(R.string.belum_ada_kunjungan), 20f, 29f, Weight.BOLD)
+                inter(getString(R.string.tiket_akan_tercatat), 14f, 20f, color = R.color.brand_muted)
+            }
+            into.button(getString(R.string.ambil_antrean_plain), radius = 14) { go(ClinicsActivity::class.java) }
+            return
+        }
+        val done = list.count { it.getString("status") == "completed" }
+        into.column(4).apply {
+            inter(if (done == list.size) getString(R.string.n_kunjungan_selesai, done) else getString(R.string.n_kunjungan_tercatat, list.size), 20f, 29f, Weight.BOLD)
+                .isAccessibilityHeading = true
+            inter(getString(R.string.riwayat_pemeriksaan, Demo.patient), 13f, 19f, color = R.color.brand_muted)
+        }
+        list.forEachIndexed { i, item -> card(into, item, first = i == 0) }
+        into.button(getString(R.string.daftar_kunjungan_baru), radius = 14) { go(ClinicsActivity::class.java) }
+            .apply { (layoutParams as LinearLayout.LayoutParams).topMargin = dp(4) }
+        into.inter(getString(R.string.menampilkan_semua_riwayat), 12f, 17f, color = R.color.brand_muted).apply {
+            gravity = Gravity.CENTER
+            (layoutParams as LinearLayout.LayoutParams).topMargin = dp(-14)
+        }
+    }
+
+    private fun card(into: LinearLayout, item: JSONObject, first: Boolean) = into.column(0, R.color.white, 22).apply {
+        setPadding(dp(20), dp(16), dp(20), dp(28))
+        if (first) (layoutParams as LinearLayout.LayoutParams).topMargin = dp(4)
+        val id = item.getInt("id")
+        val expanded = open == id
+        val top = LinearLayout(context).apply { gravity = Gravity.CENTER_VERTICAL }
+        addView(top)
+        top.inter("${item.getString("day")} · ${item.getString("clock")}", 13f, 19f, Weight.MEDIUM, R.color.brand_muted).layoutParams =
+            LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply { marginEnd = dp(12) }
+        val warn = item.getString("status") in setOf("no_show", "cancelled", "booked")
+        top.inter(item.getString("statusLabel"), 12f, 17f, Weight.SEMIBOLD, if (warn) R.color.warning_text else R.color.brand).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            gravity = Gravity.CENTER
+            minWidth = dp(70)
+            setPadding(dp(8), dp(4.5), dp(8), dp(4.5))
+            background = rounded(if (warn) R.color.warning else R.color.auth_benefit, 8)
+        }
+        inter(item.getString("clinic"), 20f, 29f, Weight.BOLD).apply { (layoutParams as LinearLayout.LayoutParams).topMargin = dp(14) }
+        inter(item.getString("doctor"), 14f, 20f, color = R.color.brand_muted).apply { (layoutParams as LinearLayout.LayoutParams).topMargin = dp(4) }
+        rule().apply { (layoutParams as LinearLayout.LayoutParams).topMargin = dp(16) }
+        val foot = LinearLayout(context).apply { gravity = Gravity.CENTER_VERTICAL }
+        addView(foot, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(20) })
+        foot.inter(getString(R.string.no_antrean_x, item.getString("number")), 13f, 19f, Weight.MEDIUM, R.color.brand_muted).layoutParams =
+            LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply { marginEnd = dp(12) }
+        foot.inter(getString(if (expanded) R.string.tutup_detail else R.string.lihat_detail), 14f, 20f, Weight.SEMIBOLD, R.color.brand).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                setMargins(dp(-8), dp(-12), dp(-8), dp(-12))
+            }
+            setPadding(dp(8), dp(12), dp(8), dp(12))
+            isClickable = true
+            isFocusable = true
+            ViewCompat.setStateDescription(this, getString(if (expanded) R.string.terbuka else R.string.tertutup))
+            setOnClickListener {
+                open = if (expanded) null else id
+                render()
+            }
+        }
+        if (expanded) column(10, R.color.soft_bg, 14).apply {
+            setPadding(dp(16), dp(14), dp(16), dp(14))
+            (layoutParams as LinearLayout.LayoutParams).topMargin = dp(16)
+            detail(getString(R.string.tanggal), item.getString("date"))
+            detail(getString(R.string.jadwal_dokter), item.getString("time"))
+            detail(getString(R.string.check_in), item.str("checkInAt") ?: getString(R.string.tidak_tercatat))
+            item.str("cancelReason")?.let { detail(getString(R.string.alasan_pembatalan), it) }
+        }
+    }
+
+    private fun ViewGroup.detail(label: String, value: String) = column(2).apply {
+        inter(label, 12f, 18f, color = R.color.brand_muted)
+        inter(value, 14f, 20f, Weight.MEDIUM)
     }
 }
 

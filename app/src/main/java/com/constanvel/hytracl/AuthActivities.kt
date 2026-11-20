@@ -5,11 +5,20 @@ import android.os.Bundle
 import android.text.Html
 import android.text.InputType
 import android.text.method.PasswordTransformationMethod
+import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RadioButton
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
@@ -77,7 +86,72 @@ private fun AppCompatActivity.enterApp() {
     }
 }
 
+/**
+ * "Masuk sebagai Pendamping" opens the companion view: the one visit this account follows,
+ * else the list (web AuthController::signedIn). An invitation link waiting to open comes first.
+ */
+private fun AppCompatActivity.enterCompanion() {
+    if (!Api.online || Demo.pendingInvite != null) return enterApp()
+    request({ Api.call("GET", "pendampingan").getJSONArray("patients").objects() }) { result ->
+        enterApp()
+        val only = result.getOrNull()?.singleOrNull()
+        startActivity(Intent(this, if (only != null) CompanionMonitorActivity::class.java else CompanionListActivity::class.java)
+            .apply { only?.let { putExtra(CompanionMonitorActivity.SHARE, it.getInt("id")) } })
+    }
+}
+
+/** Role card of Figma 31:2 (auth.css .auth-role): icon, radio, name and a two-line detail. */
+private fun LinearLayout.roleCard(icon: Int, label: String, detail: String, onPick: () -> Unit): FrameLayout {
+    val card = FrameLayout(context).apply {
+        minimumHeight = dp(112)
+        setPadding(dp(11), dp(9), dp(11), dp(7))
+        isClickable = true
+        isFocusable = true
+        contentDescription = "$label. ${detail.replace('\n', ' ')}"
+        setOnClickListener { onPick() }
+    }
+    addView(card, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f))
+    val stack = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
+    card.addView(stack)
+    stack.addView(ImageView(context).apply { setImageResource(icon); importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO },
+        LinearLayout.LayoutParams(dp(28), dp(28)))
+    stack.inter(label, 15f, 21f, Weight.SEMIBOLD).apply { tag = "label"; (layoutParams as LinearLayout.LayoutParams).topMargin = dp(6) }
+    stack.inter(detail, 12f, 18f, color = R.color.brand_muted).apply { tag = "detail"; (layoutParams as LinearLayout.LayoutParams).topMargin = dp(3) }
+    stack.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+    card.addView(View(context).apply { tag = "radio" },
+        FrameLayout.LayoutParams(dp(16), dp(16), Gravity.TOP or Gravity.END).apply { topMargin = dp(6); marginEnd = dp(2) })
+    return card
+}
+
+private fun FrameLayout.pick(chosen: Boolean) {
+    val brand = ContextCompat.getColor(context, R.color.brand)
+    background = GradientDrawable().apply {
+        cornerRadius = dp(12).toFloat()
+        setColor(ContextCompat.getColor(context, if (chosen) R.color.auth_benefit else R.color.white))
+        setStroke(if (chosen) dp(1.5) else dp(1), if (chosen) brand else 0xFFDCE8E1.toInt())
+    }
+    findViewWithTag<View>("radio").background = GradientDrawable().apply {
+        shape = GradientDrawable.OVAL
+        // Checked: a white dot inside a 4dp green ring.
+        setColor(ContextCompat.getColor(context, R.color.white))
+        setStroke(if (chosen) dp(4.5) else dp(1), if (chosen) brand else ContextCompat.getColor(context, R.color.brand_muted))
+    }
+    findViewWithTag<android.widget.TextView>("label").setTextColor(if (chosen) brand else ContextCompat.getColor(context, R.color.auth_text))
+    findViewWithTag<android.widget.TextView>("detail").setTextColor(ContextCompat.getColor(context, if (chosen) R.color.auth_benefit_text else R.color.brand_muted))
+    ViewCompat.setAccessibilityDelegate(this, object : AccessibilityDelegateCompat() {
+        override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
+            super.onInitializeAccessibilityNodeInfo(host, info)
+            info.className = RadioButton::class.java.name
+            info.isCheckable = true
+            info.isChecked = chosen
+        }
+    })
+}
+
 class LoginActivity : AppCompatActivity() {
+    /** Masuk sebagai: "patient" or "companion"; both sign in a patient account. */
+    private var role = "patient"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (Demo.signedIn) return enterApp()
@@ -89,6 +163,15 @@ class LoginActivity : AppCompatActivity() {
         b.phone.setup(getString(R.string.nomor_ponsel), getString(R.string.phone_hint), phone = true)
         b.password.setup(getString(R.string.kata_sandi), getString(R.string.masukkan_kata_sandi), password = true)
         b.password.input.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_DONE
+        role = savedInstanceState?.getString("role") ?: role
+        val cards = mutableMapOf<String, FrameLayout>()
+        fun choose(value: String) {
+            role = value
+            cards.forEach { (key, card) -> card.pick(key == role) }
+        }
+        cards["patient"] = b.roles.roleCard(R.drawable.ic_role_patient, getString(R.string.role_pasien), getString(R.string.berobat_untuk_diri_sendiri)) { choose("patient") }
+        cards["companion"] = b.roles.roleCard(R.drawable.ic_role_companion, getString(R.string.pendamping), getString(R.string.membantu_kunjungan_keluarga)) { choose("companion") }
+        choose(role)
         b.forgot.setOnClickListener { b.forgotNotice.isVisible = true }
         b.contact.setOnClickListener { b.contactNotice.isVisible = true }
         b.switchLink.setOnClickListener { startActivity(Intent(this, RegisterActivity::class.java)) }
@@ -112,9 +195,9 @@ class LoginActivity : AppCompatActivity() {
                     }
                     result.isSuccess -> result.getOrThrow().let { account ->
                         Demo.signedInAs(account.getString("name"), account.str("phone"))
-                        enterApp()
+                        if (role == "companion") enterCompanion() else enterApp()
                     }
-                    failure?.status == 0 && Demo.isDemoAccount(phone, password) -> enterApp()
+                    failure?.status == 0 && Demo.isDemoAccount(phone, password) -> if (role == "companion") enterCompanion() else enterApp()
                     else -> {
                         b.phone.error(if (failure?.status == 0) Api.OFFLINE else getString(R.string.nomor_ponsel_atau_kata_sandi_salah))
                         b.password.input.text.clear()
@@ -122,6 +205,11 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("role", role)
     }
 }
 

@@ -280,7 +280,7 @@
     <string name="farmasi_loket_f2">Farmasi · Loket F2</string>
     <string name="gedung_a_lantai_1_ambil_obat_setelah">Gedung A, lantai 1. Ambil obat setelah nomor pengambilan dipanggil.</string>
     <string name="sembunyikan_kata_sandi">Sembunyikan kata sandi</string>
-    <string name="selamat_datang_kembali">Selamat datang kembali.</string>
+    <string name="selamat_datang_kembali">Selamat datang di Hytrack</string>
     <string name="masuk_untuk_melanjutkan_kunjungan_ndan">Masuk untuk melanjutkan kunjungan\ndan memantau antrean Anda.</string>
     <string name="nomor_ponsel">Nomor ponsel</string>
     <string name="kata_sandi">Kata sandi</string>
@@ -440,4 +440,68 @@
     <string name="belum_tiba_di_meja_check_in">Belum tiba di meja check-in</string>
     <string name="memeriksa">Memeriksa…</string>
     <string name="server_staff_only">Akun petugas memakai dashboard petugas di web. Masuk dengan akun pasien di aplikasi ini.</string>
+
+    <!-- Masuk sebagai (Figma 31:2). -->
+    <string name="masuk_sebagai">Masuk sebagai</string>
+    <string name="role_pasien">Pasien</string>
+    <string name="pendamping">Pendamping</string>
+    <string name="berobat_untuk_diri_sendiri">Berobat untuk\ndiri sendiri</string>
+    <string name="membantu_kunjungan_keluarga">Membantu kunjungan\nkeluarga atau pasien</string>
+
+    <!-- Antrean pasien (Figma 31:136). -->
+    <string name="antrean_pasien">Antrean pasien</string>
+    <string name="pantau_giliran_pasien">Pantau giliran pasien yang Anda dampingi.</string>
+    <string name="pasien_yang_didampingi_upper">PASIEN YANG DIDAMPINGI</string>
+    <string name="keluarga_pasien_terhubung">Keluarga · Pasien terhubung</string>
+    <string name="nomor_antrean_pasien">Nomor antrean pasien</string>
+    <string name="poli_x">Poli %1$s</string>
+    <string name="dipanggil">Dipanggil</string>
+    <string name="di_depan_anda">Di depan Anda</string>
+    <string name="estimasi">Estimasi</string>
+    <string name="kira_menit">±%1$s mnt</string>
+    <string name="perbarui_antrean">Perbarui antrean</string>
+    <string name="memperbarui">Memperbarui…</string>
+    <string name="informasi_kunjungan">Informasi kunjungan</string>
+    <string name="akses_pendamping_hanya_lihat">Akses pendamping · Hanya lihat</string>
+    <string name="hanya_dapat_memantau">Anda hanya dapat memantau antrean pasien.\nPendaftaran antrean dilakukan oleh pasien.</string>
+    <string name="diperbarui_pukul">Diperbarui pukul %1$s</string>
+    <string name="koneksi_terputus_data_pukul">Koneksi terputus · data pukul %1$s</string>
+    <string name="pantauan_berakhir">Pantauan berakhir</string>
+    <string name="stage_belum_check_in">Belum check-in</string>
+    <string name="stage_menunggu">Menunggu</string>
+    <string name="stage_diperiksa">Diperiksa</string>
+    <string name="stage_laboratorium">Laboratorium</string>
+    <string name="stage_farmasi">Farmasi</string>
+
+    <!-- Riwayat kunjungan (Figma 31:3). -->
+    <string name="riwayat_kunjungan">Riwayat kunjungan</string>
+    <string name="n_kunjungan_selesai">%1$d kunjungan selesai</string>
+    <string name="n_kunjungan_tercatat">%1$d kunjungan tercatat</string>
+    <string name="riwayat_pemeriksaan">Riwayat pemeriksaan %1$s</string>
+    <string name="no_antrean_x">No. antrean %1$s</string>
+    <string name="lihat_detail">Lihat detail</string>
+    <string name="tutup_detail">Tutup detail</string>
+    <string name="terbuka">Terbuka</string>
+    <string name="tertutup">Tertutup</string>
+    <string name="tanggal">Tanggal</string>
+    <string name="jadwal_dokter">Jadwal dokter</string>
+    <string name="check_in">Check-in</string>
+    <string name="tidak_tercatat">Tidak tercatat</string>
+    <string name="alasan_pembatalan">Alasan pembatalan</string>
+    <string name="daftar_kunjungan_baru">Daftar kunjungan baru</string>
+    <string name="menampilkan_semua_riwayat">Menampilkan semua riwayat kunjungan Anda.</string>
+    <string name="belum_ada_kunjungan">Belum ada kunjungan</string>
+    <string name="tiket_akan_tercatat">Tiket yang Anda ambil akan tercatat di sini.</string>
+    <string name="ambil_antrean_plain">Ambil antrean</string>
+
+    <!-- Hapus data pasien (Figma 31:273). -->
+    <string name="hapus_data_pasien">Hapus data pasien</string>
+    <string name="hapus_data_pasien_tanya">Hapus data pasien?</string>
+    <string name="hapus_data_pasien_detail">Data pasien berikut akan dihapus dari daftar Anda. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="belum_ada_no_rm">Belum ada No. RM</string>
+    <string name="pastikan_data_pasien_benar">Pastikan data pasien yang dipilih sudah benar.</string>
+    <string name="hapus_data">Hapus data</string>
+    <string name="menghapus">Menghapus…</string>
+    <string name="data_x_dihapus">Data %1$s dihapus dari daftar Anda.</string>
+    <string name="koneksi_terputus_belum_dihapus">Koneksi ke server terputus. Data belum dihapus; coba lagi.</string>
 </resources>

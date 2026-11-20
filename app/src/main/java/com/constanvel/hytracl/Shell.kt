@@ -199,7 +199,10 @@ abstract class ShellActivity : AppCompatActivity() {
             val bottom = maxOf(bars.bottom, ime.bottom)
             // Margin, not padding: content must not scroll under the transparent status bar.
             shell.scroll.updateLayoutParams<FrameLayout.LayoutParams> { topMargin = bars.top }
-            shell.page.updatePadding(bottom = pageBottom + bars.bottom)
+            // Room for the bottom nav and the Hya bubble (or the pinned footer) only while one shows:
+            // a bare page ends at its own padding, so no empty band sits above the accents.
+            val reserve = if (shell.fab.isVisible || shell.footer.isVisible) pageBottom else 0
+            shell.page.updatePadding(bottom = reserve + bars.bottom)
             shell.bottomNav.updateLayoutParams { height = navBase + bars.bottom }
             shell.bottomNav.updatePadding(bottom = shell.root.dp(6) + bars.bottom)
             shell.fab.updateLayoutParams<FrameLayout.LayoutParams> { bottomMargin = shell.root.dp(95) + bars.bottom }
@@ -281,6 +284,7 @@ abstract class ShellActivity : AppCompatActivity() {
         shell.bottomNav.isVisible = !s.hya && !s.bare && !s.action
         shell.fab.isVisible = !s.hya && !s.bare
         shell.footer.isVisible = s.hya || s.action
+        ViewCompat.requestApplyInsets(shell.root)
         decor = s.decor
         placeDecor()
 

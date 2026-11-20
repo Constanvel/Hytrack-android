@@ -34,4 +34,14 @@
     <color name="guide_outline">#E9A93B</color>
     <color name="demo_border">#A4BCB0</color>
     <color name="avatar_ring">#D6E6DE</color>
+
+    <!-- Antrean pasien (Figma 31:136, companion.css). -->
+    <color name="companion_line">#DCE8E1</color>
+    <color name="companion_soft">#D7EEE6</color>
+    <color name="companion_rule">#418F81</color>
+    <color name="soft_bg">#F6F8F4</color>
+
+    <!-- Hapus data pasien (Figma 31:273). -->
+    <color name="danger">#B63832</color>
+    <color name="danger_soft">#FCEBE9</color>
 </resources>

@@ -4,13 +4,14 @@ import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.constanvel.hytracl.databinding.ScreenCompanionBinding
@@ -239,7 +240,7 @@ class CompanionListActivity : ShellActivity() {
     }
 }
 
-/** Pantauan pendamping (Figma 27:303): live progress of one accompanied visit, from real journey data. */
+/** Antrean pasien (Figma 31:136): the queue of one accompanied patient, view only, from real queue data. */
 class CompanionMonitorActivity : ShellActivity() {
     companion object {
         const val SHARE = "share"
@@ -251,6 +252,7 @@ class CompanionMonitorActivity : ShellActivity() {
     private var data: JSONObject? = null
     private var problem: String? = null
     private var syncedAt: String? = null
+    private var refreshing = false
     private val handler = Handler(Looper.getMainLooper())
     private val poll = object : Runnable {
         override fun run() {
@@ -259,14 +261,22 @@ class CompanionMonitorActivity : ShellActivity() {
         }
     }
 
-    override fun spec() = Spec(getString(R.string.pantauan_pendamping), getString(R.string.akses_pendamping_2),
-        back = CompanionListActivity::class.java, action = data?.optJSONObject("progress")?.str("phone") != null)
+    // Figma 31:136 has no bottom nav: the lockup and a "Pendamping" badge head the page.
+    override fun spec() = Spec(getString(R.string.antrean_pasien), brand = true, bare = true, decor = Decor.WAVES)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (isFinishing) return
         share = intent.getIntExtra(SHARE, 0)
-        interHeader()
+        shell.lockup.setOnClickListener { go(HomeActivity::class.java) }
+        shell.header.addView(LinearLayout(this).apply {
+            inter(getString(R.string.pendamping), 12f, 18f, Weight.SEMIBOLD, R.color.brand).apply {
+                gravity = Gravity.CENTER
+                minWidth = dp(116)
+                setPadding(dp(16), dp(6), dp(16), dp(6))
+                background = rounded(R.color.auth_benefit, 15)
+            }
+        })
     }
 
     /** go() brings an open monitor to the front, so another patient arrives here rather than in onCreate. */
@@ -291,6 +301,7 @@ class CompanionMonitorActivity : ShellActivity() {
 
     private fun load() = share.let { id ->
         request({ Api.call("GET", "pendampingan/$id") }) { result ->
+            refreshing = false
             if (id != share) return@request // a reply for the patient shown before
             result.onSuccess { data = it; problem = null; syncedAt = Demo.now() }.onFailure { problem = it.message }
             render()
@@ -298,88 +309,104 @@ class CompanionMonitorActivity : ShellActivity() {
     }
 
     override fun content(into: LinearLayout) {
-        into.dividerDrawable = ContextCompat.getDrawable(this, R.drawable.gap_12)
+        into.dividerDrawable = ContextCompat.getDrawable(this, R.drawable.gap_16)
         val json = data
         if (!Api.online || (json == null && problem != null)) return into.serverNeeded(problem) { load() }
         if (json == null) return run { into.text(R.style.Text_P_Muted, getString(R.string.memuat)) }
         val visit = json.optJSONObject("progress")
+        into.column(7).apply {
+            inter(getString(R.string.antrean_pasien), 26f, 36f, Weight.BOLD).isFocusable = true
+            inter(if (visit == null) getString(R.string.akses_pendamping_berakhir, json.optString("ended").lowercase())
+                else getString(R.string.pantau_giliran_pasien), 14f, 20f, color = R.color.brand_muted)
+            (layoutParams as LinearLayout.LayoutParams).bottomMargin = dp(3)
+        }
         if (visit == null) {
-            shell.footer.isVisible = false
-            into.notice(getString(R.string.akses_pendamping_berakhir, json.optString("ended").lowercase()), Tone.WARNING)
-            into.text(R.style.Text_P_Muted, getString(R.string.kunjungan_selesai_atau_dicabut))
-            into.text(R.style.Widget_HyTrack_Button, getString(R.string.kembali_ke_pantauan_keluarga)).setOnClickListener { go(CompanionListActivity::class.java) }
+            limit(into, getString(R.string.pantauan_berakhir), getString(R.string.kunjungan_selesai_atau_dicabut))
+            into.button(getString(R.string.kembali_ke_pantauan_keluarga)) { go(CompanionListActivity::class.java) }
             return
         }
-        visit.str("phone")?.let { phone ->
-            footerButton(getString(R.string.hubungi_pasien)) { startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:+$phone"))) }
+
+        // Pasien yang didampingi.
+        into.column(0, R.color.white, 14, stroke = R.color.companion_line).apply {
+            setPadding(dp(15), dp(10), dp(15), dp(9))
+            inter(getString(R.string.pasien_yang_didampingi_upper), 10f, 15f, Weight.SEMIBOLD, R.color.brand_muted)
+            inter(visit.str("patientName"), 18f, 25f, Weight.SEMIBOLD).top(5)
+            inter(getString(R.string.keluarga_pasien_terhubung), 12f, 18f, color = R.color.brand_muted).top(4)
         }
 
-        // Patient and live indicator.
-        val row = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
-        into.addView(row)
-        val who = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        row.addView(who, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-        who.inter(getString(R.string.kunjungan_keluarga), 10f, 14f, Weight.SEMIBOLD)
-        who.inter(visit.str("patientName"), 22f, 31f, Weight.BOLD)
-        row.inter(if (problem == null) getString(R.string.live_at, syncedAt) else getString(R.string.terputus), 11f, 15f, Weight.SEMIBOLD,
-            if (problem == null) R.color.brand else R.color.warning_text).apply {
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            accessibilityLiveRegion = android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE
-        }
-
-        // Hero: ticket, status, wait.
-        into.column(4, R.color.brand, 20, 18).apply {
-            inter(visit.str("checkedInAt")?.let { getString(R.string.sudah_check_in_at, it) } ?: getString(R.string.belum_check_in_upper), 11f, 15f, Weight.SEMIBOLD, R.color.hero_eyebrow)
-            val ticket = LinearLayout(context).apply { gravity = Gravity.CENTER_VERTICAL }
-            addView(ticket)
-            ticket.inter(visit.str("ticket"), 48f, 67f, Weight.BOLD, R.color.white).layoutParams =
-                LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { marginEnd = dp(12) }
-            ticket.inter(status(visit.getString("stage")), 14f, 20f, Weight.SEMIBOLD, R.color.white)
-            inter(headline(visit), 16f, 22f, Weight.SEMIBOLD, R.color.white)
-            visit.str("serving")?.let { inter(getString(R.string.sedang_dilayani_at, it), 12f, 17f, color = R.color.hero_text) }
-            visit.optJSONObject("pharmacy")?.takeIf { visit.getString("stage") == "pharmacy" }?.let {
-                inter(getString(R.string.nomor_ambil_obat, it.getString("pickupNumber")), 12f, 17f, color = R.color.hero_text)
+        // Queue card: ticket, clinic, then called / ahead / estimate.
+        val stage = visit.getString("stage")
+        val inLine = stage == "booked" || stage == "waiting"
+        into.column(0, R.color.brand, 18).apply {
+            setPadding(dp(20), dp(16), dp(20), dp(18))
+            val head = LinearLayout(context).apply { gravity = Gravity.CENTER_VERTICAL }
+            addView(head)
+            head.inter(getString(R.string.nomor_antrean_pasien), 13f, 19f, Weight.MEDIUM, R.color.companion_soft).layoutParams =
+                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+            head.inter(stageLabel(stage), 11f, 16f, Weight.SEMIBOLD, R.color.brand).apply {
+                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                gravity = Gravity.CENTER
+                minWidth = dp(102)
+                setPadding(dp(12), dp(5), dp(12), dp(5))
+                background = rounded(R.color.auth_benefit, 13)
             }
-        }
-
-        // Where the patient is now.
-        into.column(2, R.color.white, 20, 16).apply {
-            inter(getString(R.string.lokasi_saat_ini), 10f, 14f, Weight.SEMIBOLD)
-            inter(visit.str("place"), 18f, 25f, Weight.BOLD)
-            visit.str("placeDetail")?.let { inter(it, 13f, 18f, color = R.color.brand_muted) }
-        }
-
-        // Journey so far (patient_journeys) and the next stage.
-        into.column(10, R.color.white, 20, 16).apply {
-            inter(getString(R.string.alur_kunjungan), 16f, 22f, Weight.BOLD)
-            val steps = visit.getJSONArray("timeline").objects()
-            steps.forEach { step ->
-                val line = LinearLayout(context).apply { gravity = Gravity.CENTER_VERTICAL }
-                addView(line)
-                val current = step.optBoolean("current")
-                line.inter(if (current) "●" else "✓", 16f, 22f, Weight.BOLD, R.color.brand).apply {
-                    layoutParams = LinearLayout.LayoutParams(dp(15), ViewGroup.LayoutParams.WRAP_CONTENT).apply { marginEnd = dp(10) }
-                    gravity = Gravity.CENTER
-                    importantForAccessibility = android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            inter(visit.str("ticket"), 60f, 74f, Weight.BOLD, R.color.white).apply { top(2); maxLines = 1 }
+            inter(getString(R.string.poli_x, visit.getString("clinic")), 14f, 20f, Weight.MEDIUM, R.color.white).apply {
+                top(3)
+                setPadding(0, 0, 0, dp(15))
+            }
+            addView(View(context).apply { setBackgroundColor(ContextCompat.getColor(context, R.color.companion_rule)) },
+                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1)))
+            val metrics = LinearLayout(context)
+            addView(metrics, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(17) })
+            listOf(
+                getString(R.string.dipanggil) to (visit.str("serving") ?: "—"),
+                getString(R.string.di_depan_anda) to (if (inLine) getString(R.string.pasien, visit.optInt("ahead").toString()) else "—"),
+                getString(R.string.estimasi) to (visit.str("waitRange")?.takeIf { inLine }?.let { getString(R.string.kira_menit, it.substringBefore('–')) } ?: "—"),
+            ).forEachIndexed { i, (label, value) ->
+                metrics.column(6).apply {
+                    layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply { if (i > 0) marginStart = dp(12) }
+                    inter(label, 11f, 16f, color = R.color.companion_soft)
+                    inter(value, 19f, 27f, Weight.SEMIBOLD, R.color.white).maxLines = 1
                 }
-                line.inter(step.getString("label"), 13f, 18f, if (current) Weight.SEMIBOLD else Weight.MEDIUM).layoutParams =
-                    LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-                line.inter(if (current) getString(R.string.saat_ini) else step.str("time"), 11f, 15f, color = R.color.brand_muted).layoutParams =
-                    LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             }
-            inter(getString(R.string.berikutnya, visit.getString("next")), 12f, 17f, color = R.color.brand_muted)
+            inter(getString(if (refreshing) R.string.memperbarui else R.string.perbarui_antrean), 13f, 20f, Weight.SEMIBOLD, R.color.brand).apply {
+                top(21)
+                gravity = Gravity.CENTER
+                minHeight = dp(38)
+                background = rounded(R.color.white, 10)
+                isClickable = !refreshing
+                isFocusable = true
+                setOnClickListener {
+                    refreshing = true
+                    render()
+                    load()
+                }
+            }
         }
 
-        into.column(3).apply {
-            inter(getString(R.string.hanya_pantauan), 12f, 17f, Weight.MEDIUM, R.color.brand_muted)
-            inter(getString(R.string.akses_berakhir_saat, visit.getString("endsAt")), 12f, 17f, color = R.color.brand_muted)
+        // Informasi kunjungan: service day, doctor's session and where to go.
+        into.column(0, R.color.white, 14, stroke = R.color.companion_line).apply {
+            setPadding(dp(15), dp(11), dp(15), dp(18))
+            inter(getString(R.string.informasi_kunjungan), 14f, 20f, Weight.SEMIBOLD)
+            inter("${visit.optString("day")} · ${visit.optString("schedule")}", 13f, 19f, color = R.color.brand_muted).top(9)
+            inter(visit.str("placeDetail") ?: visit.str("place"), 13f, 19f, Weight.MEDIUM).top(10)
         }
-        into.tipCard(getString(R.string.tetap_dekat_dengan_pasien), getString(R.string.ikuti_panggilan_petugas), padding = 14, titleSize = 13f, textSize = 12f)
-        into.inter(getString(R.string.berhenti_memantau), 12f, 17f, Weight.SEMIBOLD, R.color.brand).apply {
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            minHeight = dp(32)
-            gravity = Gravity.CENTER_VERTICAL
+
+        limit(into, getString(R.string.akses_pendamping_hanya_lihat), getString(R.string.hanya_dapat_memantau))
+        into.inter(getString(if (problem == null) R.string.diperbarui_pukul else R.string.koneksi_terputus_data_pukul, syncedAt), 11f, 16f, color = R.color.brand_muted).apply {
+            gravity = Gravity.CENTER
+            top(-5)
+            accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE
+        }
+        into.inter(getString(R.string.berhenti_memantau), 12f, 17f, Weight.SEMIBOLD, R.color.warning_text).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+                topMargin = dp(-12)
+            }
+            setPadding(dp(12), dp(12), dp(12), dp(12))
             isClickable = true
+            isFocusable = true
             setOnClickListener {
                 AlertDialog.Builder(this@CompanionMonitorActivity)
                     .setMessage(R.string.berhenti_memantau_konfirmasi)
@@ -394,19 +421,22 @@ class CompanionMonitorActivity : ShellActivity() {
         }
     }
 
-    private fun status(stage: String) = getString(when (stage) {
-        "booked" -> R.string.status_menunggu_kedatangan
-        "waiting" -> R.string.status_menunggu_giliran
-        "serving" -> R.string.status_sedang_diperiksa
-        "laboratory" -> R.string.status_di_laboratorium
-        else -> R.string.status_di_farmasi
-    })
-
-    private fun headline(visit: JSONObject): String = when (visit.getString("stage")) {
-        "waiting" -> getString(R.string.pasien_lagi, visit.optInt("ahead").toString()) + (visit.str("waitRange")?.let { getString(R.string.sekitar_menit, it) } ?: "")
-        "serving" -> getString(R.string.sedang_di_ruang_pemeriksaan)
-        "laboratory" -> getString(R.string.menjalani_pemeriksaan_laboratorium)
-        "pharmacy" -> getString(R.string.obat_status, visit.optJSONObject("pharmacy")?.str("label") ?: getString(R.string.menunggu_resep_lower))
-        else -> getString(R.string.belum_tiba_di_meja_check_in)
+    /** .companion-limit: pale mint note with a green heading. */
+    private fun limit(into: LinearLayout, title: String, text: String) = into.column(8, R.color.auth_benefit, 14).apply {
+        setPadding(dp(16), dp(12), dp(16), dp(13))
+        inter(title, 13f, 19f, Weight.SEMIBOLD, R.color.brand)
+        inter(text, 12f, 18f, color = R.color.muted)
     }
+
+    private fun TextView.top(margin: Int) {
+        (layoutParams as LinearLayout.LayoutParams).topMargin = dp(margin)
+    }
+
+    private fun stageLabel(stage: String) = getString(when (stage) {
+        "booked" -> R.string.stage_belum_check_in
+        "serving" -> R.string.stage_diperiksa
+        "laboratory" -> R.string.stage_laboratorium
+        "pharmacy" -> R.string.stage_farmasi
+        else -> R.string.stage_menunggu
+    })
 }

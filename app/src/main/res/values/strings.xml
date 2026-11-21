@@ -447,6 +447,32 @@
     <string name="obat_status">Obat: %1$s</string>
     <string name="belum_tiba_di_meja_check_in">Belum tiba di meja check-in</string>
     <string name="memeriksa">Memeriksa…</string>
+    <!-- Sign-up OTP (verify.tsx) -->
+    <string name="kembali_panah">← Kembali</string>
+    <string name="akun_terverifikasi">Akun terverifikasi</string>
+    <string name="langkah_dari_3">0%1$d / 03</string>
+    <string name="verifikasi_nomor">VERIFIKASI NOMOR</string>
+    <string name="verifikasi_selesai">VERIFIKASI SELESAI</string>
+    <string name="masukkan_kode_otp">Masukkan\nkode OTP</string>
+    <string name="nomor_anda_terverifikasi">Nomor Anda\nterverifikasi.</string>
+    <string name="kode_dikirim_ke">Kode 6 digit telah dikirim melalui SMS ke</string>
+    <string name="akun_siap_digunakan">Akun HyTrack Anda siap digunakan. Mulai atur kunjungan dan pantau antrean dengan lebih tenang.</string>
+    <string name="ubah_nomor">Ubah nomor</string>
+    <string name="mode_demo_kode_otp">Mode demo · belum ada SMS. Kode OTP Anda: %1$s</string>
+    <string name="kirim_ulang_dalam"><![CDATA[Kirim ulang kode dalam <b><font color="#086F65">%1$s</font></b>]]></string>
+    <string name="kirim_ulang_kode">Kirim ulang kode</string>
+    <string name="kode_baru_dikirim">Kode baru telah dikirim.</string>
+    <string name="verifikasi_lanjutkan">Verifikasi &amp; lanjutkan</string>
+    <string name="memverifikasi">Memverifikasi…</string>
+    <string name="kode_berlaku_5_menit">Kode berlaku selama 5 menit. Jangan bagikan kode ini kepada siapa pun, termasuk pihak kami.</string>
+    <string name="digit_dari_6">Digit %1$d dari 6</string>
+    <string name="kode_otp_salah">Kode OTP salah. Periksa kembali SMS Anda.</string>
+    <string name="nomor_ponsel_terverifikasi">NOMOR PONSEL TERVERIFIKASI</string>
+    <string name="nomor_ini_terhubung">Nomor ini terhubung dengan akun Anda.</string>
+    <string name="lanjut_ke_beranda">Lanjut ke beranda</string>
+    <string name="di_beranda_pilih_pasien">Di beranda, Anda dapat memilih pasien\ndan mulai mengambil antrean.</string>
+    <string name="ada_kendala">Ada kendala?</string>
+    <string name="hubungi_bantuan">Hubungi bantuan</string>
     <string name="server_staff_only">Akun petugas memakai dashboard petugas di web. Masuk dengan akun pasien di aplikasi ini.</string>
 
     <!-- Masuk sebagai (Figma 31:2). -->

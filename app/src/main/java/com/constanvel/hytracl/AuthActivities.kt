@@ -1,30 +1,43 @@
 package com.constanvel.hytracl
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Html
 import android.text.InputType
 import android.text.method.PasswordTransformationMethod
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioButton
+import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.text.HtmlCompat
 import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.core.widget.doAfterTextChanged
 import com.constanvel.hytracl.databinding.ActivityLoginBinding
 import com.constanvel.hytracl.databinding.ActivityRegisterBinding
+import com.constanvel.hytracl.databinding.ActivityRegisterOtpBinding
 import com.constanvel.hytracl.databinding.ViewAuthFieldBinding
+import org.json.JSONObject
 
 /** Shared field setup for AuthInput / PasswordInput. */
 private fun ViewAuthFieldBinding.setup(label: String, hint: String, phone: Boolean = false, password: Boolean = false) {
@@ -61,9 +74,9 @@ private fun ViewAuthFieldBinding.error(message: String?) {
 private val ViewAuthFieldBinding.value get() = input.text.toString()
 
 /** Edge-to-edge insets plus the 412px column of auth.css on wide screens. */
-private fun AppCompatActivity.authFrame(scroll: View, main: LinearLayout) {
+private fun AppCompatActivity.authFrame(scroll: View, main: LinearLayout, gutterDp: Int = 24) {
     enableEdgeToEdge()
-    val gutter = main.dp(24)
+    val gutter = main.dp(gutterDp)
     val bottom = main.paddingBottom
     ViewCompat.setOnApplyWindowInsetsListener(scroll) { _, insets ->
         val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
@@ -265,8 +278,222 @@ class RegisterActivity : AppCompatActivity() {
                 b.confirm.input.text.clear()
                 return@setOnClickListener
             }
-            Demo.register(name, phone)
-            enterApp()
+            b.submit.isEnabled = false
+            b.submit.text = getString(R.string.memeriksa)
+            val form = JSONObject().put("name", name).put("phone", phone).put("password", password)
+                .put("password_confirmation", b.confirm.value).put("terms", true)
+            // The Laravel API sends the code; without a connection the offline demo shows one.
+            request({ Api.call("POST", "daftar", form) }) { result ->
+                b.submit.isEnabled = true
+                b.submit.text = getString(R.string.buat_akun)
+                val failure = result.exceptionOrNull() as? Api.Failure
+                when {
+                    result.isSuccess -> startActivity(RegisterOtpActivity.intent(this, name, phone, result.getOrThrow()))
+                    failure?.status == 0 -> startActivity(RegisterOtpActivity.intent(this, name, phone, null))
+                    else -> {
+                        val fields = failure?.fields.orEmpty()
+                        b.name.error(fields["name"])
+                        b.phone.error(fields["phone"] ?: failure?.message?.takeIf { fields.isEmpty() })
+                        b.password.error(fields["password"])
+                        b.password.input.text.clear()
+                        b.confirm.input.text.clear()
+                    }
+                }
+            }
         }
+    }
+}
+
+/**
+ * Sign-up steps 2 and 3 (verify.tsx; Figma 32:286 Kode OTP, 32:330 Verifikasi berhasil): six code
+ * boxes, a resend countdown, then the verified number. Offline, the demo code is shown on screen.
+ */
+class RegisterOtpActivity : AppCompatActivity() {
+    private lateinit var b: ActivityRegisterOtpBinding
+    private lateinit var boxes: List<EditText>
+    private var signup: String? = null
+    private var left = 0
+    private var filling = false
+    private val ticker = Handler(Looper.getMainLooper())
+    private val tick = object : Runnable {
+        override fun run() {
+            showResend()
+            if (left-- > 0) ticker.postDelayed(this, 1000)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        b = ActivityRegisterOtpBinding.inflate(layoutInflater)
+        setContentView(b.root)
+        authFrame(b.scroll, b.main, gutterDp = 30) // .verify-main: 30px sides
+        signup = intent.getStringExtra(SIGNUP)
+        b.count.text = getString(R.string.langkah_dari_3, 2)
+        b.chip.text = getString(R.string.verifikasi_nomor)
+        b.title.text = getString(R.string.masukkan_kode_otp)
+        b.lead.text = getString(R.string.kode_dikirim_ke)
+        b.back.text = getString(R.string.kembali_panah)
+        b.back.setOnClickListener { finish() }
+        b.changePhone.setOnClickListener { finish() }
+        b.help.setOnClickListener { b.helpNotice.isVisible = true }
+        b.submit.setOnClickListener { verify() }
+        b.continueHome.setOnClickListener { enterApp() }
+        boxes = List(6) { index ->
+            EditText(this).apply {
+                setBackgroundResource(R.drawable.bg_otp_box)
+                gravity = Gravity.CENTER
+                inputType = InputType.TYPE_CLASS_NUMBER
+                typeface = ResourcesCompat.getFont(context, R.font.inter_semibold)
+                textSize = 24f
+                setTextColor(ContextCompat.getColor(context, R.color.text))
+                setPadding(0, 0, 0, 0)
+                setSelectAllOnFocus(true) // typing over a filled box replaces its digit
+                contentDescription = getString(R.string.digit_dari_6, index + 1)
+                if (index == 0) setAutofillHints("smsOTPCode") else importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO
+                imeOptions = if (index == 5) EditorInfo.IME_ACTION_DONE else EditorInfo.IME_ACTION_NEXT
+                doAfterTextChanged { put(index, it?.toString().orEmpty()) }
+                setOnKeyListener { _, keyCode, event ->
+                    val back = keyCode == KeyEvent.KEYCODE_DEL && event.action == KeyEvent.ACTION_DOWN && text.isEmpty() && index > 0
+                    if (back) boxes[index - 1].apply { requestFocus(); text.clear() }
+                    back
+                }
+                setOnEditorActionListener { _, action, _ -> if (action == EditorInfo.IME_ACTION_DONE) verify(); false }
+                b.boxes.addView(this, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f))
+            }
+        }
+        screen(intent.getStringExtra(SCREEN)?.let(::JSONObject))
+        boxes[0].requestFocus()
+        updateSubmit()
+    }
+
+    override fun onDestroy() {
+        ticker.removeCallbacks(tick)
+        super.onDestroy()
+    }
+
+    /** The server's {phone, resendIn, demoCode}; offline: the demo code and a 45 s countdown. */
+    private fun screen(json: JSONObject?) {
+        b.phone.text = json?.str("phone") ?: maskPhone(intent.getStringExtra(PHONE).orEmpty())
+        val demo = if (json == null) DEMO_CODE else json.str("demoCode")
+        b.demoCode.isVisible = demo != null
+        b.demoCode.text = demo?.let { getString(R.string.mode_demo_kode_otp, it) }
+        left = json?.optInt("resendIn", 45) ?: 45
+        ticker.removeCallbacks(tick)
+        tick.run()
+    }
+
+    private fun showResend() {
+        if (left > 0) {
+            b.resend.text = HtmlCompat.fromHtml(getString(R.string.kirim_ulang_dalam, "%02d:%02d".format(left / 60, left % 60)), HtmlCompat.FROM_HTML_MODE_LEGACY)
+            b.resend.setOnClickListener(null)
+            b.resend.isClickable = false
+            b.resend.setTextAppearance(R.style.Text_Auth)
+            b.resend.setTextColor(ContextCompat.getColor(this, R.color.muted))
+            b.resend.textSize = 12f
+        } else {
+            b.resend.text = getString(R.string.kirim_ulang_kode)
+            b.resend.setTextAppearance(R.style.Text_Auth_Link)
+            b.resend.textSize = 13f
+            b.resend.setOnClickListener { resend() }
+        }
+    }
+
+    private fun resend() {
+        val token = signup ?: return screen(null).also { status(getString(R.string.kode_baru_dikirim)) }
+        request({ Api.call("POST", "daftar/kirim-ulang", JSONObject().put("signup", token)) }) { result ->
+            result.onSuccess { screen(it); status(getString(R.string.kode_baru_dikirim)) }
+                .onFailure { error(it.message) }
+        }
+    }
+
+    /** Writes typed, pasted or autofilled digits from box [index] on and moves focus past them. */
+    private fun put(index: Int, value: String) {
+        if (filling) return
+        filling = true
+        var digits = value.filter { it.isDigit() }
+        if (digits.length == 2 && boxes[index].tag == digits[0]) digits = digits.drop(1) // typed after the old digit
+        digits.take(6 - index).forEachIndexed { i, d -> boxes[index + i].apply { setText(d.toString()); tag = d } }
+        if (digits.isEmpty()) boxes[index].apply { text.clear(); tag = null }
+        filling = false
+        if (digits.isNotEmpty()) boxes[minOf(index + digits.length, 5)].requestFocus()
+        error(null)
+        updateSubmit()
+    }
+
+    private val code get() = boxes.joinToString("") { it.text.toString() }
+
+    private fun updateSubmit() {
+        val ready = code.length == 6
+        b.submit.isEnabled = ready
+        b.submit.alpha = if (ready) 1f else 0.5f
+    }
+
+    private fun status(message: String) {
+        b.status.text = message
+        b.status.isVisible = true
+    }
+
+    private fun error(message: String?) {
+        b.error.text = message
+        b.error.isVisible = message != null
+        boxes.forEach { it.isActivated = message != null }
+    }
+
+    private fun verify() {
+        if (code.length != 6) return
+        val token = signup
+        if (token == null) { // offline demo
+            if (code != DEMO_CODE) return error(getString(R.string.kode_otp_salah)).also { boxes[0].requestFocus() }
+            Demo.register(intent.getStringExtra(NAME).orEmpty(), intent.getStringExtra(PHONE).orEmpty())
+            return verified(maskPhone(intent.getStringExtra(PHONE).orEmpty()))
+        }
+        b.submit.isEnabled = false
+        b.submit.text = getString(R.string.memverifikasi)
+        request({ Api.verifySignup(token, code) }) { result ->
+            b.submit.text = getString(R.string.verifikasi_lanjutkan)
+            updateSubmit()
+            result.onSuccess { account ->
+                Demo.signedInAs(account.getString("name"), account.str("phone"))
+                Demo.companion = false
+                verified(maskPhone(intent.getStringExtra(PHONE).orEmpty()))
+            }.onFailure {
+                error((it as? Api.Failure)?.let { f -> f.fields["code"] ?: f.message } ?: it.message)
+                boxes[0].requestFocus()
+            }
+        }
+    }
+
+    /** Step 3/3: the account exists and is signed in; back goes on to the app, not to the form. */
+    private fun verified(phone: String) {
+        ticker.removeCallbacks(tick)
+        currentFocus?.let { getSystemService(InputMethodManager::class.java).hideSoftInputFromWindow(it.windowToken, 0) }
+        b.back.text = getString(R.string.akun_terverifikasi)
+        b.back.setOnClickListener(null)
+        b.back.isClickable = false
+        b.count.text = getString(R.string.langkah_dari_3, 3)
+        b.progress3.setBackgroundResource(R.drawable.bg_progress_done)
+        b.chip.text = getString(R.string.verifikasi_selesai)
+        b.title.text = getString(R.string.nomor_anda_terverifikasi)
+        b.lead.text = getString(R.string.akun_siap_digunakan)
+        b.otpStep.isVisible = false
+        b.doneStep.isVisible = true
+        b.verifiedPhone.text = phone
+        onBackPressedDispatcher.addCallback(this) { enterApp() }
+        b.title.sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED)
+    }
+
+    companion object {
+        private const val NAME = "name"
+        private const val PHONE = "phone"
+        private const val SIGNUP = "signup"
+        private const val SCREEN = "screen"
+        private const val DEMO_CODE = "123456"
+
+        /** "+62 813 •••• 3333", as SignupVerification::mask. */
+        fun maskPhone(normalized: String) = "+62 ${normalized.drop(2).take(3)} •••• ${normalized.takeLast(4)}"
+
+        fun intent(context: Context, name: String, phone: String, screen: JSONObject?) =
+            Intent(context, RegisterOtpActivity::class.java).putExtra(NAME, name).putExtra(PHONE, phone)
+                .putExtra(SIGNUP, screen?.str("signup")).putExtra(SCREEN, screen?.toString())
     }
 }

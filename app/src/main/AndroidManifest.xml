@@ -28,6 +28,7 @@
         </activity>
         <activity android:name=".LoginActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".RegisterActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".RegisterOtpActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".HomeActivity" />
         <activity android:name=".AccountActivity" />
         <activity android:name=".HistoryActivity" />

@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-up steps 2 and 3 (features/auth/verify.tsx; Figma 32:286 "Kode OTP", 32:330 "Verifikasi berhasil"). -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="30dp"
+        android:paddingTop="28dp"
+        android:paddingEnd="30dp"
+        android:paddingBottom="24dp">
+
+        <!-- .verify-top -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="24dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/back"
+                style="@style/Text.Auth"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/inter_medium"
+                android:lineHeight="20sp"
+                android:minHeight="44dp"
+                android:gravity="center_vertical"
+                android:textColor="@color/text"
+                android:textSize="14sp"
+                tools:text="← Kembali" />
+
+            <TextView
+                android:id="@+id/count"
+                style="@style/Text.Auth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/inter_medium"
+                android:textColor="@color/muted"
+                android:textSize="14sp"
+                tools:text="02 / 03" />
+        </LinearLayout>
+
+        <!-- .verify-progress -->
+        <LinearLayout
+            android:id="@+id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_marginTop="10dp"
+            android:divider="@drawable/gap_6"
+            android:orientation="horizontal"
+            android:showDividers="middle">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_progress_done" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_progress_done" />
+
+            <View
+                android:id="@+id/progress3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_progress_todo" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/chip"
+            style="@style/Text.Auth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:background="@drawable/bg_verify_chip"
+            android:fontFamily="@font/inter_bold"
+            android:letterSpacing="0.08"
+            android:lineHeight="14sp"
+            android:paddingStart="12dp"
+            android:paddingTop="6dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="6dp"
+            android:textColor="@color/primary"
+            android:textSize="10sp"
+            tools:text="VERIFIKASI NOMOR" />
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/Text.Auth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:accessibilityHeading="true"
+            android:fontFamily="@font/inter_bold"
+            android:lineHeight="40sp"
+            android:textColor="@color/text"
+            android:textSize="34sp"
+            tools:text="Masukkan\nkode OTP" />
+
+        <TextView
+            android:id="@+id/lead"
+            style="@style/Text.Auth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:lineHeight="24sp"
+            android:textColor="@color/muted"
+            android:textSize="14sp"
+            tools:text="Kode 6 digit telah dikirim melalui SMS ke" />
+
+        <!-- Step 2: phone, Ubah nomor, the six boxes ================================ -->
+        <LinearLayout
+            android:id="@+id/otpStep"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/phone"
+                    style="@style/Text.Auth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/inter_semibold"
+                    android:lineHeight="24sp"
+                    android:textColor="@color/text"
+                    android:textSize="15sp"
+                    tools:text="+62 813 •••• 3333" />
+
+                <TextView
+                    android:id="@+id/changePhone"
+                    style="@style/Text.Auth.Link"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center_vertical"
+                    android:minHeight="44dp"
+                    android:text="@string/ubah_nomor"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/status"
+                style="@style/Widget.HyTrack.Notice"
+                android:layout_marginTop="16dp"
+                android:accessibilityLiveRegion="polite"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/demoCode"
+                style="@style/Widget.HyTrack.Notice.Info"
+                android:layout_marginTop="16dp"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/boxes"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="24dp"
+                android:divider="@drawable/gap_8"
+                android:orientation="horizontal"
+                android:showDividers="middle" />
+
+            <TextView
+                android:id="@+id/error"
+                style="@style/Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:accessibilityLiveRegion="assertive"
+                android:fontFamily="@font/inter_semibold"
+                android:textColor="@color/error"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/resend"
+                style="@style/Text.Auth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:layout_marginBottom="22dp"
+                android:accessibilityLiveRegion="polite"
+                android:gravity="center"
+                android:lineHeight="17sp"
+                android:minHeight="24dp"
+                android:textColor="@color/muted"
+                android:textSize="12sp"
+                tools:text="Kirim ulang kode dalam 00:45" />
+
+            <TextView
+                android:id="@+id/submit"
+                style="@style/Widget.HyTrack.AuthSubmit"
+                android:layout_height="52dp"
+                android:text="@string/verifikasi_lanjutkan" />
+
+            <TextView
+                style="@style/Text.Auth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:lineHeight="19sp"
+                android:text="@string/kode_berlaku_5_menit"
+                android:textColor="@color/muted"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Step 3: the verified number and Lanjut ke beranda ======================= -->
+        <LinearLayout
+            android:id="@+id/doneStep"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:background="@drawable/bg_verify_card"
+                android:orientation="vertical"
+                android:paddingStart="18dp"
+                android:paddingTop="20dp"
+                android:paddingEnd="18dp"
+                android:paddingBottom="20dp">
+
+                <TextView
+                    style="@style/Text.Auth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/inter_bold"
+                    android:letterSpacing="0.04"
+                    android:text="@string/nomor_ponsel_terverifikasi"
+                    android:textColor="@color/primary"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/verifiedPhone"
+                    style="@style/Text.Auth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="12dp"
+                    android:fontFamily="@font/inter_semibold"
+                    android:lineHeight="28sp"
+                    android:textColor="@color/text"
+                    android:textSize="20sp"
+                    tools:text="+62 813 •••• 3333" />
+
+                <TextView
+                    style="@style/Text.Auth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/nomor_ini_terhubung"
+                    android:textColor="@color/muted"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/continueHome"
+                style="@style/Widget.HyTrack.AuthSubmit"
+                android:layout_height="52dp"
+                android:layout_marginTop="28dp"
+                android:text="@string/lanjut_ke_beranda" />
+
+            <TextView
+                style="@style/Text.Auth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:lineHeight="19sp"
+                android:text="@string/di_beranda_pilih_pasien"
+                android:textColor="@color/muted"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:minHeight="32dp" />
+
+        <!-- .verify-help -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Text.Auth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ada_kendala"
+                android:textColor="@color/muted"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/help"
+                style="@style/Text.Auth.Link"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:gravity="center_vertical"
+                android:minHeight="44dp"
+                android:text="@string/hubungi_bantuan"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/helpNotice"
+            style="@style/Widget.HyTrack.Notice"
+            android:layout_marginTop="12dp"
+            android:accessibilityLiveRegion="polite"
+            android:text="@string/account_help"
+            android:visibility="gone" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

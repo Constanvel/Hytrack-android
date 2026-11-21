@@ -33,11 +33,14 @@
     <LinearLayout style="@style/Widget.HyTrack.WarningCard">
 
         <TextView
-            style="@style/Text.Strong"
+            style="@style/Text.H3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:accessibilityHeading="true"
+            android:fontFamily="@font/inter_semibold"
             android:text="@string/qr_sulit_dipindai"
-            android:textColor="@color/warning_text" />
+            android:textColor="@color/warning_text"
+            android:textSize="17sp" />
 
         <TextView
             style="@style/Text.Small"
@@ -55,18 +58,21 @@
         android:background="@drawable/bg_btn_primary"
         android:clickable="true"
         android:focusable="true"
-        android:gravity="center"
+        android:gravity="center_vertical"
         android:minHeight="52dp"
         android:orientation="horizontal"
-        android:paddingStart="16dp"
+        android:paddingStart="20dp"
         android:paddingEnd="16dp">
 
         <TextView
             style="@style/Text.Strong"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/inter_semibold"
             android:text="@string/buka_kunjungan_aktif"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="16sp" />
 
         <FrameLayout
             android:layout_width="24dp"
@@ -79,11 +85,69 @@
                 android:layout_gravity="center"
                 android:importantForAccessibility="no"
                 android:src="@drawable/ic_arrow"
-                tools:ignore="ContentDescription" />
+                android:tint="@color/white"
+                tools:ignore="ContentDescription,UseAppTint" />
         </FrameLayout>
     </LinearLayout>
 
-    <include
+    <!-- HyaHelp with-avatar (Figma 23): the large Hya portrait overlaps the card's left edge. -->
+    <LinearLayout
         android:id="@+id/hyaHelp"
-        layout="@layout/view_hya_help" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/bg_hya_help_bordered"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:minHeight="65dp"
+        android:orientation="horizontal"
+        android:paddingEnd="18dp">
+
+        <!-- .avatar-large: white border and hairline ring, like the Hya bubble. -->
+        <FrameLayout
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_marginStart="-8dp"
+            android:layout_marginTop="-8dp"
+            android:layout_marginBottom="-8dp"
+            android:background="@drawable/bg_fab_ring">
+
+            <include
+                layout="@layout/view_avatar_large"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/Text.Strong"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/masih_bingung" />
+
+            <TextView
+                style="@style/Text.Link"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/ask_hya"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:importantForAccessibility="no"
+            android:scaleType="center"
+            android:src="@drawable/ic_arrow"
+            tools:ignore="ContentDescription" />
+    </LinearLayout>
 </merge>

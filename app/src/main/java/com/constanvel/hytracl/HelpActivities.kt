@@ -174,6 +174,7 @@ class CheckInGuideActivity : ShellActivity() {
             getString(R.string.buka_tiket_kunjungan) to getString(R.string.pilih_kunjungan_aktif_lalu_tekan),
             getString(R.string.tunjukkan_qr_ke_petugas) to getString(R.string.gunakan_qr_dari_tiket_anda_petugas_akan),
             getString(R.string.periksa_status_kehadiran) to getString(R.string.status_menjadi_sudah_check_in_setelah),
+            numbered = true,
         )
         b.openVisit.setOnClickListener { go(VisitActivity::class.java) }
     }

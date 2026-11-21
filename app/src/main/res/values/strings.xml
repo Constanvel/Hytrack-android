@@ -5,6 +5,7 @@
     <string name="back">Kembali</string>
     <string name="notifications">Notifikasi</string>
     <string name="ask_hya">Tanya Hya</string>
+    <string name="masih_bingung">Masih bingung?</string>
     <string name="close_hya">Tutup Hya</string>
     <string name="account_help">Hubungi petugas pendaftaran rumah sakit untuk bantuan akun, termasuk mengatur ulang kata sandi.</string>
     <string name="lupa_kata_sandi">Lupa kata sandi?</string>
@@ -36,18 +37,22 @@
     <string name="hapus_pencarian">Hapus pencarian</string>
     <string name="perkiraan_tunggu_berubah_mengikuti">Perkiraan tunggu berubah mengikuti pelayanan.</string>
     <string name="biar_keluarga_ikut_tenang">Biar keluarga ikut tenang.</string>
-    <string name="bagikan_perkembangan_kunjungan_bukan">Undang keluarga memantau kunjungan ini, bukan informasi medis Anda.</string>
+    <string name="bagikan_perkembangan_kunjungan_bukan">Bagikan perkembangan kunjungan, bukan informasi medis Anda.</string>
     <string name="kunjungan_anda">KUNJUNGAN ANDA</string>
+    <string name="kunjungan_hari_ini">KUNJUNGAN HARI INI</string>
+    <string name="bagikan_tautan_aman">Bagikan tautan aman</string>
+    <string name="bagikan_tautan_baru">Bagikan tautan baru</string>
+    <string name="hanya_bagikan_tepercaya">Hanya bagikan kepada orang tepercaya. Anda dapat mencabut akses kapan saja di halaman ini.</string>
     <string name="yang_bisa_dilihat_pendamping">Yang bisa dilihat pendamping</string>
     <string name="status_dan_nomor_antrean">✓ Status dan nomor antrean</string>
     <string name="perkiraan_waktu_tunggu">✓ Perkiraan waktu tunggu</string>
-    <string name="lokasi_layanan_berikutnya">✓ Lokasi dan tahapan pelayanan</string>
+    <string name="lokasi_layanan_berikutnya">✓ Lokasi layanan berikutnya</string>
     <string name="proses_penyiapan_obat">✓ Proses penyiapan obat</string>
     <string name="tidak_termasuk_diagnosis_hasil">Tidak termasuk diagnosis, hasil pemeriksaan, detail resep, nama lengkap, alamat, atau nomor check-in Anda.</string>
-    <string name="akses_otomatis_berakhir">Satu undangan, satu pendamping</string>
-    <string name="saat_kunjungan_selesai_atau_pada_hari">Pendamping menerima undangan dengan akun HyTrack-nya sendiri. Setelah diterima, tautan tidak bisa dipakai orang lain. Akses berakhir saat kunjungan selesai atau pada hari layanan pukul 23.59.</string>
+    <string name="akses_otomatis_berakhir">Akses otomatis berakhir</string>
+    <string name="saat_kunjungan_selesai_atau_pada_hari">Saat kunjungan selesai atau pada hari layanan pukul 23.59, mana yang lebih dulu.</string>
     <string name="tautan_pendamping">Tautan undangan</string>
-    <string name="salin_sekarang_demi_keamanan_tautan_ini">Kirim ke satu anggota keluarga. Demi keamanan, tautan ini hanya ditampilkan satu kali.</string>
+    <string name="salin_sekarang_demi_keamanan_tautan_ini">Kirim ke satu anggota keluarga. Tautan hanya bisa diterima satu pendamping dengan akun HyTrack-nya sendiri, dan demi keamanan hanya ditampilkan satu kali.</string>
     <string name="salin_tautan">Salin tautan</string>
     <string name="kunjungan_keluarga">KUNJUNGAN KELUARGA</string>
     <string name="lokasi_saat_ini">LOKASI SAAT INI</string>
@@ -110,10 +115,13 @@
     <string name="lihat_petunjuk_ruangan">Lihat petunjuk ruangan</string>
     <string name="nomor_npengambilan">Nomor\npengambilan</string>
     <string name="perkiraan_berubah_jika_ada_obat_racikan">Perkiraan berubah jika ada obat racikan. Petugas akan memberi tahu bila ada kendala.</string>
-    <string name="terhubung">● Terhubung</string>
+    <string name="terhubung">● Terhubung langsung</string>
     <string name="perkiraan_tunggu_2">perkiraan tunggu</string>
     <string name="sedang_dilayani">sedang dilayani</string>
-    <string name="tetap_di_dekat_ruang_dengarkan_juga">Tetap di dekat ruang. Dengarkan juga\npanggilan petugas rumah sakit.</string>
+    <string name="tetap_di_dekat_ruang_dengarkan_juga">Tetap di dekat ruang. Kami beri tahu saat nomor Anda dipanggil; dengarkan juga panggilan petugas.</string>
+    <string name="selesai_step">Selesai: %1$s</string>
+    <string name="langkah_saat_ini">Langkah saat ini</string>
+    <string name="saat_sinyal_putus">Saat sinyal putus, ikuti layar antrean rumah sakit.</string>
     <string name="antrean_berhasil_diambil">✓ Antrean berhasil diambil</string>
     <string name="nomor_antrean_anda">NOMOR ANTREAN ANDA</string>
     <string name="sedang_menunggu">sedang menunggu</string>
@@ -439,6 +447,32 @@
     <string name="obat_status">Obat: %1$s</string>
     <string name="belum_tiba_di_meja_check_in">Belum tiba di meja check-in</string>
     <string name="memeriksa">Memeriksa…</string>
+    <!-- Sign-up OTP (verify.tsx) -->
+    <string name="kembali_panah">← Kembali</string>
+    <string name="akun_terverifikasi">Akun terverifikasi</string>
+    <string name="langkah_dari_3">0%1$d / 03</string>
+    <string name="verifikasi_nomor">VERIFIKASI NOMOR</string>
+    <string name="verifikasi_selesai">VERIFIKASI SELESAI</string>
+    <string name="masukkan_kode_otp">Masukkan\nkode OTP</string>
+    <string name="nomor_anda_terverifikasi">Nomor Anda\nterverifikasi.</string>
+    <string name="kode_dikirim_ke">Kode 6 digit telah dikirim melalui SMS ke</string>
+    <string name="akun_siap_digunakan">Akun HyTrack Anda siap digunakan. Mulai atur kunjungan dan pantau antrean dengan lebih tenang.</string>
+    <string name="ubah_nomor">Ubah nomor</string>
+    <string name="mode_demo_kode_otp">Mode demo · belum ada SMS. Kode OTP Anda: %1$s</string>
+    <string name="kirim_ulang_dalam"><![CDATA[Kirim ulang kode dalam <b><font color="#086F65">%1$s</font></b>]]></string>
+    <string name="kirim_ulang_kode">Kirim ulang kode</string>
+    <string name="kode_baru_dikirim">Kode baru telah dikirim.</string>
+    <string name="verifikasi_lanjutkan">Verifikasi &amp; lanjutkan</string>
+    <string name="memverifikasi">Memverifikasi…</string>
+    <string name="kode_berlaku_5_menit">Kode berlaku selama 5 menit. Jangan bagikan kode ini kepada siapa pun, termasuk pihak kami.</string>
+    <string name="digit_dari_6">Digit %1$d dari 6</string>
+    <string name="kode_otp_salah">Kode OTP salah. Periksa kembali SMS Anda.</string>
+    <string name="nomor_ponsel_terverifikasi">NOMOR PONSEL TERVERIFIKASI</string>
+    <string name="nomor_ini_terhubung">Nomor ini terhubung dengan akun Anda.</string>
+    <string name="lanjut_ke_beranda">Lanjut ke beranda</string>
+    <string name="di_beranda_pilih_pasien">Di beranda, Anda dapat memilih pasien\ndan mulai mengambil antrean.</string>
+    <string name="ada_kendala">Ada kendala?</string>
+    <string name="hubungi_bantuan">Hubungi bantuan</string>
     <string name="server_staff_only">Akun petugas memakai dashboard petugas di web. Masuk dengan akun pasien di aplikasi ini.</string>
 
     <!-- Masuk sebagai (Figma 31:2). -->

@@ -15,6 +15,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.constanvel.hytracl.databinding.ScreenCompanionBinding
+import com.constanvel.hytracl.databinding.ViewBookBarBinding
 import com.constanvel.hytracl.databinding.ViewRowLinkBinding
 import org.json.JSONObject
 
@@ -37,8 +38,22 @@ class CompanionAccessActivity : ShellActivity() {
 
     private val active get() = visit?.str("stage") in liveStages
 
+    private lateinit var bar: ViewBookBarBinding
+
     override fun spec() = if (invitations != null && !active) Spec(getString(R.string.akses_pendamping), back = VisitActivity::class.java)
-    else Spec(getString(R.string.akses_pendamping), getString(R.string.kelola_akses_kunjungan), back = VisitActivity::class.java)
+    else Spec(getString(R.string.akses_pendamping), getString(R.string.kelola_akses_kunjungan), back = VisitActivity::class.java,
+        action = Api.online && problem == null && invitations != null)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (isFinishing) return
+        // "Bagikan tautan aman" is pinned in place of the nav (Figma 09).
+        bar = ViewBookBarBinding.inflate(layoutInflater, shell.footer, true)
+        shell.footer.setBackgroundResource(R.color.bg) // also behind the system navigation bar
+        bar.book.setOnClickListener {
+            if (!busy) act({ newLink = Api.call("POST", "pendamping").getString("link") }) { Demo.flash = getString(R.string.undangan_pendamping_dibuat) }
+        }
+    }
 
     override fun onResume() {
         super.onResume()
@@ -73,6 +88,7 @@ class CompanionAccessActivity : ShellActivity() {
         }
         val shown = newLink
         ScreenCompanionBinding.inflate(layoutInflater, into).apply {
+            eyebrow.text = getString(if (v.optBoolean("isToday")) R.string.kunjungan_hari_ini else R.string.kunjungan_anda)
             who.text = "${v.str("patientName")} · ${v.str("ticket")}"
             `when`.text = "${v.str("dateLabel")} · ${Demo.HOSPITAL}"
             linkCard.isVisible = shown != null
@@ -86,12 +102,9 @@ class CompanionAccessActivity : ShellActivity() {
                     .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.undangan_pendamping_hytrack))
                     .putExtra(Intent.EXTRA_TEXT, shown), getString(R.string.bagikan_tautan)))
             }
-            invite.text = getString(if (list.isEmpty()) R.string.undang_pendamping else R.string.undang_pendamping_lain)
-            invite.isEnabled = !busy
-            invite.alpha = if (busy) 0.6f else 1f
-            invite.setOnClickListener {
-                act({ newLink = Api.call("POST", "pendamping").getString("link") }) { Demo.flash = getString(R.string.undangan_pendamping_dibuat) }
-            }
+            bar.label.text = getString(if (list.isEmpty()) R.string.bagikan_tautan_aman else R.string.bagikan_tautan_baru)
+            bar.book.isEnabled = !busy
+            bar.book.alpha = if (busy) 0.6f else 1f
             invitations.isVisible = list.isNotEmpty()
             list.forEach { item -> row(invitations, item) }
         }

@@ -186,7 +186,8 @@ abstract class ShellActivity : AppCompatActivity() {
         item.label.text = label
         val current = tab == target
         item.marker.setBackgroundResource(if (current) R.drawable.bg_nav_marker else 0)
-        item.label.typeface = ResourcesCompat.getFont(this, if (current) R.font.jakarta_bold else R.font.jakarta_regular)
+        item.label.typeface = ResourcesCompat.getFont(this, if (current) R.font.inter_semibold else R.font.inter_medium)
+        item.label.setTextColor(ContextCompat.getColor(this, if (current) R.color.primary else R.color.muted))
         item.root.isSelected = current
         item.root.setOnClickListener { if (!current || this::class.java != screen) go(screen) }
     }
@@ -312,6 +313,10 @@ abstract class ShellActivity : AppCompatActivity() {
         shell.title.text = s.title
         shell.subtitle.text = s.subtitle
         shell.subtitle.isVisible = s.subtitle != null
+        // Sub-pages: a 21sp title beside the back chip and a 10sp medium caption (Figma 31:2).
+        shell.title.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (s.back != null) 21f else 24f)
+        shell.subtitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (s.back != null) 10f else 12f)
+        shell.subtitle.typeface = ResourcesCompat.getFont(this, if (s.back != null) R.font.inter_medium else R.font.inter_regular)
         shell.bell.isVisible = !s.hya && s.back == null && !s.bare
         shell.unreadDot.isVisible = Demo.unread > 0
         shell.bell.contentDescription = if (Demo.unread > 0) getString(R.string.notifikasi_belum_dibaca, Demo.unread) else getString(R.string.notifications)

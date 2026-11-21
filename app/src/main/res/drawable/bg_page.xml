@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- .app-shell background: the mint atmosphere on top and a soft mint fade at the page end. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><color android:color="@color/bg" /></item>
+    <item android:drawable="@drawable/atmos_mint" android:gravity="top|fill_horizontal" android:height="220dp" />
+    <item android:gravity="bottom|fill_horizontal" android:height="150dp">
+        <shape><gradient android:angle="270" android:startColor="#00E0EFE6" android:endColor="#CCE0EFE6" /></shape>
+    </item>
+</layer-list>

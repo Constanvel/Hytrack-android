@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- .card.marked: the card with its 4x32 teal marker on the left edge, 22dp from the top -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/bg_card" />
+    <item android:gravity="top|start" android:top="22dp" android:width="4dp" android:height="32dp">
+        <shape>
+            <solid android:color="@color/marker" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+</layer-list>

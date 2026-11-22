@@ -28,7 +28,9 @@
                 style="@style/Text.Link"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="15sp"
+                android:fontFamily="@font/inter_semibold"
+                android:textColor="@color/text"
+                android:textSize="16sp"
                 tools:text="Antrean &amp; jadwal dokter" />
 
             <TextView

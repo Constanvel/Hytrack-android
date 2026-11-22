@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- .button -->
+<!-- .button: 168deg teal gradient, 14px corners -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 <item android:state_pressed="true"><shape>
-    <solid android:color="@color/primary_hover" />
-    <corners android:radius="12dp" />
+    <gradient android:angle="270" android:startColor="@color/primary_hover" android:endColor="#13776A" />
+    <corners android:radius="14dp" />
 </shape></item>
 <item><shape>
-    <solid android:color="@color/primary" />
-    <corners android:radius="12dp" />
+    <gradient android:angle="270" android:startColor="@color/gradient_start" android:endColor="@color/gradient_end" />
+    <corners android:radius="14dp" />
 </shape></item>
 </selector>

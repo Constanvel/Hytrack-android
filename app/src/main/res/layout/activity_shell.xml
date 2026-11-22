@@ -20,7 +20,8 @@
         <!-- The page plus its decoration: the accent sits at the end of the page and scrolls with it. -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_page">
 
         <!-- .decor-waves / .decor-corner: behind the content, above the bottom bar. -->
         <ImageView
@@ -70,10 +71,11 @@
 
                 <ImageView
                     android:id="@+id/back"
-                    android:layout_width="32dp"
-                    android:layout_height="44dp"
-                    android:layout_marginStart="-10dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="-8dp"
+                    android:layout_marginEnd="2dp"
+                    android:background="@drawable/bg_back_chip"
                     android:contentDescription="@string/back"
                     android:scaleType="center"
                     android:src="@drawable/ic_back"
@@ -142,7 +144,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:accessibilityHeading="true"
-                            android:fontFamily="@font/jakarta_bold"
+                            android:fontFamily="@font/inter_bold"
                             android:lineHeight="28sp"
                             android:text="@string/app_name"
                             android:textColor="@color/brand"
@@ -152,7 +154,7 @@
                             style="@style/Text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:fontFamily="@font/jakarta_semibold"
+                            android:fontFamily="@font/inter_semibold"
                             android:lineHeight="13sp"
                             android:text="@string/tagline"
                             android:textColor="@color/brand_muted"

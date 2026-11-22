@@ -73,14 +73,49 @@ fun ViewGroup.notice(value: CharSequence, tone: Tone = Tone.GREEN) = text(
     }, value,
 )
 
-/** Steps component: numbered card. */
-fun ViewGroup.steps(vararg items: Pair<String, String>) {
+/**
+ * Steps component (components/ui.tsx Steps): marked card; steps before [done] ticked, [current] filled teal.
+ * [numbered] is the guide variant (Figma 23): teal "01" in place of the circle, text aligned to the top.
+ */
+fun ViewGroup.steps(vararg items: Pair<String, String>, done: Int = 0, current: Int = -1, numbered: Boolean = false) {
     removeAllViews()
+    if (numbered) {
+        setBackgroundResource(R.drawable.bg_card)
+        updatePadding(left = dp(20), top = dp(22), right = dp(20), bottom = dp(22))
+        (this as? LinearLayout)?.dividerDrawable = ContextCompat.getDrawable(context, R.drawable.gap_22)
+    } else {
+        setBackgroundResource(R.drawable.bg_card_marked)
+    }
     items.forEachIndexed { index, (title, detail) ->
         ViewStepBinding.inflate(LayoutInflater.from(context), this, true).apply {
-            stepNumber.text = "${index + 1}"
+            val isDone = index < done
+            val isCurrent = !isDone && index == current
+            stepNumber.text = when {
+                isDone -> "✓"
+                numbered -> "%02d".format(index + 1)
+                else -> "${index + 1}"
+            }
             stepTitle.text = title
             stepDetail.text = detail
+            if (isDone) {
+                stepNumber.textSize = 13f
+                stepNumber.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                stepTitle.contentDescription = context.getString(R.string.selesai_step, title)
+            }
+            if (isCurrent) {
+                stepNumber.setBackgroundResource(R.drawable.bg_step_current)
+                stepNumber.setTextColor(ContextCompat.getColor(context, R.color.white))
+                ViewCompat.setStateDescription(root, context.getString(R.string.langkah_saat_ini))
+            }
+            if (numbered) {
+                root.gravity = android.view.Gravity.TOP
+                stepNumber.background = null
+                stepNumber.updateLayoutParams<LinearLayout.LayoutParams> { width = dp(24); height = dp(22) }
+                (stepTitle.parent as View).updateLayoutParams<LinearLayout.LayoutParams> { marginStart = dp(16) }
+                stepDetail.textSize = 13f
+                stepDetail.lineHeight = dp(20.15)
+                stepDetail.updateLayoutParams<LinearLayout.LayoutParams> { topMargin = dp(4) }
+            }
         }
     }
 }
@@ -186,7 +221,8 @@ abstract class ShellActivity : AppCompatActivity() {
         item.label.text = label
         val current = tab == target
         item.marker.setBackgroundResource(if (current) R.drawable.bg_nav_marker else 0)
-        item.label.typeface = ResourcesCompat.getFont(this, if (current) R.font.jakarta_bold else R.font.jakarta_regular)
+        item.label.typeface = ResourcesCompat.getFont(this, if (current) R.font.inter_semibold else R.font.inter_medium)
+        item.label.setTextColor(ContextCompat.getColor(this, if (current) R.color.primary else R.color.muted))
         item.root.isSelected = current
         item.root.setOnClickListener { if (!current || this::class.java != screen) go(screen) }
     }
@@ -312,6 +348,10 @@ abstract class ShellActivity : AppCompatActivity() {
         shell.title.text = s.title
         shell.subtitle.text = s.subtitle
         shell.subtitle.isVisible = s.subtitle != null
+        // Sub-pages: a 21sp title beside the back chip and a 10sp medium caption (Figma 31:2).
+        shell.title.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (s.back != null) 21f else 24f)
+        shell.subtitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (s.back != null) 10f else 12f)
+        shell.subtitle.typeface = ResourcesCompat.getFont(this, if (s.back != null) R.font.inter_medium else R.font.inter_regular)
         shell.bell.isVisible = !s.hya && s.back == null && !s.bare
         shell.unreadDot.isVisible = Demo.unread > 0
         shell.bell.contentDescription = if (Demo.unread > 0) getString(R.string.notifikasi_belum_dibaca, Demo.unread) else getString(R.string.notifications)

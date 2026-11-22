@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- .otp-boxes input: white with a hairline; focused 2dp teal on pale; invalid (activated) red. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape>
+            <solid android:color="@color/pale" />
+            <stroke android:width="2dp" android:color="@color/primary" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+    <item android:state_activated="true">
+        <shape>
+            <solid android:color="@color/white" />
+            <stroke android:width="1dp" android:color="@color/error" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <solid android:color="@color/white" />
+            <stroke android:width="1dp" android:color="#DCE8E1" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+</selector>

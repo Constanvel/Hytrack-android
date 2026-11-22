@@ -21,6 +21,7 @@
     <LinearLayout style="@style/Widget.HyTrack.Hero">
 
         <TextView
+            android:id="@+id/eyebrow"
             style="@style/Text.Hero.Eyebrow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -43,7 +44,9 @@
             tools:text="Minggu, 15 November 2026 · RS Harapan Sehat" />
     </LinearLayout>
 
-    <LinearLayout style="@style/Widget.HyTrack.Card">
+    <LinearLayout
+        style="@style/Widget.HyTrack.Card"
+        android:background="@drawable/bg_card_marked">
 
         <TextView
             style="@style/Text.H3"
@@ -61,6 +64,8 @@
                 style="@style/Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/inter_medium"
+                android:textSize="15sp"
                 android:text="@string/status_dan_nomor_antrean"
                 android:textColor="@color/primary" />
 
@@ -68,6 +73,8 @@
                 style="@style/Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/inter_medium"
+                android:textSize="15sp"
                 android:text="@string/perkiraan_waktu_tunggu"
                 android:textColor="@color/primary" />
 
@@ -75,6 +82,8 @@
                 style="@style/Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/inter_medium"
+                android:textSize="15sp"
                 android:text="@string/lokasi_layanan_berikutnya"
                 android:textColor="@color/primary" />
 
@@ -82,6 +91,8 @@
                 style="@style/Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/inter_medium"
+                android:textSize="15sp"
                 android:text="@string/proses_penyiapan_obat"
                 android:textColor="@color/primary" />
         </LinearLayout>
@@ -101,8 +112,11 @@
             style="@style/Text.H3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:accessibilityHeading="true"
+            android:fontFamily="@font/inter_semibold"
             android:text="@string/akses_otomatis_berakhir"
-            android:textColor="@color/warning_text" />
+            android:textColor="@color/warning_text"
+            android:textSize="17sp" />
 
         <TextView
             style="@style/Text.P"
@@ -151,11 +165,6 @@
             android:text="@string/bagikan_tautan" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/invite"
-        style="@style/Widget.HyTrack.Button"
-        android:text="@string/undang_pendamping" />
-
     <!-- One row per invitation: who accepted, its status, and revoke while it is live. -->
     <LinearLayout
         android:id="@+id/invitations"
@@ -170,4 +179,10 @@
             android:accessibilityHeading="true"
             android:text="@string/undangan_untuk_kunjungan_ini" />
     </LinearLayout>
+
+    <TextView
+        style="@style/Text.P.Muted"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/hanya_bagikan_tepercaya" />
 </merge>

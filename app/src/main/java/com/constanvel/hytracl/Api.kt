@@ -66,7 +66,16 @@ object Api {
 
     fun login(username: String, password: String): JSONObject {
         token = null
-        val json = call("POST", "masuk", JSONObject().put("username", username).put("password", password))
+        return signIn(call("POST", "masuk", JSONObject().put("username", username).put("password", password)))
+    }
+
+    /** Sign-up step 2/3: the right code creates the account and signs it in. */
+    fun verifySignup(signup: String, code: String): JSONObject {
+        token = null
+        return signIn(call("POST", "daftar/verifikasi", JSONObject().put("signup", signup).put("code", code)))
+    }
+
+    private fun signIn(json: JSONObject): JSONObject {
         token = json.getString("token")
         val account = json.getJSONObject("account")
         role = account.getString("role")

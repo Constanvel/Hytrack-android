@@ -42,7 +42,8 @@ object Demo {
     /** The account as the server knows it ([Api.login], or after editing the own data pasien). */
     fun signedInAs(name: String, phoneNumber: String?) {
         patient = name.trim()
-        phone = phoneNumber?.let { "•••• " + normalizePhone(it).takeLast(4) } ?: phone
+        // The server sends "•••• 0001": its last digits, not a number to normalize ("0001" is not "62001").
+        phone = phoneNumber?.let { "•••• " + it.filter(Char::isDigit).takeLast(4) } ?: phone
         signedIn = true
     }
 

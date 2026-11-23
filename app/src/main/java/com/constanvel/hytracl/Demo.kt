@@ -5,46 +5,24 @@ import java.util.Locale
 
 /**
  * In-memory demo data and visit state. Values follow the Laravel seeder of the web app
- * (DatabaseSeeder + config/hytrack.php); nothing here talks to a hospital system.
- * State lives for the app process only, like a fresh `migrate --seed` on each launch.
+ * (DatabaseSeeder + config/hytrack.php); nothing here talks to a hospital system or a server.
+ * State lives for the app process only, like a fresh `migrate --seed` on each launch. The visit
+ * and notifications belong to the signed-in account ([Local.current]).
  */
 object Demo {
     const val HOSPITAL = "RS Harapan Sehat"
     const val DEMO_PHONE = "0812-5550-0842"
     const val DEMO_PASSWORD = "hytrack-demo"
-    private const val DEMO_PHONE_NORMALIZED = "6281255500842"
+    const val LABORATORY = "Laboratorium A-108 · Gedung A, lantai 1"
+    const val PHARMACY = "Farmasi Loket F2 · Gedung A, lantai 1"
 
-    var patient = "Siti Aminah"
-        private set
-    var phone = "•••• 0842"
-        private set
-
-    /** "Siti Aminah" -> "Siti A." (what a companion may see). */
-    val patientShort get() = patient.trim().split(Regex("\\s+")).let { p ->
-        if (p.size > 1) "${p.first()} ${p.last().first()}." else p.first()
-    }
+    val patient get() = Local.current?.self?.name.orEmpty()
+    val phone get() = "•••• " + Local.current?.self?.phone.orEmpty().takeLast(4)
 
     /** Patient::normalizePhone: digits only, local 0 prefix becomes 62. */
     fun normalizePhone(input: String): String {
         val digits = input.filter { it.isDigit() }
         return if (digits.startsWith("0")) "62" + digits.drop(1) else digits
-    }
-
-    fun isDemoAccount(phone: String, password: String) =
-        normalizePhone(phone) == DEMO_PHONE_NORMALIZED && password == DEMO_PASSWORD
-
-    fun register(name: String, phoneNumber: String) {
-        patient = name.trim()
-        phone = "•••• " + normalizePhone(phoneNumber).takeLast(4)
-        signedIn = true
-    }
-
-    /** The account as the server knows it ([Api.login], or after editing the own data pasien). */
-    fun signedInAs(name: String, phoneNumber: String?) {
-        patient = name.trim()
-        // The server sends "•••• 0001": its last digits, not a number to normalize ("0001" is not "62001").
-        phone = phoneNumber?.let { "•••• " + it.filter(Char::isDigit).takeLast(4) } ?: phone
-        signedIn = true
     }
 
     /** An invitation link opened before signing in; [LoginActivity] continues to it. */
@@ -92,7 +70,7 @@ object Demo {
     // Dates ---------------------------------------------------------------------
     private val weekdays = listOf("Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu")
     private val weekdaysShort = listOf("Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab")
-    private val months = listOf("Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli",
+    val MONTHS = listOf("Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli",
         "Agustus", "September", "Oktober", "November", "Desember")
     private val monthsShort = listOf("Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu",
         "Sep", "Okt", "Nov", "Des")
@@ -108,17 +86,19 @@ object Demo {
         val weekday get() = weekdays[dow]
         val label get() = "$dom ${monthsShort[month]}"
         val medium get() = "$weekday, $dom ${monthsShort[month]} $year"
-        val long get() = "$weekday, $dom ${months[month]} $year"
-        val monthTitle get() = "${months[month]} $year"
+        val long get() = "$weekday, $dom ${MONTHS[month]} $year"
+        /** "28 Oktober 2026" and "28 Okt 2026" (riwayat). */
+        val full get() = "$dom ${MONTHS[month]} $year"
+        val short get() = "$dom ${monthsShort[month]} $year"
+        val monthTitle get() = "${MONTHS[month]} $year"
         val monthKey get() = year * 12 + month
         val millis: Long get() = cal.timeInMillis
     }
 
     /**
-     * Booking window. The web app opens today + 2 (config/hytrack.php booking_days); the Android
-     * revision lets patients book further ahead. Every doctor practises daily at the same hours,
-     * so a later day only differs in quota/estimate, which follow the same rules as today + 1.
-     * ponytail: fixed window, read it from the backend once the app talks to one.
+     * Booking window: today and the next 59 days, like the web (config/hytrack.php booking_days = 60).
+     * Every doctor practises daily at the same hours, so a later day only differs in quota/estimate,
+     * which follow the same rules as today + 1.
      */
     const val BOOKING_DAYS = 60
     val days = List(BOOKING_DAYS) { Day(it) }
@@ -128,18 +108,23 @@ object Demo {
     private fun stamp() = "${days[0].label} · ${now()}"
 
     // Visit ---------------------------------------------------------------------
-    enum class Stage { BOOKED, WAITING, SERVING, LABORATORY, PHARMACY, COMPLETED, NO_SHOW }
+    /** QueueStatus, with its labels. A cancelled visit keeps its stage and gets [Visit.cancelReason]. */
+    enum class Stage(val label: String) {
+        BOOKED("Belum check-in"), WAITING("Sudah check-in"), SERVING("Dipanggil"), LABORATORY("Laboratorium"),
+        PHARMACY("Farmasi"), COMPLETED("Selesai"), NO_SHOW("Tidak hadir"),
+    }
 
     enum class Rx(val label: String) {
         RECEIVED("Resep diterima"), PREPARING("Obat disiapkan"), CHECKING("Pemeriksaan akhir"),
         READY("Siap diambil"), COMPLETED("Sudah diambil"),
     }
 
-    class Visit(val doctor: Doctor, val day: Day) {
+    class Visit(val id: Int, val doctor: Doctor, val day: Day) {
         val clinic = clinic(doctor.clinicId)
         var stage = Stage.BOOKED
         var rx: Rx? = null
-        var companionActive = false
+        var checkedInAt: String? = null
+        var cancelReason: String? = null
         // The seeded queue is today's; a later day has no tickets yet (same rule as quota()).
         val ticket = "A-%03d".format(Locale.ROOT, (if (day.offset == 0) doctor.issued else 0) + 1)
         val ahead = if (day.offset == 0) doctor.ahead else 0
@@ -153,17 +138,18 @@ object Demo {
         val leaveBy get() = clock(doctor.start - CHECK_IN_LEAD - TRAVEL)
         val leadMinutes = CHECK_IN_LEAD
         val travelMinutes = TRAVEL
-        val active get() = stage != Stage.COMPLETED && stage != Stage.NO_SHOW
+        val active get() = stage != Stage.COMPLETED && stage != Stage.NO_SHOW && cancelReason == null
+        val status get() = if (cancelReason != null) "cancelled" else stage.name.lowercase()
+        val statusLabel get() = if (cancelReason != null) "Dibatalkan" else stage.label
     }
 
     class Notification(val message: String, val action: String?, val time: String, var unread: Boolean = true)
 
-    var signedIn = false
+    val signedIn get() = Local.current != null
     /** Signed in as Pendamping: reopening the app returns to the companion view. */
     var companion = false
-    var visit: Visit? = null
-        private set
-    val notifications = mutableListOf<Notification>()
+    val visit get() = Local.current?.visit
+    val notifications: MutableList<Notification> get() = Local.current?.notifications ?: mutableListOf()
     val unread get() = notifications.count { it.unread }
 
     /** One-shot status line shown at the top of the next screen (Inertia flash). */
@@ -175,35 +161,32 @@ object Demo {
         flash = message
         flashTone = Tone.WARNING
     }
-    /** The valid companion link, if any. */
-    var companionLink: String? = null
-        private set
-    /** Like the web, the link is revealed once, right after it is created. */
-    var revealLink = false
-
     val activeVisit get() = visit?.takeIf { it.active }
 
     private fun notify(message: String, action: String? = null) {
         notifications.add(0, Notification(message, action, stamp()))
     }
 
+    private var visits = 0
+
     fun book(doctor: Doctor, day: Day) {
-        visit = Visit(doctor, day)
-        notify("Antrean ${visit!!.ticket} berhasil diambil.", "Check-in saat tiba di rumah sakit.")
+        val account = Local.current ?: return
+        val v = Visit(++visits, doctor, day)
+        account.visit = v
+        account.visits.add(0, v)
+        notify("Antrean ${v.ticket} berhasil diambil.", "Check-in saat tiba di rumah sakit.")
     }
 
     fun cancel() {
-        visit = null
+        visit?.cancelReason = "Dibatalkan oleh pasien"
+        Local.current?.visit = null
         flash = "Kunjungan dibatalkan."
     }
 
+    /** The account's data stays (like the server's) for when it signs in again. */
     fun signOut() {
-        Api.logout()
-        signedIn = false
+        Local.signOut()
         companion = false
-        visit = null
-        notifications.clear()
-        companionLink = null
     }
 
     /** Demo controls: the patient plays the staff's part (VisitController::simulate). */
@@ -212,46 +195,31 @@ object Demo {
         when (action) {
             "check-in" -> {
                 v.stage = Stage.WAITING
+                v.checkedInAt = now()
                 notify("Check-in berhasil. Anda masuk antrean dokter.", "Tunggu di dekat ruang poliklinik.")
             }
             "examined" -> {
                 if (v.stage == Stage.WAITING) notify("Nomor ${v.ticket} dipanggil.", "Silakan masuk ke ruang pemeriksaan.")
                 v.stage = Stage.LABORATORY
-                notify("Pemeriksaan dokter selesai. Selanjutnya ke laboratorium.", "Laboratorium A-108 · Gedung A, lantai 1")
+                notify("Pemeriksaan dokter selesai. Selanjutnya ke laboratorium.", LABORATORY)
             }
             "laboratory" -> {
                 v.stage = Stage.PHARMACY
                 v.rx = Rx.RECEIVED
-                notify("Resep diterima farmasi. Obat sedang diproses.", "Farmasi Loket F2 · Gedung A, lantai 1")
+                notify("Resep diterima farmasi. Obat sedang diproses.", PHARMACY)
             }
             "medicine-ready" -> {
                 v.rx = Rx.READY
-                notify("Obat siap diambil. Nomor pengambilan ${v.pickupNumber}.", "Farmasi Loket F2 · Gedung A, lantai 1")
+                notify("Obat siap diambil. Nomor pengambilan ${v.pickupNumber}.", PHARMACY)
             }
             "picked-up" -> {
                 v.rx = Rx.COMPLETED
                 v.stage = Stage.COMPLETED
-                v.companionActive = false
-                companionLink = null
                 notify("Kunjungan selesai. Semoga lekas sehat.")
             }
         }
     }
 
-    fun shareCompanion() {
-        val v = activeVisit ?: return
-        v.companionActive = true
-        val token = (1..48).map { "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789".random() }.joinToString("")
-        companionLink = "https://hytrack.demo/pantauan/$token"
-        revealLink = true
-        flash = "Akses pendamping diaktifkan."
-    }
-
-    fun revokeCompanion(byCompanion: Boolean = false) {
-        activeVisit?.companionActive = false
-        companionLink = null
-        if (!byCompanion) flash = "Akses pendamping dicabut."
-    }
 
     /** "Ruang A-204 · Gedung A, lantai 2" -> ("Ruang A-204", "Gedung A, lantai 2"). */
     fun splitRoom(room: String?): Pair<String, String> {

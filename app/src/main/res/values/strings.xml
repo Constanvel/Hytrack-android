@@ -341,9 +341,6 @@
     <string name="jam_kuota_tersisa">%1$s · %2$s kuota tersisa</string>
 
     <!-- Data pasien, Akun and Family Companion over the Laravel API. -->
-    <string name="butuh_server">Data ini tersimpan di server HyTrack. Masuk saat terhubung ke server untuk mengelolanya.</string>
-    <string name="coba_lagi">Coba lagi</string>
-    <string name="memuat">Memuat…</string>
     <string name="batal">Batal</string>
     <string name="data_pasien">Data pasien</string>
     <string name="profil_dan_data_pasien">PROFIL DAN DATA PASIEN</string>
@@ -386,7 +383,6 @@
     <string name="lima_digit">5 digit</string>
     <string name="pastikan_data_sudah_benar">Pastikan data sudah benar</string>
     <string name="data_dipakai_untuk_identifikasi">Data dipakai untuk identifikasi dan komunikasi kunjungan. Jika mengisi untuk orang lain, pastikan Anda mendapat persetujuannya.</string>
-    <string name="menyimpan">Menyimpan…</string>
     <string name="simpan_perubahan">Simpan perubahan</string>
     <string name="simpan_data_pasien">Simpan data pasien</string>
     <string name="umur_dihitung_otomatis">Umur dihitung otomatis. Tanggal tidak boleh di masa depan.</string>
@@ -446,7 +442,6 @@
     <string name="menjalani_pemeriksaan_laboratorium">Menjalani pemeriksaan laboratorium</string>
     <string name="obat_status">Obat: %1$s</string>
     <string name="belum_tiba_di_meja_check_in">Belum tiba di meja check-in</string>
-    <string name="memeriksa">Memeriksa…</string>
     <!-- Sign-up OTP (verify.tsx) -->
     <string name="kembali_panah">← Kembali</string>
     <string name="akun_terverifikasi">Akun terverifikasi</string>
@@ -463,17 +458,17 @@
     <string name="kirim_ulang_kode">Kirim ulang kode</string>
     <string name="kode_baru_dikirim">Kode baru telah dikirim.</string>
     <string name="verifikasi_lanjutkan">Verifikasi &amp; lanjutkan</string>
-    <string name="memverifikasi">Memverifikasi…</string>
     <string name="kode_berlaku_5_menit">Kode berlaku selama 5 menit. Jangan bagikan kode ini kepada siapa pun, termasuk pihak kami.</string>
     <string name="digit_dari_6">Digit %1$d dari 6</string>
     <string name="kode_otp_salah">Kode OTP salah. Periksa kembali SMS Anda.</string>
+    <string name="kode_kedaluwarsa">Kode sudah kedaluwarsa. Minta kode baru.</string>
+    <string name="terlalu_banyak_percobaan">Terlalu banyak percobaan. Minta kode baru.</string>
     <string name="nomor_ponsel_terverifikasi">NOMOR PONSEL TERVERIFIKASI</string>
     <string name="nomor_ini_terhubung">Nomor ini terhubung dengan akun Anda.</string>
     <string name="lanjut_ke_beranda">Lanjut ke beranda</string>
     <string name="di_beranda_pilih_pasien">Di beranda, Anda dapat memilih pasien\ndan mulai mengambil antrean.</string>
     <string name="ada_kendala">Ada kendala?</string>
     <string name="hubungi_bantuan">Hubungi bantuan</string>
-    <string name="server_staff_only">Akun petugas memakai dashboard petugas di web. Masuk dengan akun pasien di aplikasi ini.</string>
 
     <!-- Masuk sebagai (Figma 31:2). -->
     <string name="masuk_sebagai">Masuk sebagai</string>
@@ -494,12 +489,10 @@
     <string name="estimasi">Estimasi</string>
     <string name="kira_menit">±%1$s mnt</string>
     <string name="perbarui_antrean">Perbarui antrean</string>
-    <string name="memperbarui">Memperbarui…</string>
     <string name="informasi_kunjungan">Informasi kunjungan</string>
     <string name="akses_pendamping_hanya_lihat">Akses pendamping · Hanya lihat</string>
     <string name="hanya_dapat_memantau">Anda hanya dapat memantau antrean pasien.\nPendaftaran antrean dilakukan oleh pasien.</string>
     <string name="diperbarui_pukul">Diperbarui pukul %1$s</string>
-    <string name="koneksi_terputus_data_pukul">Koneksi terputus · data pukul %1$s</string>
     <string name="pantauan_berakhir">Pantauan berakhir</string>
     <string name="stage_belum_check_in">Belum check-in</string>
     <string name="stage_menunggu">Menunggu</string>
@@ -535,7 +528,5 @@
     <string name="belum_ada_no_rm">Belum ada No. RM</string>
     <string name="pastikan_data_pasien_benar">Pastikan data pasien yang dipilih sudah benar.</string>
     <string name="hapus_data">Hapus data</string>
-    <string name="menghapus">Menghapus…</string>
     <string name="data_x_dihapus">Data %1$s dihapus dari daftar Anda.</string>
-    <string name="koneksi_terputus_belum_dihapus">Koneksi ke server terputus. Data belum dihapus; coba lagi.</string>
 </resources>

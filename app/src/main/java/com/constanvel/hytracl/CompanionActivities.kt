@@ -5,8 +5,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -20,29 +18,20 @@ import com.constanvel.hytracl.databinding.ViewRowLinkBinding
 import org.json.JSONObject
 
 /*
- * Family Companion over the Laravel API (App\Services\CompanionInvitations): an invitation per
- * visit, accepted with the companion's own account, single-use, ending with the visit or at
- * 23.59 on the service day, revocable by the patient at any time.
+ * Family Companion on the app's own data ([Local], after App\Services\CompanionInvitations): an
+ * invitation per visit, accepted with the companion's own account, single-use, ending with the
+ * visit, revocable by the patient at any time.
  */
-
-private val liveStages = setOf("booked", "waiting", "serving", "laboratory", "pharmacy")
 
 /** Patient side (web CompanionAccess): invite, see who accepted, revoke. */
 class CompanionAccessActivity : ShellActivity() {
-    private var visit: JSONObject? = null
-    private var invitations: List<JSONObject>? = null
-    private var problem: String? = null
-    private var busy = false
-    /** The new link is shown once, right after it is created (only its hash is stored). */
+    /** The new link is shown once, right after it is created. */
     private var newLink: String? = null
-
-    private val active get() = visit?.str("stage") in liveStages
 
     private lateinit var bar: ViewBookBarBinding
 
-    override fun spec() = if (invitations != null && !active) Spec(getString(R.string.akses_pendamping), back = VisitActivity::class.java)
-    else Spec(getString(R.string.akses_pendamping), getString(R.string.kelola_akses_kunjungan), back = VisitActivity::class.java,
-        action = Api.online && problem == null && invitations != null)
+    override fun spec() = if (Demo.activeVisit == null) Spec(getString(R.string.akses_pendamping), back = VisitActivity::class.java)
+    else Spec(getString(R.string.akses_pendamping), getString(R.string.kelola_akses_kunjungan), back = VisitActivity::class.java, action = true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,46 +40,25 @@ class CompanionAccessActivity : ShellActivity() {
         bar = ViewBookBarBinding.inflate(layoutInflater, shell.footer, true)
         shell.footer.setBackgroundResource(R.color.bg) // also behind the system navigation bar
         bar.book.setOnClickListener {
-            if (!busy) act({ newLink = Api.call("POST", "pendamping").getString("link") }) { Demo.flash = getString(R.string.undangan_pendamping_dibuat) }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (Api.online) load()
-    }
-
-    private fun load() = request({
-        Api.call("GET", "akun").optJSONObject("visit") to Api.call("GET", "pendamping").getJSONArray("invitations").objects()
-    }) { result ->
-        result.onSuccess { (v, list) -> visit = v; invitations = list; problem = null }.onFailure { problem = it.message }
-        render()
-    }
-
-    private fun act(work: () -> Unit, done: () -> Unit = {}) {
-        busy = true
-        render()
-        request(work) { result ->
-            busy = false
-            result.onSuccess { done() }.onFailure { Demo.warn(it.message) }
-            load()
+            runCatching { newLink = Local.invite() }
+                .onSuccess { Demo.flash = getString(R.string.undangan_pendamping_dibuat) }.onFailure { Demo.warn(it.message) }
+            render()
         }
     }
 
     override fun content(into: LinearLayout) {
-        if (!Api.online || problem != null) return into.serverNeeded(problem) { load() }
-        val list = invitations ?: return run { into.text(R.style.Text_P_Muted, getString(R.string.memuat)) }
-        val v = visit
-        if (v == null || !active) {
+        val v = Demo.activeVisit
+        if (v == null) {
             into.notice(getString(R.string.tidak_ada_kunjungan_aktif_untuk_dibagikan), Tone.WARNING)
             into.add(R.layout.view_row_link).let { ViewRowLinkBinding.bind(it) }.bind(getString(R.string.buka_kunjungan)) { go(VisitActivity::class.java) }
             return
         }
+        val list = Local.invitations()
         val shown = newLink
         ScreenCompanionBinding.inflate(layoutInflater, into).apply {
-            eyebrow.text = getString(if (v.optBoolean("isToday")) R.string.kunjungan_hari_ini else R.string.kunjungan_anda)
-            who.text = "${v.str("patientName")} · ${v.str("ticket")}"
-            `when`.text = "${v.str("dateLabel")} · ${Demo.HOSPITAL}"
+            eyebrow.text = getString(if (v.isToday) R.string.kunjungan_hari_ini else R.string.kunjungan_anda)
+            who.text = "${Demo.patient} · ${v.ticket}"
+            `when`.text = "${v.day.long} · ${Demo.HOSPITAL}"
             linkCard.isVisible = shown != null
             this.link.text = shown
             copy.setOnClickListener {
@@ -103,8 +71,6 @@ class CompanionAccessActivity : ShellActivity() {
                     .putExtra(Intent.EXTRA_TEXT, shown), getString(R.string.bagikan_tautan)))
             }
             bar.label.text = getString(if (list.isEmpty()) R.string.bagikan_tautan_aman else R.string.bagikan_tautan_baru)
-            bar.book.isEnabled = !busy
-            bar.book.alpha = if (busy) 0.6f else 1f
             invitations.isVisible = list.isNotEmpty()
             list.forEach { item -> row(invitations, item) }
         }
@@ -126,12 +92,13 @@ class CompanionAccessActivity : ShellActivity() {
         val since = if (status == "accepted") item.str("acceptedAt")?.let { getString(R.string.sejak, it) }
         else item.str("sentAt")?.let { getString(R.string.dikirim, it) }
         text.text(R.style.Text_Small_Muted, listOfNotNull(item.getString("label"), since).joinToString(" · "))
-        if (live) card.addView(android.widget.TextView(this, null, 0, R.style.Widget_HyTrack_TextButton).apply {
+        if (live) card.addView(TextView(this, null, 0, R.style.Widget_HyTrack_TextButton).apply {
             this.text = getString(R.string.cabut_akses)
             setTextColor(ContextCompat.getColor(context, R.color.warning_text))
-            isEnabled = !busy
             setOnClickListener {
-                act({ Api.call("DELETE", "pendamping/${item.getInt("id")}") }) { Demo.flash = getString(R.string.akses_pendamping_dicabut) }
+                Local.revoke(item.getInt("id"))
+                Demo.flash = getString(R.string.akses_pendamping_dicabut)
+                render()
             }
         })
     }
@@ -144,11 +111,6 @@ class CompanionAccessActivity : ShellActivity() {
 class CompanionInviteActivity : ShellActivity() {
     override val requiresSignIn = false
     private val token by lazy { intent.data?.lastPathSegment ?: intent.getStringExtra(TOKEN).orEmpty() }
-    private var invite: JSONObject? = null
-    private var canAccept = false
-    private var problem: String? = null
-    private var loaded = false
-    private var busy = false
 
     companion object {
         const val TOKEN = "token"
@@ -157,32 +119,17 @@ class CompanionInviteActivity : ShellActivity() {
     override fun spec() = Spec(getString(R.string.undangan_pendamping), getString(R.string.akses_pendamping_2), bare = true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Not signed in against the server: sign in first, then come back to this invitation.
-        if (!Api.online) {
-            Demo.pendingInvite = intent.data?.lastPathSegment ?: intent.getStringExtra(TOKEN)
-            Demo.signOut()
-        }
         super.onCreate(savedInstanceState)
-        if (!Api.online && !isFinishing) {
+        // Not signed in: sign in first, then come back to this invitation.
+        if (!Demo.signedIn && !isFinishing) {
+            Demo.pendingInvite = token
             startActivity(Intent(this, LoginActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
             finish()
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (Api.online && !loaded) request({ Api.call("GET", "pantauan/$token") }) { result ->
-            loaded = true
-            result.onSuccess { invite = it.getJSONObject("invite"); canAccept = it.optBoolean("canAccept") }
-                .onFailure { problem = if ((it as? Api.Failure)?.status == 404) null else it.message }
-            render()
-        }
-    }
-
     override fun content(into: LinearLayout) {
-        if (problem != null) return into.serverNeeded(problem)
-        if (!loaded) return run { into.text(R.style.Text_P_Muted, getString(R.string.memuat)) }
-        val item = invite
+        val item = Local.preview(token)
         if (item == null) {
             into.notice(getString(R.string.undangan_tidak_berlaku), Tone.WARNING)
             into.text(R.style.Text_P_Muted, getString(R.string.minta_undangan_baru))
@@ -197,20 +144,12 @@ class CompanionInviteActivity : ShellActivity() {
             text(R.style.Text, getString(R.string.yang_dilihat_pendamping))
             text(R.style.Text_Small_Muted, getString(R.string.hanya_pantauan))
         }
-        if (!canAccept) return run { into.notice(getString(R.string.undangan_untuk_pendamping), Tone.INFO) }
-        into.text(R.style.Widget_HyTrack_Button, getString(R.string.terima_undangan)).apply {
-            isEnabled = !busy
-            setOnClickListener {
-                busy = true
-                render()
-                request({ Api.call("POST", "pantauan/$token").getInt("id") }) { result ->
-                    busy = false
-                    result.onSuccess { id ->
-                        go(CompanionMonitorActivity::class.java) { putExtra(CompanionMonitorActivity.SHARE, id) }
-                        finish()
-                    }.onFailure { Demo.warn(it.message); loaded = false; onResume() }
-                }
-            }
+        if (!Local.canAccept(token)) return run { into.notice(getString(R.string.undangan_untuk_pendamping), Tone.INFO) }
+        into.text(R.style.Widget_HyTrack_Button, getString(R.string.terima_undangan)).setOnClickListener {
+            runCatching { Local.accept(token) }.onSuccess { id ->
+                go(CompanionMonitorActivity::class.java) { putExtra(CompanionMonitorActivity.SHARE, id) }
+                finish()
+            }.onFailure { Demo.warn(it.message); render() }
         }
     }
 }
@@ -218,22 +157,11 @@ class CompanionInviteActivity : ShellActivity() {
 /** Pantauan keluarga: every visit this account accompanies right now. */
 class CompanionListActivity : ShellActivity() {
     override val tab = Tab.HOME
-    private var patients: List<JSONObject>? = null
-    private var problem: String? = null
 
     override fun spec() = Spec(getString(R.string.pantauan_keluarga), getString(R.string.akses_pendamping_2), back = HomeActivity::class.java)
 
-    override fun onResume() {
-        super.onResume()
-        if (Api.online) request({ Api.call("GET", "pendampingan").getJSONArray("patients").objects() }) { result ->
-            result.onSuccess { patients = it; problem = null }.onFailure { problem = it.message }
-            render()
-        }
-    }
-
     override fun content(into: LinearLayout) {
-        if (!Api.online || problem != null) return into.serverNeeded(problem)
-        val list = patients ?: return run { into.text(R.style.Text_P_Muted, getString(R.string.memuat)) }
+        val list = Local.following()
         into.text(R.style.Text_H2, getString(R.string.kunjungan_yang_anda_dampingi))
         if (list.isEmpty()) {
             LinearLayout(this, null, 0, R.style.Widget_HyTrack_Card_Empty).apply {
@@ -257,22 +185,11 @@ class CompanionListActivity : ShellActivity() {
 class CompanionMonitorActivity : ShellActivity() {
     companion object {
         const val SHARE = "share"
-        private const val POLL_MS = 15_000L // like the web's useLive pollSeconds
     }
 
     override val tab = Tab.HOME
     private var share = 0
-    private var data: JSONObject? = null
-    private var problem: String? = null
-    private var syncedAt: String? = null
-    private var refreshing = false
-    private val handler = Handler(Looper.getMainLooper())
-    private val poll = object : Runnable {
-        override fun run() {
-            load()
-            handler.postDelayed(this, POLL_MS)
-        }
-    }
+    private var syncedAt = Demo.now()
 
     // Figma 31:136 has no bottom nav: the lockup and a "Pendamping" badge head the page.
     override fun spec() = Spec(getString(R.string.antrean_pasien), brand = true, bare = true, decor = Decor.WAVES)
@@ -297,39 +214,23 @@ class CompanionMonitorActivity : ShellActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         share = intent.getIntExtra(SHARE, 0)
-        data = null
-        problem = null
+        syncedAt = Demo.now()
         render()
     }
 
     override fun onResume() {
         super.onResume()
-        if (Api.online) handler.post(poll)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        handler.removeCallbacks(poll)
-    }
-
-    private fun load() = share.let { id ->
-        request({ Api.call("GET", "pendampingan/$id") }) { result ->
-            refreshing = false
-            if (id != share) return@request // a reply for the patient shown before
-            result.onSuccess { data = it; problem = null; syncedAt = Demo.now() }.onFailure { problem = it.message }
-            render()
-        }
+        syncedAt = Demo.now()
     }
 
     override fun content(into: LinearLayout) {
         into.dividerDrawable = ContextCompat.getDrawable(this, R.drawable.gap_16)
-        val json = data
-        if (!Api.online || (json == null && problem != null)) return into.serverNeeded(problem) { load() }
-        if (json == null) return run { into.text(R.style.Text_P_Muted, getString(R.string.memuat)) }
-        val visit = json.optJSONObject("progress")
+        // Another account's share, or one that is gone, reads as ended (the web answers 404).
+        val json = runCatching { Local.followed(share) }.getOrNull()
+        val visit = json?.optJSONObject("progress")
         into.column(7).apply {
             inter(getString(R.string.antrean_pasien), 26f, 36f, Weight.BOLD).isFocusable = true
-            inter(if (visit == null) getString(R.string.akses_pendamping_berakhir, json.optString("ended").lowercase())
+            inter(if (visit == null) getString(R.string.akses_pendamping_berakhir, (json?.str("ended") ?: "Berakhir").lowercase())
                 else getString(R.string.pantau_giliran_pasien), 14f, 20f, color = R.color.brand_muted)
             (layoutParams as LinearLayout.LayoutParams).bottomMargin = dp(3)
         }
@@ -383,17 +284,16 @@ class CompanionMonitorActivity : ShellActivity() {
                     inter(value, 19f, 27f, Weight.SEMIBOLD, R.color.white).maxLines = 1
                 }
             }
-            inter(getString(if (refreshing) R.string.memperbarui else R.string.perbarui_antrean), 13f, 20f, Weight.SEMIBOLD, R.color.brand).apply {
+            inter(getString(R.string.perbarui_antrean), 13f, 20f, Weight.SEMIBOLD, R.color.brand).apply {
                 top(21)
                 gravity = Gravity.CENTER
                 minHeight = dp(38)
                 background = rounded(R.color.white, 10)
-                isClickable = !refreshing
+                isClickable = true
                 isFocusable = true
                 setOnClickListener {
-                    refreshing = true
+                    syncedAt = Demo.now()
                     render()
-                    load()
                 }
             }
         }
@@ -407,7 +307,7 @@ class CompanionMonitorActivity : ShellActivity() {
         }
 
         limit(into, getString(R.string.akses_pendamping_hanya_lihat), getString(R.string.hanya_dapat_memantau))
-        into.inter(getString(if (problem == null) R.string.diperbarui_pukul else R.string.koneksi_terputus_data_pukul, syncedAt), 11f, 16f, color = R.color.brand_muted).apply {
+        into.inter(getString(R.string.diperbarui_pukul, syncedAt), 11f, 16f, color = R.color.brand_muted).apply {
             gravity = Gravity.CENTER
             top(-5)
             accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE
@@ -425,10 +325,9 @@ class CompanionMonitorActivity : ShellActivity() {
                     .setMessage(R.string.berhenti_memantau_konfirmasi)
                     .setNegativeButton(R.string.batal, null)
                     .setPositiveButton(R.string.berhenti_memantau) { _, _ ->
-                        request({ Api.call("DELETE", "pendampingan/$share") }) { result ->
-                            result.onSuccess { Demo.flash = getString(R.string.anda_berhenti_memantau) }.onFailure { Demo.warn(it.message) }
-                            go(CompanionListActivity::class.java)
-                        }
+                        Local.stop(share)
+                        Demo.flash = getString(R.string.anda_berhenti_memantau)
+                        go(CompanionListActivity::class.java)
                     }.show()
             }
         }

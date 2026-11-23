@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.text.Html
 import android.text.InputType
 import android.text.method.PasswordTransformationMethod
@@ -37,7 +38,6 @@ import com.constanvel.hytracl.databinding.ActivityLoginBinding
 import com.constanvel.hytracl.databinding.ActivityRegisterBinding
 import com.constanvel.hytracl.databinding.ActivityRegisterOtpBinding
 import com.constanvel.hytracl.databinding.ViewAuthFieldBinding
-import org.json.JSONObject
 
 /** Shared field setup for AuthInput / PasswordInput. */
 private fun ViewAuthFieldBinding.setup(label: String, hint: String, phone: Boolean = false, password: Boolean = false) {
@@ -93,10 +93,9 @@ private fun AppCompatActivity.authFrame(scroll: View, main: LinearLayout, gutter
 fun AppCompatActivity.enterSignedIn() = if (Demo.companion) enterCompanion() else enterApp()
 
 private fun AppCompatActivity.enterApp() {
-    Demo.signedIn = true
     startActivity(Intent(this, HomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
     // An invitation link opened while signed out continues once signed in.
-    Demo.pendingInvite?.takeIf { Api.online }?.let { token ->
+    Demo.pendingInvite?.let { token ->
         Demo.pendingInvite = null
         startActivity(Intent(this, CompanionInviteActivity::class.java).putExtra(CompanionInviteActivity.TOKEN, token))
     }
@@ -107,13 +106,11 @@ private fun AppCompatActivity.enterApp() {
  * else the list (web AuthController::signedIn). An invitation link waiting to open comes first.
  */
 private fun AppCompatActivity.enterCompanion() {
-    if (!Api.online || Demo.pendingInvite != null) return enterApp()
-    request({ Api.call("GET", "pendampingan").getJSONArray("patients").objects() }) { result ->
-        enterApp()
-        val only = result.getOrNull()?.singleOrNull()
-        startActivity(Intent(this, if (only != null) CompanionMonitorActivity::class.java else CompanionListActivity::class.java)
-            .apply { only?.let { putExtra(CompanionMonitorActivity.SHARE, it.getInt("id")) } })
-    }
+    if (Demo.pendingInvite != null) return enterApp()
+    val only = Local.following().singleOrNull()
+    enterApp()
+    startActivity(Intent(this, if (only != null) CompanionMonitorActivity::class.java else CompanionListActivity::class.java)
+        .apply { only?.let { putExtra(CompanionMonitorActivity.SHARE, it.getInt("id")) } })
 }
 
 /** Role card of Figma 31:2 (auth.css .auth-role): icon, radio, name and a two-line detail. */
@@ -197,32 +194,12 @@ class LoginActivity : AppCompatActivity() {
             b.phone.error(if (phone.isEmpty()) getString(R.string.nomor_ponsel_wajib_diisi) else null)
             b.password.error(if (password.isEmpty()) getString(R.string.kata_sandi_wajib_diisi) else null)
             if (phone.isEmpty() || password.isEmpty()) return@setOnClickListener
-            b.submit.isEnabled = false
-            b.submit.text = getString(R.string.memeriksa)
-            // The Laravel API first; without a connection the app falls back to the offline demo.
-            request({ Api.login(phone, password) }) { result ->
-                b.submit.isEnabled = true
-                b.submit.text = getString(R.string.masuk)
-                val failure = result.exceptionOrNull() as? Api.Failure
-                when {
-                    result.isSuccess && Api.role != "patient" -> {
-                        Api.logout()
-                        b.phone.error(getString(R.string.server_staff_only))
-                    }
-                    result.isSuccess -> result.getOrThrow().let { account ->
-                        Demo.signedInAs(account.getString("name"), account.str("phone"))
-                        Demo.companion = role == "companion"
-                        enterSignedIn()
-                    }
-                    failure?.status == 0 && Demo.isDemoAccount(phone, password) -> {
-                        Demo.companion = role == "companion"
-                        enterSignedIn()
-                    }
-                    else -> {
-                        b.phone.error(if (failure?.status == 0) Api.OFFLINE else getString(R.string.nomor_ponsel_atau_kata_sandi_salah))
-                        b.password.input.text.clear()
-                    }
-                }
+            if (Local.login(phone, password)) {
+                Demo.companion = role == "companion"
+                enterSignedIn()
+            } else {
+                b.phone.error(getString(R.string.nomor_ponsel_atau_kata_sandi_salah))
+                b.password.input.text.clear()
             }
         }
     }
@@ -260,7 +237,7 @@ class RegisterActivity : AppCompatActivity() {
             b.phone.error(when {
                 b.phone.value.isBlank() -> getString(R.string.nomor_ponsel_wajib_diisi)
                 !Regex("^628\\d{7,11}$").matches(phone) -> getString(R.string.phone_invalid)
-                Demo.isDemoAccount(phone, Demo.DEMO_PASSWORD) -> getString(R.string.nomor_ponsel_sudah_terdaftar_silakan)
+                Local.phoneTaken(phone) -> getString(R.string.nomor_ponsel_sudah_terdaftar_silakan)
                 else -> null
             })
             b.password.error(when {
@@ -278,40 +255,22 @@ class RegisterActivity : AppCompatActivity() {
                 b.confirm.input.text.clear()
                 return@setOnClickListener
             }
-            b.submit.isEnabled = false
-            b.submit.text = getString(R.string.memeriksa)
-            val form = JSONObject().put("name", name).put("phone", phone).put("password", password)
-                .put("password_confirmation", b.confirm.value).put("terms", true)
-            // The Laravel API sends the code; without a connection the offline demo shows one.
-            request({ Api.call("POST", "daftar", form) }) { result ->
-                b.submit.isEnabled = true
-                b.submit.text = getString(R.string.buat_akun)
-                val failure = result.exceptionOrNull() as? Api.Failure
-                when {
-                    result.isSuccess -> startActivity(RegisterOtpActivity.intent(this, name, phone, result.getOrThrow()))
-                    failure?.status == 0 -> startActivity(RegisterOtpActivity.intent(this, name, phone, null))
-                    else -> {
-                        val fields = failure?.fields.orEmpty()
-                        b.name.error(fields["name"])
-                        b.phone.error(fields["phone"] ?: failure?.message?.takeIf { fields.isEmpty() })
-                        b.password.error(fields["password"])
-                        b.password.input.text.clear()
-                        b.confirm.input.text.clear()
-                    }
-                }
-            }
+            // The code is shown on screen: there is no SMS gateway, as in the web demo.
+            startActivity(RegisterOtpActivity.intent(this, name, phone, password))
         }
     }
 }
 
 /**
  * Sign-up steps 2 and 3 (verify.tsx; Figma 32:286 Kode OTP, 32:330 Verifikasi berhasil): six code
- * boxes, a resend countdown, then the verified number. Offline, the demo code is shown on screen.
+ * boxes, a resend countdown, then the verified number. The demo code is shown on screen; like
+ * SignupVerification it lasts 5 minutes, allows 5 tries and can be resent after 45 seconds.
  */
 class RegisterOtpActivity : AppCompatActivity() {
     private lateinit var b: ActivityRegisterOtpBinding
     private lateinit var boxes: List<EditText>
-    private var signup: String? = null
+    private var sentAt = 0L
+    private var attempts = 0
     private var left = 0
     private var filling = false
     private val ticker = Handler(Looper.getMainLooper())
@@ -327,7 +286,6 @@ class RegisterOtpActivity : AppCompatActivity() {
         b = ActivityRegisterOtpBinding.inflate(layoutInflater)
         setContentView(b.root)
         authFrame(b.scroll, b.main, gutterDp = 30) // .verify-main: 30px sides
-        signup = intent.getStringExtra(SIGNUP)
         b.count.text = getString(R.string.langkah_dari_3, 2)
         b.chip.text = getString(R.string.verifikasi_nomor)
         b.title.text = getString(R.string.masukkan_kode_otp)
@@ -361,7 +319,10 @@ class RegisterOtpActivity : AppCompatActivity() {
                 b.boxes.addView(this, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f))
             }
         }
-        screen(intent.getStringExtra(SCREEN)?.let(::JSONObject))
+        b.phone.text = maskPhone(phone)
+        b.demoCode.isVisible = true
+        b.demoCode.text = getString(R.string.mode_demo_kode_otp, DEMO_CODE)
+        send()
         boxes[0].requestFocus()
         updateSubmit()
     }
@@ -371,13 +332,13 @@ class RegisterOtpActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    /** The server's {phone, resendIn, demoCode}; offline: the demo code and a 45 s countdown. */
-    private fun screen(json: JSONObject?) {
-        b.phone.text = json?.str("phone") ?: maskPhone(intent.getStringExtra(PHONE).orEmpty())
-        val demo = if (json == null) DEMO_CODE else json.str("demoCode")
-        b.demoCode.isVisible = demo != null
-        b.demoCode.text = demo?.let { getString(R.string.mode_demo_kode_otp, it) }
-        left = json?.optInt("resendIn", 45) ?: 45
+    private val phone get() = intent.getStringExtra(PHONE).orEmpty()
+
+    /** A new code: 5 minutes and 5 tries, and the next one after 45 seconds. */
+    private fun send() {
+        sentAt = SystemClock.elapsedRealtime()
+        attempts = 0
+        left = 45
         ticker.removeCallbacks(tick)
         tick.run()
     }
@@ -399,11 +360,9 @@ class RegisterOtpActivity : AppCompatActivity() {
     }
 
     private fun resend() {
-        val token = signup ?: return screen(null).also { status(getString(R.string.kode_baru_dikirim)) }
-        request({ Api.call("POST", "daftar/kirim-ulang", JSONObject().put("signup", token)) }) { result ->
-            result.onSuccess { screen(it); status(getString(R.string.kode_baru_dikirim)) }
-                .onFailure { error(it.message) }
-        }
+        send()
+        error(null)
+        status(getString(R.string.kode_baru_dikirim))
     }
 
     /** Writes typed, pasted or autofilled digits from box [index] on and moves focus past them. */
@@ -441,26 +400,16 @@ class RegisterOtpActivity : AppCompatActivity() {
 
     private fun verify() {
         if (code.length != 6) return
-        val token = signup
-        if (token == null) { // offline demo
-            if (code != DEMO_CODE) return error(getString(R.string.kode_otp_salah)).also { boxes[0].requestFocus() }
-            Demo.register(intent.getStringExtra(NAME).orEmpty(), intent.getStringExtra(PHONE).orEmpty())
-            return verified(maskPhone(intent.getStringExtra(PHONE).orEmpty()))
+        val problem = when {
+            attempts >= 5 -> R.string.terlalu_banyak_percobaan
+            SystemClock.elapsedRealtime() - sentAt > 5 * 60_000 -> R.string.kode_kedaluwarsa
+            code != DEMO_CODE -> R.string.kode_otp_salah.also { attempts++ }
+            else -> null
         }
-        b.submit.isEnabled = false
-        b.submit.text = getString(R.string.memverifikasi)
-        request({ Api.verifySignup(token, code) }) { result ->
-            b.submit.text = getString(R.string.verifikasi_lanjutkan)
-            updateSubmit()
-            result.onSuccess { account ->
-                Demo.signedInAs(account.getString("name"), account.str("phone"))
-                Demo.companion = false
-                verified(maskPhone(intent.getStringExtra(PHONE).orEmpty()))
-            }.onFailure {
-                error((it as? Api.Failure)?.let { f -> f.fields["code"] ?: f.message } ?: it.message)
-                boxes[0].requestFocus()
-            }
-        }
+        if (problem != null) return error(getString(problem)).also { boxes[0].requestFocus() }
+        Local.register(intent.getStringExtra(NAME).orEmpty(), phone, intent.getStringExtra(PASSWORD).orEmpty())
+        Demo.companion = false
+        verified(maskPhone(phone))
     }
 
     /** Step 3/3: the account exists and is signed in; back goes on to the app, not to the form. */
@@ -485,15 +434,13 @@ class RegisterOtpActivity : AppCompatActivity() {
     companion object {
         private const val NAME = "name"
         private const val PHONE = "phone"
-        private const val SIGNUP = "signup"
-        private const val SCREEN = "screen"
+        private const val PASSWORD = "password"
         private const val DEMO_CODE = "123456"
 
         /** "+62 813 •••• 3333", as SignupVerification::mask. */
         fun maskPhone(normalized: String) = "+62 ${normalized.drop(2).take(3)} •••• ${normalized.takeLast(4)}"
 
-        fun intent(context: Context, name: String, phone: String, screen: JSONObject?) =
-            Intent(context, RegisterOtpActivity::class.java).putExtra(NAME, name).putExtra(PHONE, phone)
-                .putExtra(SIGNUP, screen?.str("signup")).putExtra(SCREEN, screen?.toString())
+        fun intent(context: Context, name: String, phone: String, password: String) =
+            Intent(context, RegisterOtpActivity::class.java).putExtra(NAME, name).putExtra(PHONE, phone).putExtra(PASSWORD, password)
     }
 }

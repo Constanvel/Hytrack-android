@@ -255,7 +255,8 @@ abstract class ShellActivity : AppCompatActivity() {
                 v.updateLayoutParams<FrameLayout.LayoutParams> { leftMargin = side; rightMargin = side }
             }
             shell.fab.updateLayoutParams<FrameLayout.LayoutParams> { marginEnd = shell.root.dp(15) + side }
-            decorInset = bars.bottom
+            // The accent ends the page right above the bottom bar (web: bottom 80px + safe area).
+            decorInset = bar
             placeDecor()
             insets
         }

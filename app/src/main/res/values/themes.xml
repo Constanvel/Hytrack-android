@@ -22,12 +22,12 @@
     <style name="Theme.Hytracl" parent="Base.Theme.Hytracl" />
 
     <!--
-      Launcher window (androidx SplashScreen, API 28+): the logo on the app background, drawn by the
-      system before the app starts. SplashActivity's first frame has the same logo in the same
+      Launcher window (androidx SplashScreen, API 28+): the mark on the splash background, drawn by the
+      system before the app starts. SplashActivity's first frame has the same mark in the same
       place, so the hand-over shows no flash and no second logo.
     -->
     <style name="Theme.Hytracl.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/bg</item>
+        <item name="windowSplashScreenBackground">@color/splash_bg</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon</item>
         <item name="postSplashScreenTheme">@style/Theme.Hytracl</item>
     </style>

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Splash icon: the logo at its splash size (132×97dp) on the 288dp canvas the system expects,
-  inside the 192dp circle Android 12+ masks the icon with.
+  Splash icon: the mark as the storyboard first shows it (Figma 43:44, 120dp wide, hands at 12 and
+  about 4 o'clock), on the 288dp canvas the system expects, inside the 192dp circle Android 12+
+  masks the icon with. SplashActivity's first frame draws the same mark in the same place.
 -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item
@@ -12,8 +13,24 @@
         </shape>
     </item>
     <item
-        android:width="132dp"
-        android:height="97dp"
-        android:drawable="@drawable/logo_hytrack"
+        android:width="120dp"
+        android:height="87.4dp"
+        android:drawable="@drawable/splash_mark"
+        android:gravity="center" />
+    <item
+        android:width="120dp"
+        android:height="87.4dp"
+        android:gravity="center">
+        <rotate
+            android:drawable="@drawable/splash_hand_hour"
+            android:fromDegrees="121"
+            android:pivotX="86.63%"
+            android:pivotY="17.57%"
+            android:toDegrees="121" />
+    </item>
+    <item
+        android:width="120dp"
+        android:height="87.4dp"
+        android:drawable="@drawable/splash_hand_minute"
         android:gravity="center" />
 </layer-list>

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Android 12+ draws the splash icon about 1.76× larger than its canvas (measured on API 37), so the
-  logo is 75×55dp here to show at the 132×97dp SplashActivity uses. On the 288dp canvas,
-  inside the 192dp circle Android 12+ masks the icon with.
+  Splash icon: the mark as the storyboard first shows it (Figma 43:44, 120dp wide, hands at 12 and
+  about 4 o'clock), on the 288dp canvas the system expects, inside the 192dp circle Android 12+
+  masks the icon with. SplashActivity's first frame draws the same mark in the same place.
+  Android 12+ draws the icon about 1.76× larger than its canvas (measured on API 37), so the mark
+  is 68.2dp wide here to show at 120dp.
 -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item
@@ -13,8 +15,24 @@
         </shape>
     </item>
     <item
-        android:width="75dp"
-        android:height="55dp"
-        android:drawable="@drawable/logo_hytrack"
+        android:width="68.2dp"
+        android:height="49.7dp"
+        android:drawable="@drawable/splash_mark"
+        android:gravity="center" />
+    <item
+        android:width="68.2dp"
+        android:height="49.7dp"
+        android:gravity="center">
+        <rotate
+            android:drawable="@drawable/splash_hand_hour"
+            android:fromDegrees="121"
+            android:pivotX="86.63%"
+            android:pivotY="17.57%"
+            android:toDegrees="121" />
+    </item>
+    <item
+        android:width="68.2dp"
+        android:height="49.7dp"
+        android:drawable="@drawable/splash_hand_minute"
         android:gravity="center" />
 </layer-list>

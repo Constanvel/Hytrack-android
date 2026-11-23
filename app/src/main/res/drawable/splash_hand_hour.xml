@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The mark's hour hand at 12 o'clock, on splash_mark's canvas; it turns about the clock's
+     centre (83.9, 12.4). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96.85dp"
+    android:height="70.56dp"
+    android:viewportWidth="96.8502"
+    android:viewportHeight="70.5552">
+    <path
+        android:pathData="M83.9,12.342L83.9,8.75"
+        android:strokeColor="#124558"
+        android:strokeLineCap="round"
+        android:strokeWidth="2.289" />
+</vector>

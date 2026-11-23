@@ -51,4 +51,11 @@
     <!-- Hapus data pasien (Figma 31:273). -->
     <color name="danger">#B63832</color>
     <color name="danger_soft">#FCEBE9</color>
+
+    <!-- Splash, from the Figma storyboard 43:2. -->
+    <color name="splash_bg">#F1F9F5</color>
+    <color name="splash_text">#47736D</color>
+    <color name="splash_sweep">#A8E5ED</color>
+    <color name="splash_teal_top">#086B62</color>
+    <color name="splash_teal_bottom">#168875</color>
 </resources>

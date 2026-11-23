@@ -23,6 +23,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
+import androidx.core.view.updatePaddingRelative
 import com.constanvel.hytracl.databinding.ActivityShellBinding
 import com.constanvel.hytracl.databinding.ViewDemoControlsBinding
 import com.constanvel.hytracl.databinding.ViewGuideHintBinding
@@ -344,6 +345,25 @@ abstract class ShellActivity : AppCompatActivity() {
         shell.back.isVisible = s.back != null
         s.back?.let { target -> shell.back.setOnClickListener { go(target) } }
         shell.headerAvatar.root.isVisible = s.hya
+        // Hya (Figma 43:2 frames 19/21): back chip at x 11, Hya at 32dp from x 74, title at x 118.
+        shell.header.updatePaddingRelative(
+            start = shell.root.dp(if (s.hya) 11 else 24),
+            end = shell.root.dp(if (s.hya) 12 else 24),
+        )
+        shell.back.updateLayoutParams<LinearLayout.LayoutParams> {
+            marginStart = shell.root.dp(if (s.hya) 0 else -8)
+            marginEnd = shell.root.dp(if (s.hya) 11 else 2)
+        }
+        shell.headerAvatar.root.updateLayoutParams<LinearLayout.LayoutParams> {
+            width = shell.root.dp(if (s.hya) 32 else 44)
+            height = width
+        }
+        // Hya's art keeps its crop at the smaller size (web: 49.6px wide, 9px left).
+        (shell.headerAvatar.root as ViewGroup).getChildAt(0).updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            width = shell.root.dp(if (s.hya) 49.6 else 68)
+            height = shell.root.dp(if (s.hya) 37.2 else 51)
+            marginStart = shell.root.dp(if (s.hya) -9 else -12)
+        }
         shell.heading.isVisible = !s.brand
         shell.lockup.isVisible = s.brand
         shell.title.text = s.title

@@ -275,7 +275,7 @@ class CompanionMonitorActivity : ShellActivity() {
             addView(metrics, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(17) })
             listOf(
                 getString(R.string.dipanggil) to (visit.str("serving") ?: "—"),
-                getString(R.string.di_depan_anda) to (if (inLine) getString(R.string.pasien, visit.optInt("ahead").toString()) else "—"),
+                getString(R.string.di_depan_anda) to (if (inLine) getString(R.string.pasien, visit.optInt("ahead")) else "—"),
                 getString(R.string.estimasi) to (visit.str("waitRange")?.takeIf { inLine }?.let { getString(R.string.kira_menit, it.substringBefore('–')) } ?: "—"),
             ).forEachIndexed { i, (label, value) ->
                 metrics.column(6).apply {

@@ -44,20 +44,12 @@ fun ShellActivity.footerButton(label: String, onClick: () -> Unit) {
         FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, shell.root.dp(1)))
 }
 
-/** Shown in place of server data when the app runs on the offline demo or the server is down. */
-fun ViewGroup.serverNeeded(message: String?, retry: (() -> Unit)? = null) {
-    notice(message ?: context.getString(R.string.butuh_server), Tone.WARNING)
-    if (retry != null && message != null) button(context.getString(R.string.coba_lagi), Look.PALE, onClick = retry)
-}
-
 /** Data pasien (Figma 27:61): the account's own record, then the family it manages. */
 class PatientDataActivity : ShellActivity() {
     override val tab = Tab.ACCOUNT
-    private var patients: List<JSONObject>? = null
-    private var problem: String? = null
 
     override fun spec() = Spec(getString(R.string.data_pasien), getString(R.string.profil_dan_data_pasien),
-        back = AccountActivity::class.java, action = Api.online)
+        back = AccountActivity::class.java, action = true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,23 +58,10 @@ class PatientDataActivity : ShellActivity() {
         footerButton(getString(R.string.tambah_pasien)) { go(PatientFormActivity::class.java) }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (Api.online) load()
-    }
-
-    private fun load() = request({ Api.call("GET", "data-pasien").getJSONArray("patients").objects() }) { result ->
-        result.onSuccess { patients = it; problem = null }.onFailure { problem = it.message }
-        render()
-    }
-
     override fun content(into: LinearLayout) {
         into.dividerDrawable = ContextCompat.getDrawable(this, R.drawable.gap_24)
         into.lead(getString(R.string.data_tepat_berobat_lebih_mudah), getString(R.string.kelola_identitas_dan_kontak_pasien))
-        val list = patients
-        if (!Api.online || problem != null) return into.serverNeeded(problem) { load() }
-        if (list == null) return run { into.inter(getString(R.string.memuat), 14f, 20f, color = R.color.brand_muted) }
-        list.forEach { patient -> card(into, patient) }
+        Local.records().forEach { patient -> card(into, patient) }
         into.tipCard(getString(R.string.mengurus_kunjungan_keluarga), getString(R.string.tambahkan_data_pasien_yang_anda_dampingi))
     }
 
@@ -117,7 +96,7 @@ class PatientDataActivity : ShellActivity() {
         }
     }
 
-    /** Hapus data pasien (Figma 31:273): confirm, then DELETE /api/data-pasien/{id}; Laravel refuses the owner's record. */
+    /** Hapus data pasien (Figma 31:273): confirm, then delete; the owner's record is refused, as in PatientRecords. */
     private fun confirmDelete(patient: JSONObject) {
         val dialog = Dialog(this)
         val box = LinearLayout(this).apply {
@@ -151,26 +130,14 @@ class PatientDataActivity : ShellActivity() {
         val actions = LinearLayout(this)
         box.addView(actions, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { topMargin = box.dp(32) })
         val cancel = actions.button(getString(R.string.batal), Look.OUTLINE, 52, 12) { dialog.cancel() }
-        lateinit var remove: TextView
-        remove = actions.button(getString(R.string.hapus_data), height = 52, radius = 12) {
-            dialog.setCancelable(false)
-            cancel.isEnabled = false
-            remove.isEnabled = false
-            remove.text = getString(R.string.menghapus)
-            error.isVisible = false
-            request({ Api.call("DELETE", "data-pasien/${patient.getInt("id")}") }) { result ->
-                result.onSuccess {
-                    dialog.dismiss()
-                    Demo.flash = getString(R.string.data_x_dihapus, patient.getString("name"))
-                    load()
-                }.onFailure {
-                    dialog.setCancelable(true)
-                    cancel.isEnabled = true
-                    remove.isEnabled = true
-                    remove.text = getString(R.string.hapus_data)
-                    error.text = if ((it as? Api.Failure)?.status == 0) getString(R.string.koneksi_terputus_belum_dihapus) else it.message
-                    error.isVisible = true
-                }
+        val remove = actions.button(getString(R.string.hapus_data), height = 52, radius = 12) {
+            runCatching { Local.deleteRecord(patient.getInt("id")) }.onSuccess {
+                dialog.dismiss()
+                Demo.flash = getString(R.string.data_x_dihapus, patient.getString("name"))
+                render()
+            }.onFailure {
+                error.text = it.message
+                error.isVisible = true
             }
         }
         remove.background = remove.rounded(R.color.danger, 12)
@@ -196,7 +163,7 @@ class PatientDataActivity : ShellActivity() {
     }
 }
 
-/** Tambah / ubah data pasien (Figma 27:110 and 27:179). Laravel validates; its messages show per field. */
+/** Tambah / ubah data pasien (Figma 27:110 and 27:179). [Local] validates like Laravel; its messages show per field. */
 class PatientFormActivity : ShellActivity() {
     companion object {
         const val PATIENT = "patient"
@@ -207,7 +174,6 @@ class PatientFormActivity : ShellActivity() {
     /** Typed values survive re-renders (render rebuilds the views). */
     private val values = mutableMapOf<String, String>()
     private var errors: Map<String, String> = emptyMap()
-    private var saving = false
 
     override fun spec() = Spec(getString(if (patient != null) R.string.ubah_data_pasien else R.string.tambah_data_pasien),
         getString(R.string.profil_dan_data_pasien), back = PatientDataActivity::class.java, bare = true)
@@ -267,11 +233,7 @@ class PatientFormActivity : ShellActivity() {
         into.tipCard(getString(R.string.pastikan_data_sudah_benar), getString(R.string.data_dipakai_untuk_identifikasi), padding = 14, textSize = 12f)
         into.column(12).apply {
             (layoutParams as LinearLayout.LayoutParams).topMargin = dp(16)
-            button(getString(when {
-                saving -> R.string.menyimpan
-                patient != null -> R.string.simpan_perubahan
-                else -> R.string.simpan_data_pasien
-            })) { save() }.apply { isEnabled = !saving }
+            button(getString(if (patient != null) R.string.simpan_perubahan else R.string.simpan_data_pasien)) { save() }
             button(getString(R.string.batal), Look.GHOST) { go(PatientDataActivity::class.java) }
         }
     }
@@ -358,25 +320,15 @@ class PatientFormActivity : ShellActivity() {
     }
 
     private fun save() {
-        if (saving) return
-        saving = true
-        render()
-        val body = JSONObject()
-        listOf("name", "birth_date", "gender", "phone", "address", "city", "postal_code").forEach { body.put(it, values[it]?.trim().orEmpty()) }
         val id = patient?.optInt("id")
-        request({ if (id != null) Api.call("PUT", "data-pasien/$id", body) else Api.call("POST", "data-pasien", body) }) { result ->
-            saving = false
-            result.onSuccess { json ->
-                Demo.flash = if (id != null) getString(R.string.perubahan_data_pasien_tersimpan)
-                else getString(R.string.data_tersimpan, json.getJSONObject("patient").getString("name"))
-                // The own record also names the account (home, akun).
-                json.getJSONObject("patient").takeIf { it.optBoolean("self") }?.let { Demo.signedInAs(it.getString("name"), it.str("phone")) }
-                go(PatientDataActivity::class.java)
-            }.onFailure { failure ->
-                errors = (failure as? Api.Failure)?.fields?.takeIf { it.isNotEmpty() } ?: mapOf("form" to (failure.message ?: Api.OFFLINE))
-                render()
-                shell.scroll.scrollTo(0, 0)
-            }
+        runCatching { Local.saveRecord(id, values) }.onSuccess { saved ->
+            Demo.flash = if (id != null) getString(R.string.perubahan_data_pasien_tersimpan)
+            else getString(R.string.data_tersimpan, saved.getString("name"))
+            go(PatientDataActivity::class.java)
+        }.onFailure { failure ->
+            errors = (failure as? Local.Refused)?.fields?.takeIf { it.isNotEmpty() } ?: mapOf("form" to failure.message.orEmpty())
+            render()
+            shell.scroll.scrollTo(0, 0)
         }
     }
 }

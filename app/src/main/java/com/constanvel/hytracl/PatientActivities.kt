@@ -92,20 +92,12 @@ class HomeActivity : ShellActivity() {
         guideRestart(b.guideRestart)
         b.helpLink.setOnClickListener { go(HelpActivity::class.java) }
         // Visits this account accompanies (web Home: "Pantauan keluarga" when following > 0).
+        val following = Local.following().size
         if (following > 0) {
             val card = LinearLayout(this, null, 0, R.style.Widget_HyTrack_Card)
             into.addView(card, 1, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
             ViewRowLinkBinding.bind(card.add(R.layout.view_row_link))
                 .bind(getString(R.string.pantauan_keluarga), getString(R.string.pantauan_keluarga_detail, following)) { go(CompanionListActivity::class.java) }
-        }
-    }
-
-    private var following = 0
-
-    override fun onResume() {
-        super.onResume()
-        if (Api.online) request({ Api.call("GET", "pendampingan").getJSONArray("patients").length() }) { result ->
-            result.onSuccess { if (it != following) { following = it; render() } }
         }
     }
 }
@@ -154,11 +146,9 @@ class AccountActivity : ShellActivity() {
     }
 }
 
-/** Riwayat kunjungan (Figma 31:3): every ticket of this account, from GET /api/riwayat. */
+/** Riwayat kunjungan (Figma 31:3): every ticket of this account (VisitView::history). */
 class HistoryActivity : ShellActivity() {
     override val tab = Tab.ACCOUNT
-    private var items: List<JSONObject>? = null
-    private var problem: String? = null
     private var open: Int? = null
 
     override fun spec() = Spec(getString(R.string.riwayat_kunjungan),
@@ -171,21 +161,10 @@ class HistoryActivity : ShellActivity() {
         interHeader()
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (Api.online) load()
-    }
-
-    private fun load() = request({ Api.call("GET", "riwayat").getJSONArray("items").objects() }) { result ->
-        result.onSuccess { items = it; problem = null }.onFailure { problem = it.message }
-        render()
-    }
-
     override fun content(into: LinearLayout) {
         into.dividerDrawable = ContextCompat.getDrawable(this, R.drawable.gap_16)
         into.updatePadding(top = into.dp(19), bottom = into.dp(32))
-        if (!Api.online || problem != null) return into.serverNeeded(problem) { load() }
-        val list = items ?: return run { into.inter(getString(R.string.memuat), 14f, 20f, color = R.color.brand_muted) }
+        val list = Local.history()
         if (list.isEmpty()) {
             into.column(8, R.color.white, 22, 20).apply {
                 inter(getString(R.string.belum_ada_kunjungan), 20f, 29f, Weight.BOLD)

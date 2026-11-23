@@ -377,7 +377,11 @@ abstract class ShellActivity : AppCompatActivity() {
         val guiding = Guide.visible(this, s.guide)
         if (guiding) guideHint(content, s.guide!!)
         content(content)
-        content.findViewById<View>(R.id.hyaHelp)?.setOnClickListener { go(HyaActivity::class.java) }
+        content.findViewById<View>(R.id.hyaHelp)?.let { card ->
+            card.setOnClickListener { go(HyaActivity::class.java) }
+            // The Hya card already shows Hya (Figma 43:2 frame 04): no bubble on top of it.
+            if (card.isVisible) shell.fab.isVisible = false
+        }
         if (guiding) {
             highlight(content)
             highlight(shell.footer)

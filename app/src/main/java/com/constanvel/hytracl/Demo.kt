@@ -157,6 +157,8 @@ object Demo {
     class Notification(val message: String, val action: String?, val time: String, var unread: Boolean = true)
 
     val signedIn get() = Local.current != null
+    /** A patient, staff or manager session. */
+    val inSession get() = signedIn || Local.role != null
     /** Signed in as Pendamping: reopening the app returns to the companion view. */
     var companion = false
     val visit get() = Local.current?.visit

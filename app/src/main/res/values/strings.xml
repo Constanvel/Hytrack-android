@@ -155,13 +155,13 @@
     <string name="kunjungan_baru_1_2">KUNJUNGAN BARU · 1 / 2</string>
     <string name="cari_nama_poliklinik">Cari nama poliklinik</string>
     <string name="rawat_jalan_2">%1$s · Rawat jalan</string>
-    <string name="dokter_praktik_menit">%1$s dokter praktik · %2$s menit</string>
+    <string name="dokter_praktik_menit">%1$d dokter praktik · %2$s menit</string>
     <string name="dokter_jadwal">Dokter &amp; jadwal</string>
     <string name="kunjungan_baru_2_2">KUNJUNGAN BARU · 2 / 2</string>
     <string name="anda_sudah_memiliki_satu_kunjungan_aktif">Anda sudah memiliki satu kunjungan aktif.</string>
     <string name="jadwal_belum_tersedia_2">" · Jadwal belum tersedia"</string>
     <string name="menit">%1$s menit</string>
-    <string name="pasien">%1$s pasien</string>
+    <string name="pasien">%1$d pasien</string>
     <string name="dokter_terlambat">Dokter terlambat ±%1$s</string>
     <string name="jadwal_dipilih">Jadwal dipilih · %1$s</string>
     <string name="kuota_penuh">Kuota penuh</string>
@@ -182,15 +182,15 @@
     <string name="mulai_kunjungan_baru">Mulai kunjungan baru</string>
     <string name="kunjungan_selesai_akses_pendamping_telah">Kunjungan selesai. Akses pendamping telah berakhir.</string>
     <string name="berangkat_sebelum">Berangkat sebelum %1$s</string>
-    <string name="check_in_paling_lambat_menit_sebelum">"Check-in paling lambat %1$s, %2$s menit sebelum praktik dimulai. "</string>
-    <string name="perjalanan_menit_adalah_perkiraan_umum">Perjalanan ±%1$s menit adalah perkiraan umum; sesuaikan dengan perjalanan Anda.</string>
+    <string name="check_in_paling_lambat_menit_sebelum">"Check-in paling lambat %1$s, %2$d menit sebelum praktik dimulai. "</string>
+    <string name="perjalanan_menit_adalah_perkiraan_umum">Perjalanan ±%1$d menit adalah perkiraan umum; sesuaikan dengan perjalanan Anda.</string>
     <string name="diperbarui">Diperbarui %1$s</string>
     <string name="giliran_anda">GILIRAN ANDA</string>
     <string name="sudah_check_in">SUDAH CHECK-IN</string>
     <string name="silakan_masuk">Silakan masuk</string>
     <string name="menunggu_giliran">Menunggu giliran</string>
     <string name="nomor_anda_dipanggil_ke">Nomor Anda dipanggil ke %1$s</string>
-    <string name="pasien_lagi_sebelum_anda">%1$s pasien lagi sebelum Anda</string>
+    <string name="pasien_lagi_sebelum_anda">%1$d pasien lagi sebelum Anda</string>
     <string name="sekarang">Sekarang</string>
     <string name="masuk_ke_sini">MASUK KE SINI</string>
     <string name="tunggu_di_sini">TUNGGU DI SINI</string>
@@ -242,7 +242,7 @@
     <string name="tautan_disalin">Tautan disalin</string>
     <string name="pantauan_keluarga">Pantauan keluarga</string>
     <string name="akses_pendamping_2">AKSES PENDAMPING</string>
-    <string name="pasien_lagi">%1$s pasien lagi</string>
+    <string name="pasien_lagi">%1$d pasien lagi</string>
     <string name="menunggu_resep_lower">menunggu resep</string>
     <string name="belum_check_in_2">Belum check-in</string>
     <string name="giliran_anda_2">Giliran Anda</string>
@@ -311,8 +311,8 @@
     <string name="konfirmasi_kata_sandi_tidak_sama">Konfirmasi kata sandi tidak sama.</string>
     <string name="setujui_syarat_ketentuan_dan_kebijakan">Setujui Syarat &amp; Ketentuan dan Kebijakan Privasi untuk melanjutkan.</string>
     <string name="beranda">Beranda</string>
-    <string name="notifikasi_belum_dibaca">Notifikasi, %1$s belum dibaca</string>
-    <string name="panduan_langkah_dari">PANDUAN · LANGKAH %1$s DARI %2$s</string>
+    <string name="notifikasi_belum_dibaca">Notifikasi, %1$d belum dibaca</string>
+    <string name="panduan_langkah_dari">PANDUAN · LANGKAH %1$d DARI %2$d</string>
     <string name="demo_staff_control">Kontrol demo · menggantikan tindakan petugas</string>
     <string name="wait_minutes">%1$s mnt</string>
     <string name="hya_active_visit">KUNJUNGAN AKTIF · %1$s&lt;br>&lt;b>%2$s · Poli %3$s&lt;/b></string>
@@ -338,7 +338,7 @@
     <string name="chevron_next">›</string>
     <string name="kalender_lengkap">Kalender lengkap</string>
     <string name="pilih_bulan_atau_tanggal_lain">Pilih bulan atau tanggal lain untuk booking lebih awal.</string>
-    <string name="jam_kuota_tersisa">%1$s · %2$s kuota tersisa</string>
+    <string name="jam_kuota_tersisa">%1$s · %2$d kuota tersisa</string>
 
     <!-- Data pasien, Akun and Family Companion over the Laravel API. -->
     <string name="batal">Batal</string>

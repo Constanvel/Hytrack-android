@@ -66,33 +66,172 @@
         android:divider="@drawable/gap_20"
         android:visibility="gone">
 
+        <!-- Visit card with the time the data was read (Figma 43:2 frame 21). -->
+        <LinearLayout
+            android:id="@+id/contextRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_notice"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingTop="11dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="11dp">
+
+            <TextView
+                android:id="@+id/context"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/inter_bold"
+                android:textColor="@color/chat_link"
+                android:textSize="12sp"
+                tools:text="A-027 · Poli Penyakit Dalam" />
+
+            <TextView
+                android:id="@+id/contextTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:fontFamily="@font/inter_regular"
+                android:textColor="@color/chat_link"
+                android:textSize="11sp"
+                tools:text="Data 09.10" />
+        </LinearLayout>
+
         <TextView
-            android:id="@+id/context"
-            style="@style/Widget.HyTrack.Notice"
-            tools:text="Panduan layanan" />
+            android:id="@+id/day"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-6dp"
+            android:layout_marginBottom="-10dp"
+            android:fontFamily="@font/inter_regular"
+            android:gravity="center"
+            android:textColor="@color/chat_muted"
+            android:textSize="11sp"
+            tools:text="Hari ini · 09.10" />
 
         <LinearLayout
             android:id="@+id/messages"
             style="@style/Widget.HyTrack.Stack"
             android:accessibilityLiveRegion="polite"
             android:contentDescription="@string/percakapan_hya"
-            android:divider="@drawable/gap_16" />
+            android:divider="@drawable/gap_20" />
 
-        <include
-            android:id="@+id/directions"
-            layout="@layout/view_row_link" />
+        <!-- Indented under Hya's bubble: where to wait, its source, a reply chip. -->
+        <LinearLayout
+            android:id="@+id/follow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:divider="@drawable/gap_12"
+            android:orientation="vertical"
+            android:showDividers="middle">
 
-        <include
-            android:id="@+id/late"
-            layout="@layout/item_suggestion" />
+            <LinearLayout
+                android:id="@+id/place"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_chat_place"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-        <TextView
-            android:id="@+id/restart"
-            style="@style/Widget.HyTrack.TextButton"
-            android:text="@string/mulai_percakapan_baru" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/inter_bold"
+                    android:text="@string/tempat_menunggu"
+                    android:textColor="@color/chat_link"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/placeRoom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:fontFamily="@font/inter_bold"
+                    android:textColor="@color/chat_heading"
+                    android:textSize="20sp"
+                    tools:text="Ruang A-204" />
+
+                <TextView
+                    android:id="@+id/placeBuilding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/inter_regular"
+                    android:textColor="@color/chat_muted"
+                    android:textSize="14sp"
+                    tools:text="Gedung A, lantai 2" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/inter_bold"
+                        android:text="@string/buka_petunjuk_ruangan"
+                        android:textColor="@color/chat_link"
+                        android:textSize="14sp" />
+
+                    <ImageView
+                        android:layout_width="17.8dp"
+                        android:layout_height="13.8dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_arrow" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/source"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-4dp"
+                android:layout_marginBottom="6dp"
+                android:fontFamily="@font/inter_regular"
+                android:paddingStart="2dp"
+                android:textColor="@color/chat_muted"
+                android:textSize="11sp"
+                tools:text="Sumber: antrean kunjungan · 09.10" />
+
+            <include
+                android:id="@+id/directions"
+                layout="@layout/view_row_link" />
+
+            <TextView
+                android:id="@+id/late"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_chat_chip"
+                android:fontFamily="@font/inter_regular"
+                android:paddingStart="16dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="10dp"
+                android:text="@string/bagaimana_jika_saya_terlambat"
+                android:textColor="@color/chat_link"
+                android:textSize="12sp" />
+        </LinearLayout>
     </LinearLayout>
 
     <TextView
+        android:id="@+id/warning"
         style="@style/Widget.HyTrack.Notice.Warning"
         android:text="@string/untuk_keluhan_atau_pertanyaan_medis" />
+
+    <TextView
+        android:id="@+id/restart"
+        style="@style/Widget.HyTrack.TextButton"
+        android:layout_marginStart="40dp"
+        android:text="@string/mulai_percakapan_baru"
+        android:visibility="gone" />
 </merge>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pulse line on the ticket card (Figma 43:2 frame 04), from public/assets/ticket-pulse.svg. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="137dp"
+    android:height="53dp"
+    android:viewportWidth="137"
+    android:viewportHeight="53">
+    <path
+        android:pathData="M2.5,27.4796H24.8929L34.3214,23.0715L41.3929,31.398L50.8214,2.5L60.4857,50.5L69.4429,27.4796H87.3571L94.4286,23.0715L101.5,27.4796H134.5"
+        android:strokeAlpha="0.3"
+        android:strokeColor="#086F65"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="5" />
+</vector>

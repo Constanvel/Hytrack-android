@@ -1,6 +1,7 @@
 package com.constanvel.hytracl
 
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.StateListDrawable
 import android.text.InputType
 import android.view.Gravity
@@ -43,10 +44,29 @@ fun ViewGroup.inter(
     addView(it, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
 }
 
-fun View.rounded(@ColorRes fill: Int, radius: Number, @ColorRes stroke: Int? = null) = GradientDrawable().apply {
+fun View.rounded(@ColorRes fill: Int, radius: Number, @ColorRes stroke: Int? = null, strokeWidth: Number = 1) = GradientDrawable().apply {
     setColor(ContextCompat.getColor(context, fill))
     cornerRadius = dp(radius).toFloat()
-    stroke?.let { setStroke(dp(1), ContextCompat.getColor(context, it)) }
+    stroke?.let { setStroke(dp(strokeWidth), ContextCompat.getColor(context, it)) }
+}
+
+/** .card.marked (Figma 43:2): bordered card with the 4x32 teal marker on its left edge. */
+fun View.marked(
+    @ColorRes fill: Int = R.color.white,
+    @ColorRes stroke: Int = R.color.card_border,
+    radius: Number = 22,
+    markerTop: Number = 22,
+    strokeWidth: Number = 1,
+) = LayerDrawable(arrayOf(
+    rounded(fill, radius, stroke, strokeWidth),
+    GradientDrawable().apply {
+        setColor(ContextCompat.getColor(context, R.color.marker))
+        cornerRadius = dp(2).toFloat()
+    },
+)).apply {
+    setLayerGravity(1, Gravity.TOP or Gravity.START)
+    setLayerInsetTop(1, dp(markerTop))
+    setLayerSize(1, dp(4), dp(32))
 }
 
 /** Vertical stack with a fixed gap between children (CSS flex column + gap). */
@@ -60,7 +80,7 @@ fun ViewGroup.column(gap: Number, @ColorRes fill: Int? = null, radius: Number = 
         addView(it, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
     }
 
-enum class Look { PRIMARY, OUTLINE, PALE, GHOST }
+enum class Look { PRIMARY, OUTLINE, PALE, GHOST, SECONDARY, LOGOUT, DANGER }
 
 /** .button variants of the Inter frames: 16sp semibold, 10–14dp corners. */
 fun ViewGroup.button(label: String, look: Look = Look.PRIMARY, height: Number = 50, radius: Number = 10, onClick: () -> Unit): TextView =
@@ -73,7 +93,11 @@ fun ViewGroup.button(label: String, look: Look = Look.PRIMARY, height: Number = 
             Look.OUTLINE -> pressed(R.color.white, R.color.white_hover, radius, R.color.brand)
             Look.PALE -> pressed(R.color.auth_benefit, R.color.pale_hover, radius)
             Look.GHOST -> pressed(android.R.color.transparent, R.color.auth_benefit, radius)
+            Look.SECONDARY -> pressed(R.color.pale, R.color.pale_hover, radius, R.color.pale_border)
+            Look.LOGOUT -> pressed(R.color.logout, R.color.logout_hover, radius, R.color.logout_border)
+            Look.DANGER -> pressed(R.color.danger_pale, R.color.danger_pale_hover, radius)
         }
+        if (look == Look.DANGER) it.setTextColor(ContextCompat.getColor(context, R.color.danger_text))
         it.isClickable = true
         it.isFocusable = true
         it.setOnClickListener { onClick() }
@@ -84,9 +108,9 @@ private fun View.pressed(@ColorRes fill: Int, @ColorRes down: Int, radius: Numbe
     addState(intArrayOf(), rounded(fill, radius, stroke))
 }
 
-/** .tip-card: pale mint, green title, muted text. */
-fun ViewGroup.tipCard(title: String, text: String, padding: Number = 16, titleSize: Float = 14f, textSize: Float = 13f) =
-    column(if (padding == 16) 6 else 4, R.color.auth_benefit, if (padding == 16) 12 else 14, padding).apply {
+/** .tip-card (Figma 43:2 frames 13-15): pale mint with its own border, green title, muted text. */
+fun ViewGroup.tipCard(title: String, text: String, padding: Number = 15, titleSize: Float = 14f, textSize: Float = 13f) =
+    column(if (padding == 15) 6 else 4, R.color.auth_benefit, 18, padding, R.color.pale_border).apply {
         inter(title, titleSize, titleSize + 6, Weight.SEMIBOLD, R.color.brand)
         inter(text, textSize, textSize + 6, color = R.color.muted) // #5C706C on the mint card is 4.4:1
     }
@@ -97,7 +121,7 @@ fun ViewGroup.lead(title: String, text: String, gap: Number = 8) = column(gap).a
     inter(text, 15f, 21f, color = R.color.brand_muted)
 }
 
-/** Input styled like .form-field input: white, 1dp border, 10dp corners, 14sp Inter. */
+/** Input styled like .form-field input (Figma 43:2 frames 14-15): pale fill, 1dp border, 12dp corners, 14sp Inter. */
 fun ViewGroup.input(hint: String, type: Int = InputType.TYPE_CLASS_TEXT, lines: Int = 1): EditText = EditText(context).also {
     it.hint = hint
     it.inputType = type
@@ -105,7 +129,7 @@ fun ViewGroup.input(hint: String, type: Int = InputType.TYPE_CLASS_TEXT, lines: 
     it.typeface = ResourcesCompat.getFont(context, R.font.inter_regular)
     it.setTextColor(ContextCompat.getColor(context, R.color.auth_text))
     it.setHintTextColor(ContextCompat.getColor(context, R.color.brand_muted))
-    it.background = it.fieldBackground(error = false)
+    it.background = it.fieldBackground(error = false, radius = if (lines > 1) 22 else 12)
     it.setPadding(it.dp(14))
     it.minHeight = it.dp(if (lines > 1) 88 else 50)
     if (lines > 1) {
@@ -117,9 +141,9 @@ fun ViewGroup.input(hint: String, type: Int = InputType.TYPE_CLASS_TEXT, lines: 
     addView(it, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
 }
 
-fun View.fieldBackground(error: Boolean) = StateListDrawable().apply {
-    addState(intArrayOf(android.R.attr.state_focused), rounded(R.color.white, 10, if (error) R.color.error else R.color.brand))
-    addState(intArrayOf(), rounded(R.color.white, 10, if (error) R.color.error else R.color.border))
+fun View.fieldBackground(error: Boolean, radius: Number = 12) = StateListDrawable().apply {
+    addState(intArrayOf(android.R.attr.state_focused), rounded(R.color.field_bg, radius, if (error) R.color.error else R.color.brand))
+    addState(intArrayOf(), rounded(R.color.field_bg, radius, if (error) R.color.error else R.color.field_border))
 }
 
 /** Thin rule between a card's header and its details (<hr>). */

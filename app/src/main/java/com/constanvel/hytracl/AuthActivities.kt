@@ -40,13 +40,15 @@ import com.constanvel.hytracl.databinding.ActivityRegisterOtpBinding
 import com.constanvel.hytracl.databinding.ViewAuthFieldBinding
 
 /** Shared field setup for AuthInput / PasswordInput. */
-private fun ViewAuthFieldBinding.setup(label: String, hint: String, phone: Boolean = false, password: Boolean = false) {
+private fun ViewAuthFieldBinding.setup(label: String, hint: String, phone: Boolean = false, password: Boolean = false, username: Boolean = false) {
     this.label.text = label
     input.hint = hint
     icon.isVisible = phone
     val face = input.typeface // password input types reset it to monospace
     input.inputType = when {
         password -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+        // Sign-in also takes a staff username (web login.tsx: a text field, autocomplete="username").
+        username -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
         phone -> InputType.TYPE_CLASS_PHONE
         else -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS or InputType.TYPE_TEXT_VARIATION_PERSON_NAME
     }
@@ -90,7 +92,15 @@ private fun AppCompatActivity.authFrame(scroll: View, main: LinearLayout, gutter
 }
 
 /** Opens where this session belongs: the companion view when signed in as Pendamping, else the home. */
-fun AppCompatActivity.enterSignedIn() = if (Demo.companion) enterCompanion() else enterApp()
+fun AppCompatActivity.enterSignedIn() = when {
+    // Staff and managers open their dashboard and ignore the role cards (AuthController::signedIn).
+    Local.role != null -> startActivity(
+        Intent(this, if (Local.role == Local.Role.STAFF) StaffActivity::class.java else ManagementActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
+    )
+    Demo.companion -> enterCompanion()
+    else -> enterApp()
+}
 
 private fun AppCompatActivity.enterApp() {
     startActivity(Intent(this, HomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
@@ -167,13 +177,13 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (Demo.signedIn) return enterSignedIn()
+        if (Demo.inSession) return enterSignedIn()
         val b = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(b.root)
         authFrame(b.scroll, b.main)
         b.identity.authTitle.text = getString(R.string.selamat_datang_kembali)
         b.identity.authIntro.text = getString(R.string.masuk_untuk_melanjutkan_kunjungan_ndan)
-        b.phone.setup(getString(R.string.nomor_ponsel), getString(R.string.phone_hint), phone = true)
+        b.phone.setup(getString(R.string.nomor_ponsel), getString(R.string.phone_hint), phone = true, username = true)
         b.password.setup(getString(R.string.kata_sandi), getString(R.string.masukkan_kata_sandi), password = true)
         b.password.input.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_DONE
         role = savedInstanceState?.getString("role") ?: role

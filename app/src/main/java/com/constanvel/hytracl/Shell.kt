@@ -44,6 +44,8 @@ class Spec(
     val hya: Boolean = false,
     val queue: Boolean = false,
     val bare: Boolean = false,
+    /** Keep the bottom nav on a bare page (Figma 43:2 Riwayat kunjungan). */
+    val nav: Boolean = false,
     val decor: Decor? = null,
     val guide: GuideStep? = null,
     /** The screen pins its own action bar in the footer in place of the bottom nav. */
@@ -378,7 +380,7 @@ abstract class ShellActivity : AppCompatActivity() {
         shell.bell.contentDescription = if (Demo.unread > 0) getString(R.string.notifikasi_belum_dibaca, Demo.unread) else getString(R.string.notifications)
         shell.close.isVisible = s.hya
         shell.header.setBackgroundResource(if (s.hya) R.drawable.bg_header_rule else 0)
-        shell.bottomNav.isVisible = !s.hya && !s.bare && !s.action
+        shell.bottomNav.isVisible = !s.hya && (!s.bare || s.nav) && !s.action
         shell.fab.animate().cancel()
         shell.fab.alpha = 1f
         tucked = false

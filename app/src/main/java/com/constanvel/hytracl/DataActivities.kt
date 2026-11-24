@@ -65,7 +65,8 @@ class PatientDataActivity : ShellActivity() {
         into.tipCard(getString(R.string.mengurus_kunjungan_keluarga), getString(R.string.tambahkan_data_pasien_yang_anda_dampingi))
     }
 
-    private fun card(into: LinearLayout, patient: JSONObject) = into.column(16, R.color.white, 20, 20, R.color.border).apply {
+    private fun card(into: LinearLayout, patient: JSONObject) = into.column(16, padding = 20).apply {
+        background = marked()
         column(4).apply {
             inter(getString(if (patient.optBoolean("self")) R.string.diri_sendiri else R.string.pasien_yang_didampingi), 11f, 17f, Weight.SEMIBOLD, R.color.brand)
             inter(patient.getString("name"), 22f, 28f, Weight.BOLD)
@@ -83,16 +84,9 @@ class PatientDataActivity : ShellActivity() {
         button(getString(R.string.ubah_data_pasien), Look.OUTLINE) {
             go(PatientFormActivity::class.java) { putExtra(PatientFormActivity.PATIENT, patient.toString()) }
         }
-        // Only family records can go; the account's own record stays.
-        if (!patient.optBoolean("self")) inter(getString(R.string.hapus_data_pasien), 14f, 20f, Weight.SEMIBOLD, R.color.danger).apply {
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                gravity = Gravity.CENTER_HORIZONTAL
-                setMargins(0, dp(-8), 0, dp(-10))
-            }
-            setPadding(dp(12))
-            isClickable = true
-            isFocusable = true
-            setOnClickListener { confirmDelete(patient) }
+        // Only family records can go; the account's own record stays. Pale red button (Figma 43:2 frame 13).
+        if (!patient.optBoolean("self")) button(getString(R.string.hapus_data_pasien), Look.DANGER, 52, 12) { confirmDelete(patient) }.apply {
+            (layoutParams as LinearLayout.LayoutParams).topMargin = dp(-4)
         }
     }
 
@@ -230,7 +224,7 @@ class PatientFormActivity : ShellActivity() {
                 }
             }
         }
-        into.tipCard(getString(R.string.pastikan_data_sudah_benar), getString(R.string.data_dipakai_untuk_identifikasi), padding = 14, textSize = 12f)
+        into.tipCard(getString(R.string.pastikan_data_sudah_benar), getString(R.string.data_dipakai_untuk_identifikasi), textSize = 12f)
         into.column(12).apply {
             (layoutParams as LinearLayout.LayoutParams).topMargin = dp(16)
             button(getString(if (patient != null) R.string.simpan_perubahan else R.string.simpan_data_pasien)) { save() }
@@ -238,7 +232,9 @@ class PatientFormActivity : ShellActivity() {
         }
     }
 
-    private fun section(into: LinearLayout, title: Int) = into.column(16).apply {
+    /** Each group sits on a white card 10dp wider than its fields on every side (Figma 43:2 frames 14-15). */
+    private fun section(into: LinearLayout, title: Int) = into.column(16, R.color.white, 20, 10, R.color.fieldset_border).apply {
+        (layoutParams as LinearLayout.LayoutParams).setMargins(dp(-10), dp(-10), dp(-10), dp(-10))
         inter(getString(title), 18f, 24f, Weight.BOLD)
     }
 
@@ -248,7 +244,7 @@ class PatientFormActivity : ShellActivity() {
             inter(getString(label), 14f, 20f, Weight.SEMIBOLD)
             val view = control()
             val error = errors[name]
-            view.background = view.fieldBackground(error != null)
+            view.background = view.fieldBackground(error != null, if (((view as? EditText)?.minLines ?: 1) > 1) 22 else 12)
             view.contentDescription = getString(label)
             if (view is EditText) {
                 view.setText(values[name].orEmpty())

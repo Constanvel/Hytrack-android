@@ -6,6 +6,7 @@
     tools:parentTag="android.widget.LinearLayout">
 
     <TextView
+        android:id="@+id/examined"
         style="@style/Widget.HyTrack.Notice"
         android:text="@string/pemeriksaan_dokter_selesai" />
 
@@ -79,19 +80,22 @@
             style="@style/Text.H3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/lapor_dulu_di_meja_laboratorium" />
+            android:text="@string/perkiraan_antrean_lab"
+            android:textSize="19sp" />
 
         <TextView
-            style="@style/Text.Small.Muted"
+            style="@style/Text.P.Muted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/antrean_laboratorium_dimulai_setelah_anda" />
+            android:layout_marginTop="6dp"
+            android:text="@string/dimulai_setelah_lapor_lab"
+            android:textSize="14sp" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/directions"
         style="@style/Widget.HyTrack.Button.Secondary"
-        android:text="@string/lihat_petunjuk_ruangan" />
+        android:text="@string/lihat_denah_rute_aksesibel" />
 
     <include
         android:id="@+id/demo"

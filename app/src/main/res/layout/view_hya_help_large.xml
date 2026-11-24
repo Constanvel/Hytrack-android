@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Asisten Hya on Akun (Figma 43:2 frame 16): 142dp card, two-line title, caption, 72dp portrait. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/hyaHelp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
+    android:background="@drawable/bg_hya_help_large"
+    android:clickable="true"
+    android:contentDescription="@string/ask_hya"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:minHeight="142dp"
+    android:orientation="horizontal"
+    android:paddingStart="20dp"
+    android:paddingEnd="21dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:importantForAccessibility="noHideDescendants"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/inter_bold"
+            android:lineHeight="28dp"
+            android:text="@string/ada_yang_bisa_hya_bantu_2"
+            android:textColor="@color/text"
+            android:textSize="20sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="13dp"
+            android:fontFamily="@font/inter_regular"
+            android:lineHeight="17dp"
+            android:text="@string/panduan_antrean_dan_arah_layanan"
+            android:textColor="@color/muted"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- .avatar-large at 72dp: 5dp white border, 1dp ring. -->
+    <FrameLayout
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:background="@drawable/bg_fab_ring"
+        android:importantForAccessibility="noHideDescendants">
+
+        <com.constanvel.hytracl.CircleFrame
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_avatar">
+
+            <ImageView
+                android:layout_width="96dp"
+                android:layout_height="91dp"
+                android:layout_marginStart="-17dp"
+                android:importantForAccessibility="no"
+                android:scaleType="centerCrop"
+                android:src="@drawable/hya_avatar" />
+        </com.constanvel.hytracl.CircleFrame>
+    </FrameLayout>
+</LinearLayout>

@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- .hero: 129deg teal gradient, 24px corners, the card contour at the top right -->
+<!-- .hero: 129deg teal gradient, 24px corners -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item><shape>
         <gradient android:angle="315" android:startColor="@color/gradient_start" android:endColor="@color/gradient_end" />
         <corners android:radius="24dp" />
     </shape></item>
-    <item android:drawable="@drawable/card_contour" android:gravity="top|end" android:width="364dp" android:height="142dp" />
 </layer-list>

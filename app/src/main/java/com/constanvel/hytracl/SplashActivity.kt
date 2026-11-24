@@ -29,7 +29,7 @@ class SplashActivity : AppCompatActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         // Already signed in (the app was only closed): no brand moment, straight back in.
-        if (Demo.signedIn) return route()
+        if (Demo.inSession) return route()
         enableEdgeToEdge()
         val b = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(b.root)
@@ -110,7 +110,7 @@ class SplashActivity : AppCompatActivity() {
     private fun route() {
         if (done || isFinishing) return
         done = true
-        if (Demo.signedIn) return enterSignedIn()
+        if (Demo.inSession) return enterSignedIn()
         // The next screen fades in over the splash, which holds still beneath it.
         val fade = ActivityOptions.makeCustomAnimation(this, android.R.anim.fade_in, R.anim.splash_hold)
         startActivity(Intent(this, LoginActivity::class.java), fade.toBundle())

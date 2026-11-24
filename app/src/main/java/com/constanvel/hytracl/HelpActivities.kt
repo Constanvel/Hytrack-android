@@ -2,9 +2,12 @@ package com.constanvel.hytracl
 
 import android.app.Activity
 import android.os.Bundle
+import android.view.Gravity
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
@@ -25,6 +28,8 @@ class HyaActivity : ShellActivity() {
 
     private val messages = mutableListOf<Message>()
     private var pending = false
+    /** Clock of the first question, for the day stamp above the chat. */
+    private var startedAt = ""
     private lateinit var composer: ViewComposerBinding
 
     override fun spec() = Spec(getString(R.string.hya), getString(R.string.asisten_digital_hytrack), back = VisitActivity::class.java, hya = true)
@@ -50,6 +55,7 @@ class HyaActivity : ShellActivity() {
     private fun ask(question: String) {
         val value = question.trim().take(500)
         if (value.isEmpty() || pending) return
+        if (messages.isEmpty()) startedAt = Demo.now()
         messages += Message(true, value)
         composer.input.text.clear()
         pending = true
@@ -90,34 +96,61 @@ class HyaActivity : ShellActivity() {
             }
             return
         }
+        // Conversation (Figma 43:2 frame 21): visit card, day stamp, turns, then where to wait.
         b.context.text = if (v != null) getString(R.string.poli_2, v.ticket, v.clinic.name) else getString(R.string.panduan_layanan)
-        // .message { max-width: 94% } of the content column.
-        val maxBubble = ((resources.displayMetrics.widthPixels - into.dp(48)) * 0.94f).toInt() - into.dp(32)
+        b.contextTime.isVisible = v != null
+        b.contextTime.text = getString(R.string.data_pukul, Demo.now())
+        b.day.text = getString(R.string.hari_ini_pukul, startedAt)
+        val column = minOf(resources.displayMetrics.widthPixels, into.dp(540)) - into.dp(48)
         val bubbles = messages.map { it.user to it.text } + if (pending) listOf(false to getString(R.string.menyiapkan_jawaban)) else emptyList()
         bubbles.forEach { (user, text) ->
             ItemMessageBinding.inflate(layoutInflater, b.messages, false).apply {
                 body.text = text
-                body.maxWidth = maxBubble
-                author.isVisible = !user
+                from.isVisible = !user
                 if (user) {
-                    root.setBackgroundResource(R.drawable.bg_msg_user)
+                    root.gravity = Gravity.END
+                    body.setBackgroundResource(R.drawable.bg_msg_user)
                     body.setTextColor(ContextCompat.getColor(this@HyaActivity, R.color.white))
+                    body.textSize = 16f
+                    body.setPadding(into.dp(16), into.dp(16), into.dp(16), into.dp(16))
+                    (body.layoutParams as ViewGroup.MarginLayoutParams).marginStart = 0
+                    body.maxWidth = column - into.dp(98) // max-width: calc(100% - 98px)
+                } else {
+                    body.maxWidth = column - into.dp(40)
                 }
-                b.messages.addView(root, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                    gravity = if (user) android.view.Gravity.END else android.view.Gravity.START
-                })
+                b.messages.addView(root)
             }
         }
-        b.directions.bind(getString(R.string.buka_petunjuk_ruangan)) { go(DirectionsActivity::class.java) }
-        b.late.question.text = getString(R.string.bagaimana_jika_saya_terlambat)
-        b.late.arrow.isVisible = false
-        b.late.root.isEnabled = !pending
-        b.late.root.setOnClickListener { ask(getString(R.string.bagaimana_jika_saya_terlambat)) }
+        val room = v?.clinic?.room
+        b.place.isVisible = room != null
+        b.source.isVisible = room != null
+        b.directions.root.isVisible = room == null
+        if (room != null) {
+            val (name, building) = Demo.splitRoom(room)
+            b.placeRoom.text = name
+            b.placeBuilding.text = building
+            b.placeBuilding.isVisible = building.isNotEmpty()
+            b.place.contentDescription = getString(R.string.tempat_menunggu_detail, name, building)
+            b.place.setOnClickListener { go(DirectionsActivity::class.java) }
+            b.source.text = getString(R.string.sumber_antrean_kunjungan, Demo.now())
+        } else {
+            b.directions.bind(getString(R.string.buka_petunjuk_ruangan)) { go(DirectionsActivity::class.java) }
+        }
+        b.late.isEnabled = !pending
+        b.late.setOnClickListener { ask(getString(R.string.bagaimana_jika_saya_terlambat)) }
+        b.restart.isVisible = true
         b.restart.setOnClickListener { messages.clear(); render() }
+        // The medical notice joins the indented column under Hya's reply.
+        b.warning.apply {
+            (layoutParams as ViewGroup.MarginLayoutParams).marginStart = into.dp(40)
+            textSize = 12f
+            typeface = ResourcesCompat.getFont(this@HyaActivity, R.font.inter_regular)
+            setTextColor(ContextCompat.getColor(this@HyaActivity, R.color.chat_warning))
+        }
         // scrollIntoView({ block: 'nearest' }) on the row under the messages: only if it is hidden.
         shell.scroll.post {
-            val rect = android.graphics.Rect().also { b.directions.root.getDrawingRect(it) }
-            shell.scroll.offsetDescendantRectToMyCoords(b.directions.root, rect)
+            val rect = android.graphics.Rect().also { b.follow.getDrawingRect(it) }
+            shell.scroll.offsetDescendantRectToMyCoords(b.follow, rect)
             val visibleBottom = shell.scroll.scrollY + shell.scroll.height - shell.footer.height
             if (rect.bottom > visibleBottom) shell.scroll.smoothScrollBy(0, rect.bottom - visibleBottom)
         }

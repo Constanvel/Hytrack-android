@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- .hya-help.large (Figma 43:2 frame 16): mint gradient, 1px #CDE1D3 border, 24dp corners. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="315"
+        android:centerColor="@color/hya_large_end"
+        android:centerX="0.714"
+        android:endColor="@color/hya_large_end"
+        android:startColor="@color/hya_large_start" />
+    <stroke android:width="1dp" android:color="@color/hya_large_border" />
+    <corners android:radius="24dp" />
+</shape>

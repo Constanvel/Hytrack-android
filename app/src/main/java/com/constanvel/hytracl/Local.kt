@@ -49,6 +49,12 @@ object Local {
     var current: Account? = null
         private set
 
+    /** Staff and managers sign in with their username (AuthController::accountName); they have no patient account. */
+    enum class Role { STAFF, MANAGER }
+    private val STAFF_ACCOUNTS = mapOf("dina" to Role.STAFF, "manajer" to Role.MANAGER)
+    var role: Role? = null
+        private set
+
     init {
         seed("Siti Aminah", "6281255500842", "00-08-42", "1988-05-12", "female")
         // A second patient account to accept Siti's companion invitation in the demo.
@@ -77,8 +83,35 @@ object Local {
     // Accounts ----------------------------------------------------------------------
 
     fun login(phone: String, password: String): Boolean {
-        current = accounts.firstOrNull { it.phone == Demo.normalizePhone(phone) && it.password == password }
-        return current != null
+        role = STAFF_ACCOUNTS[phone.trim().lowercase()]?.takeIf { password == Demo.DEMO_PASSWORD }
+        current = if (role != null) null else accounts.firstOrNull { it.phone == Demo.normalizePhone(phone) && it.password == password }
+        return current != null || role != null
+    }
+
+    /** A registered patient found by phone at the booking desk (StaffController::findPatient). */
+    class Patient(val name: String, val phone: String, val active: String?) {
+        val masked get() = "•••• " + phone.takeLast(4)
+    }
+
+    fun patientByPhone(input: String): Patient? {
+        val digits = Demo.normalizePhone(input)
+        if (digits.length < 9) return null
+        val a = accounts.firstOrNull { it.phone == digits } ?: return null
+        val v = a.visit?.takeIf { it.active }
+        return Patient(a.self.name, a.phone, v?.let { "${it.ticket} · ${it.clinic.name} · ${Ops.dateLabel(Ops.today().plusDays(it.day.offset.toLong()))}" })
+    }
+
+    /** A booking in [Ops], from the app or the desk, becomes that patient's visit (Patient::queues). */
+    fun attach(q: Ops.Queue) {
+        val a = accounts.firstOrNull { it.phone == q.phone } ?: return
+        val v = Demo.Visit(q)
+        a.visit = v
+        a.visits.add(0, v)
+    }
+
+    /** QueueService::notify, for a patient who has an account on this device. */
+    fun notify(phone: String?, message: String, action: String?) {
+        accounts.firstOrNull { it.phone == phone }?.notifications?.add(0, Demo.Notification(message, action, Demo.stamp()))
     }
 
     fun phoneTaken(normalized: String) = accounts.any { it.phone == normalized || it.self.phone == normalized }
@@ -90,6 +123,7 @@ object Local {
 
     fun signOut() {
         current = null
+        role = null
     }
 
     // Data pasien (PatientRecords) ------------------------------------------------------

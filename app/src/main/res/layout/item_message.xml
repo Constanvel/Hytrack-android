@@ -1,26 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- .message: Hya's white bubble (with name) or the patient's primary bubble. -->
+<!-- One chat turn (Figma 43:2 frame 21): Hya's 32dp avatar and name above her bubble, which is
+     indented 40dp; the patient's bubble has no header. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_msg_assistant"
+    android:divider="@drawable/gap_2"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:showDividers="middle">
 
-    <TextView
-        android:id="@+id/author"
-        style="@style/Text.Strong"
+    <LinearLayout
+        android:id="@+id/from"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="6dp"
-        android:lineHeight="23.1sp"
-        android:text="@string/hya" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <include
+            layout="@layout/view_avatar"
+            android:layout_width="32dp"
+            android:layout_height="32dp" />
+
+        <TextView
+            android:id="@+id/author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="11dp"
+            android:fontFamily="@font/inter_bold"
+            android:text="@string/hya"
+            android:textColor="@color/chat_heading"
+            android:textSize="13sp" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/body"
-        style="@style/Text.P"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:background="@drawable/bg_msg_assistant"
+        android:fontFamily="@font/inter_regular"
+        android:lineSpacingMultiplier="1.15"
+        android:paddingStart="16dp"
+        android:paddingTop="14dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="14dp"
+        android:textColor="@color/chat_heading"
+        android:textSize="14sp"
         tools:text="Belum ada kunjungan aktif." />
 </LinearLayout>

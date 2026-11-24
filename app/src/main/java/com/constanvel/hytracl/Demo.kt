@@ -105,6 +105,8 @@ object Demo {
 
     fun clock(minutes: Int) = String.format(Locale.ROOT, "%02d.%02d", minutes / 60 % 24, minutes % 60)
     fun now(): String = Calendar.getInstance().let { clock(it.get(Calendar.HOUR_OF_DAY) * 60 + it.get(Calendar.MINUTE)) }
+    /** Minutes since midnight, now. */
+    fun minuteOfDay(): Int = Calendar.getInstance().let { it.get(Calendar.HOUR_OF_DAY) * 60 + it.get(Calendar.MINUTE) }
     private fun stamp() = "${days[0].label} · ${now()}"
 
     // Visit ---------------------------------------------------------------------
@@ -125,6 +127,15 @@ object Demo {
         var rx: Rx? = null
         var checkedInAt: String? = null
         var cancelReason: String? = null
+        /** Clock when the doctor finished (Figma 43:2 frame 07 notice). */
+        var examinedAt: String? = null
+        /** Minute of the day the pharmacy received the prescription (frame 08). */
+        var rxReceived: Int? = null
+        var laboratoryDone = false
+        /** Figma 43:2 frame 08: "15–25 menit · Perkiraan siap 10.30–10.40", as VisitView::readyEstimate.
+         *  ponytail: a fixed 25–35 minute preparation window from receipt, like the web. */
+        val readyIn get() = rxReceived?.let { from -> "${maxOf(0, from + 25 - minuteOfDay())}–${maxOf(0, from + 35 - minuteOfDay())}" }
+        val readyBetween get() = rxReceived?.let { "${clock(it + 25)}–${clock(it + 35)}" }
         // The seeded queue is today's; a later day has no tickets yet (same rule as quota()).
         val ticket = "A-%03d".format(Locale.ROOT, (if (day.offset == 0) doctor.issued else 0) + 1)
         val ahead = if (day.offset == 0) doctor.ahead else 0
@@ -201,11 +212,14 @@ object Demo {
             "examined" -> {
                 if (v.stage == Stage.WAITING) notify("Nomor ${v.ticket} dipanggil.", "Silakan masuk ke ruang pemeriksaan.")
                 v.stage = Stage.LABORATORY
+                v.examinedAt = now()
                 notify("Pemeriksaan dokter selesai. Selanjutnya ke laboratorium.", LABORATORY)
             }
             "laboratory" -> {
                 v.stage = Stage.PHARMACY
                 v.rx = Rx.RECEIVED
+                v.laboratoryDone = true
+                v.rxReceived = minuteOfDay()
                 notify("Resep diterima farmasi. Obat sedang diproses.", PHARMACY)
             }
             "medicine-ready" -> {

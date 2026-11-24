@@ -1,6 +1,8 @@
 package com.constanvel.hytracl
 
 import android.graphics.Rect
+import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.LinearLayout
@@ -26,7 +28,7 @@ class VisitActivity : ShellActivity() {
             Stage.WAITING, Stage.SERVING -> Spec(getString(R.string.antrean_saya), getString(R.string.rawat_jalan_hari_ini), back = HomeActivity::class.java, queue = true, guide = GuideStep.ANTREAN)
             Stage.LABORATORY -> Spec(getString(R.string.layanan_berikutnya), getString(R.string.kunjungan_2, v.ticket), back = VisitActivity::class.java, guide = GuideStep.LAYANAN)
             Stage.PHARMACY -> Spec(getString(R.string.status_obat), getString(R.string.farmasi_rawat_jalan), back = VisitActivity::class.java, guide = GuideStep.LAYANAN)
-            Stage.COMPLETED -> Spec(getString(R.string.kunjungan_selesai))
+            Stage.COMPLETED -> Spec(getString(R.string.kunjungan_selesai), getString(R.string.kunjungan_2, v.ticket), action = true)
             Stage.NO_SHOW -> Spec(getString(R.string.kunjungan), getString(R.string.rawat_jalan))
         }
     }
@@ -35,12 +37,7 @@ class VisitActivity : ShellActivity() {
         val v = Demo.visit
         when (v?.stage) {
             null, Stage.NO_SHOW -> message(into, getString(R.string.belum_ada_kunjungan_aktif), getString(R.string.pilih_poliklinik_dan_jadwal_dokter_untuk), getString(R.string.ambil_antrean_2))
-            Stage.COMPLETED -> message(into, getString(R.string.terima_kasih), getString(R.string.semoga_lekas_sehat, Demo.patient), getString(R.string.mulai_kunjungan_baru)).apply {
-                notice.isVisible = true
-                notice.text = getString(R.string.kunjungan_selesai_akses_pendamping_telah)
-                text.setTextColor(ContextCompat.getColor(this@VisitActivity, R.color.text))
-                hyaHelp.root.isVisible = false
-            }
+            Stage.COMPLETED -> completed(into, v)
             Stage.BOOKED -> ticket(into, v)
             Stage.WAITING, Stage.SERVING -> queue(into, v)
             Stage.LABORATORY -> lab(into, v)
@@ -55,6 +52,40 @@ class VisitActivity : ShellActivity() {
             this.action.text = action
             this.action.setOnClickListener { go(ClinicsActivity::class.java) }
         }
+
+    /** Kunjungan telah selesai (Figma 43:2 frame 10): what was done, then back to Beranda. */
+    private fun completed(into: LinearLayout, v: Demo.Visit) {
+        footerButton(getString(R.string.kembali_ke_beranda)) { go(HomeActivity::class.java) }
+        val medicine = v.rx != null
+        into.notice(getString(R.string.kunjungan_telah_diselesaikan))
+        into.column(8, padding = 20).apply {
+            background = GradientDrawable(GradientDrawable.Orientation.TL_BR, intArrayOf(
+                ContextCompat.getColor(context, R.color.gradient_start), ContextCompat.getColor(context, R.color.gradient_end),
+            )).apply { cornerRadius = dp(24).toFloat() }
+            inter("✓", 30f, 42f, Weight.BOLD, R.color.white).importantForAccessibility = android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            inter(getString(R.string.kunjungan_selesai), 28f, 39f, Weight.BOLD, R.color.white)
+            inter(getString(R.string.terima_kasih_nama, Demo.patient) + "\n" +
+                getString(if (medicine) R.string.obat_diterima_semoga_lekas_sehat else R.string.semoga_lekas_sehat_2), 15f, 21f, color = R.color.white)
+        }
+        into.column(14, R.color.white, 22, 16, R.color.card_border).apply {
+            inter(getString(R.string.ringkasan_kunjungan), 18f, 25f, Weight.BOLD).isAccessibilityHeading = true
+            fun item(title: String, detail: String) = column(2).apply {
+                inter(title, 15f, 21f, Weight.SEMIBOLD, R.color.brand)
+                inter(detail, 13f, 18f, color = R.color.muted)
+            }
+            item(getString(R.string.check_in_kedatangan_done), "${v.ticket} · ${Demo.patient}")
+            if (v.laboratoryDone) item(getString(R.string.layanan_berikutnya_done), getString(R.string.kunjungan_laboratorium_selesai))
+            if (medicine) item(getString(R.string.pengambilan_obat_done), getString(R.string.diterima_di_loket_f2, v.pickupNumber))
+        }
+        if (medicine) into.column(4, R.color.info, 18, 12).apply {
+            inter(getString(R.string.sebelum_meninggalkan_rumah_sakit), 14f, 20f, Weight.SEMIBOLD, R.color.info_text)
+            inter(getString(R.string.pastikan_obat_dan_aturan_pakai), 13f, 18f, color = R.color.info_text)
+        }
+        into.inter(getString(R.string.kunjungan_anda_telah_selesai), 14f, 20f, color = R.color.muted).apply {
+            gravity = Gravity.CENTER
+            (layoutParams as LinearLayout.LayoutParams).topMargin = dp(4)
+        }
+    }
 
     private fun ticket(into: LinearLayout, v: Demo.Visit) = ScreenVisitTicketBinding.inflate(layoutInflater, into).apply {
         ticket.text = v.ticket
@@ -90,6 +121,7 @@ class VisitActivity : ShellActivity() {
 
     private fun lab(into: LinearLayout, v: Demo.Visit) = ScreenVisitLabBinding.inflate(layoutInflater, into).apply {
         val room = Demo.splitRoom(v.clinic.room).first
+        v.examinedAt?.let { examined.text = getString(R.string.pemeriksaan_dokter_selesai_pukul, it) }
         steps.steps(
             getString(R.string.gunakan_lift_di_sebelah_kanan) to getString(R.string.dari_ikuti_tanda_lift, room),
             getString(R.string.turun_ke_lantai_1) to getString(R.string.keluar_lift_lalu_belok_kiri),
@@ -104,14 +136,23 @@ class VisitActivity : ShellActivity() {
         val ready = v.rx == Rx.READY
         val label = v.rx?.label ?: getString(R.string.menunggu_resep)
         val pickup = v.pickupNumber
-        status.text = getString(R.string.status_farmasi, label)
+        // Figma 43:2 frame 08: update time, then the expected ready window while the medicine is prepared.
+        status.text = getString(R.string.pembaruan_farmasi, Demo.now())
         eyebrow.text = if (ready) getString(R.string.obat_siap_diambil) else getString(R.string.obat_sedang_disiapkan)
-        headline.text = if (ready) getString(R.string.silakan_ke_loket_f2) else label
-        instruction.text = if (ready) getString(R.string.tunjukkan_nomor_pengambilan_anda) else getString(R.string.tunggu_sampai_nomor_anda_dipanggil)
+        headline.text = when {
+            ready -> getString(R.string.silakan_ke_loket_f2)
+            v.readyIn != null -> getString(R.string.menit, v.readyIn)
+            else -> label
+        }
+        instruction.text = when {
+            ready -> getString(R.string.tunjukkan_nomor_pengambilan_anda)
+            v.readyBetween != null -> getString(R.string.perkiraan_siap, v.readyBetween)
+            else -> getString(R.string.tunggu_sampai_nomor_anda_dipanggil)
+        }
         this.pickup.text = pickup
         val step = maxOf(1, listOf(Rx.RECEIVED, Rx.PREPARING, Rx.CHECKING, Rx.READY).indexOf(v.rx))
         steps.steps(
-            getString(R.string.resep_diterima) to getString(R.string.resep_dari_dokter_diterima),
+            getString(R.string.resep_diterima) to (v.rxReceived?.let { getString(R.string.pukul_resep_diterima, Demo.clock(it)) } ?: getString(R.string.resep_dari_dokter_diterima)),
             getString(R.string.obat_disiapkan) to getString(R.string.sedang_dikerjakan_petugas_farmasi),
             getString(R.string.pemeriksaan_akhir) to getString(R.string.obat_diperiksa_apoteker),
             getString(R.string.siap_diambil) to if (ready) getString(R.string.nomor_dipanggil, pickup) else getString(R.string.tunggu_pemberitahuan_sebelum_ke_loket),

@@ -307,8 +307,15 @@ class ManagementActivity : DashboardActivity() {
 
     private var kind = 0
     private var format = "PDF"
-    /** ponytail: kept for this session only; the web keeps it in the browser (localStorage). */
-    private val downloads = mutableListOf<Download>()
+    /** On this device across restarts, as the web keeps it in the browser (localStorage). */
+    private val store by lazy { getSharedPreferences("laporan", MODE_PRIVATE) }
+    private val downloads by lazy {
+        store.getString("downloads", null).orEmpty().lines().mapNotNull { line ->
+            val p = line.split('|')
+            if (p.size != 5) return@mapNotNull null
+            runCatching { Download(p[0].toInt(), LocalDate.parse(p[1]), Ops.clinics.firstOrNull { it.id == p[2].toInt() }, p[3], p[4]) }.getOrNull()
+        }.toMutableList()
+    }
 
     private fun LinearLayout.reports() {
         val r = report
@@ -385,6 +392,7 @@ class ManagementActivity : DashboardActivity() {
         val at = "${DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("id")).format(now).replace(".", "")} · ${Ops.clock(java.time.Instant.now())}"
         downloads.add(0, Download(kind, date, clinic, format, at))
         if (downloads.size > 20) downloads.removeAt(downloads.size - 1)
+        store.edit().putString("downloads", downloads.joinToString("\n") { "${it.kind}|${it.date}|${it.clinic?.id ?: 0}|${it.format}|${it.at}" }).apply()
         render()
     }
 
@@ -402,6 +410,9 @@ class ManagementActivity : DashboardActivity() {
         pendingCsv = null
     }
 
+    /** The print job renders from this WebView, so it must outlive [printPreview] (a local one is collected mid-job). */
+    private var printing: WebView? = null
+
     /** "Unduh laporan PDF" prints the preview, as window.print() does on the web. */
     private fun printPreview() {
         val r = report
@@ -415,7 +426,7 @@ class ManagementActivity : DashboardActivity() {
             <table border="1" cellpadding="6" style="border-collapse:collapse"><tr><th>Poliklinik</th><th>Selesai</th><th>Tunggu</th><th>Target</th></tr>$rows</table>
             <p>Sesuai target tunggu ${percent(r.withinTarget)} · Check-in tepat waktu ${percent(r.onTime)}</p>
             <p><small>Laporan tidak memuat nama, nomor rekam medis, atau identitas pasien.</small></p></body></html>"""
-        val web = WebView(this)
+        val web = WebView(this).also { printing = it }
         web.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView, url: String?) {
                 (getSystemService(PRINT_SERVICE) as PrintManager)

@@ -26,8 +26,8 @@
     <string name="keluar">Keluar</string>
     <string name="tunjukkan_qr_ini_nkepada_petugas">Tunjukkan QR ini\nkepada petugas</string>
     <string name="meja_check_in_gedung_a_lantai_2">Meja check-in · Gedung A, lantai 2</string>
-    <string name="gambar_qr_contoh_gunakan_nomor_check_in">Gambar QR contoh; gunakan nomor check-in di bawahnya</string>
-    <string name="gambar_qr_masih_contoh_dan_belum_dapat">Gambar QR masih contoh dan belum dapat dipindai. Petugas mengonfirmasi kedatangan dengan nomor check-in.</string>
+    <string name="qr_check_in_nomor">QR check-in %1$s; nomor check-in %2$s</string>
+    <string name="qr_hanya_berlaku_untuk_kunjungan_ini">QR hanya berlaku untuk kunjungan ini pada tanggal layanannya. Bila sulit terbaca, sebutkan nomor check-in kepada petugas.</string>
     <string name="nomor_check_in_manual">Nomor check-in manual</string>
     <string name="lihat_antrean_saya">Lihat antrean saya</string>
     <string name="mau_berobat_ke_mana">Mau berobat ke mana?</string>

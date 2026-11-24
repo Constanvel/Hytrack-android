@@ -33,11 +33,12 @@
             android:gravity="center"
             tools:text="A-027 · Siti Aminah" />
 
+        <!-- TicketQr: drawn from the visit's signed payload (CheckInTicket::payload). -->
         <ImageView
-            android:layout_width="232dp"
-            android:layout_height="232dp"
-            android:contentDescription="@string/gambar_qr_contoh_gunakan_nomor_check_in"
-            android:src="@drawable/qr_example" />
+            android:id="@+id/qr"
+            android:layout_width="@dimen/qr_size"
+            android:layout_height="@dimen/qr_size"
+            android:importantForAccessibility="yes" />
 
         <TextView
             android:id="@+id/code"
@@ -62,7 +63,7 @@
         style="@style/Text.P.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/gambar_qr_masih_contoh_dan_belum_dapat" />
+        android:text="@string/qr_hanya_berlaku_untuk_kunjungan_ini" />
 
     <TextView
         android:id="@+id/manualCode"

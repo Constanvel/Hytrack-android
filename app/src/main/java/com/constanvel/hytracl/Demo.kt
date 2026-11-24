@@ -38,15 +38,13 @@ object Demo {
         val name: String,
         val start: Int, // minutes after midnight
         val end: Int,
-        val quotaToday: Int,
         val waitToday: String,
-        val issued: Int, // tickets already issued today
-        val ahead: Int,
-        val serving: String?,
         val delay: String? = null,
     ) {
         val time get() = "${clock(start)}–${clock(end)}"
-        fun quota(day: Day) = if (day.offset == 0) quotaToday else 30
+        /** The same doctor in the staff data, where tickets and quota live. */
+        val ops get() = Ops.doctors.first { it.id == id }
+        fun quota(day: Day) = Ops.quota(ops, Ops.today().plusDays(day.offset.toLong()))
         fun wait(day: Day) = if (day.offset == 0) waitToday else "0–10"
     }
 
@@ -58,10 +56,10 @@ object Demo {
     )
 
     val doctors = listOf(
-        Doctor(1, 1, "dr. Rina Kusuma, Sp.PD", 9 * 60, 12 * 60, 4, "15–25", 26, 3, "A-023"),
-        Doctor(2, 1, "dr. Budi Santoso, Sp.PD", 13 * 60, 16 * 60, 17, "10–20", 13, 0, null),
-        Doctor(3, 2, "dr. Maya Pratiwi, Sp.JP", 8 * 60, 11 * 60, 22, "10–20", 8, 2, "A-006"),
-        Doctor(4, 3, "dr. Andi Wirawan, Sp.A", 10 * 60, 13 * 60, 26, "0–10", 4, 0, null),
+        Doctor(1, 1, "dr. Rina Kusuma, Sp.PD", 9 * 60, 12 * 60, "15–25"),
+        Doctor(2, 1, "dr. Budi Santoso, Sp.PD", 13 * 60, 16 * 60, "10–20"),
+        Doctor(3, 2, "dr. Maya Pratiwi, Sp.JP", 8 * 60, 11 * 60, "10–20"),
+        Doctor(4, 3, "dr. Andi Wirawan, Sp.A", 10 * 60, 13 * 60, "0–10"),
     )
 
     fun clinic(id: Int) = clinics.firstOrNull { it.id == id } ?: clinics.first()
@@ -107,7 +105,7 @@ object Demo {
     fun now(): String = Calendar.getInstance().let { clock(it.get(Calendar.HOUR_OF_DAY) * 60 + it.get(Calendar.MINUTE)) }
     /** Minutes since midnight, now. */
     fun minuteOfDay(): Int = Calendar.getInstance().let { it.get(Calendar.HOUR_OF_DAY) * 60 + it.get(Calendar.MINUTE) }
-    private fun stamp() = "${days[0].label} · ${now()}"
+    fun stamp() = "${days[0].label} · ${now()}"
 
     // Visit ---------------------------------------------------------------------
     /** QueueStatus, with its labels. A cancelled visit keeps its stage and gets [Visit.cancelReason]. */
@@ -121,35 +119,45 @@ object Demo {
         READY("Siap diambil"), COMPLETED("Sudah diambil"),
     }
 
-    class Visit(val id: Int, val doctor: Doctor, val day: Day) {
+    /** The patient's view of one booking in [Ops] (VisitView): staff actions show up here, and back. */
+    class Visit(val queue: Ops.Queue) {
+        val id = queue.id
+        val doctor = doctors.first { it.id == queue.doctor.id }
+        val day = Day(java.time.temporal.ChronoUnit.DAYS.between(Ops.today(), queue.date).toInt())
         val clinic = clinic(doctor.clinicId)
-        var stage = Stage.BOOKED
-        var rx: Rx? = null
-        var checkedInAt: String? = null
-        var cancelReason: String? = null
+        /** A cancelled visit keeps the stage it had; [cancelReason] says it was cancelled. */
+        val stage get() = when (queue.status) {
+            Ops.Status.CANCELLED -> if (queue.checkIn != null) Stage.WAITING else Stage.BOOKED
+            else -> Stage.valueOf(queue.status.name)
+        }
+        val rx get() = queue.order?.status?.let { Rx.entries[it.ordinal] }
+        val checkedInAt get() = Ops.clock(queue.checkIn)
+        val cancelReason get() = queue.cancelReason
         /** Clock when the doctor finished (Figma 43:2 frame 07 notice). */
-        var examinedAt: String? = null
+        val examinedAt get() = Ops.clock(queue.stage(Ops.StageKind.CONSULTATION).completed)
         /** Minute of the day the pharmacy received the prescription (frame 08). */
-        var rxReceived: Int? = null
-        var laboratoryDone = false
+        val rxReceived get() = queue.order?.received?.atZone(java.time.ZoneId.systemDefault())?.let { it.hour * 60 + it.minute }
+        val laboratoryDone get() = queue.stage(Ops.StageKind.LABORATORY).status == Ops.StageStatus.DONE
         /** Figma 43:2 frame 08: "15–25 menit · Perkiraan siap 10.30–10.40", as VisitView::readyEstimate.
          *  ponytail: a fixed 25–35 minute preparation window from receipt, like the web. */
         val readyIn get() = rxReceived?.let { from -> "${maxOf(0, from + 25 - minuteOfDay())}–${maxOf(0, from + 35 - minuteOfDay())}" }
         val readyBetween get() = rxReceived?.let { "${clock(it + 25)}–${clock(it + 35)}" }
-        // The seeded queue is today's; a later day has no tickets yet (same rule as quota()).
-        val ticket = "A-%03d".format(Locale.ROOT, (if (day.offset == 0) doctor.issued else 0) + 1)
-        val ahead = if (day.offset == 0) doctor.ahead else 0
+        val ticket = queue.number
+        private val inLine get() = queue.status == Ops.Status.BOOKED || queue.status == Ops.Status.WAITING
+        val ahead get() = if (inLine) Ops.ahead(queue) else 0
         val waitRange: String? = doctor.wait(day).takeIf { it.isNotEmpty() }
-        val serving = if (day.offset == 0) doctor.serving else null
-        val checkInCode = "HT-000126"
-        val pickupNumber = "F-091"
+        val serving get() = if (inLine) Ops.queues.firstOrNull { it.doctor === queue.doctor && it.date == queue.date && it.status == Ops.Status.SERVING }?.number else null
+        val checkInCode = queue.code
+        /** What the check-in QR carries (CheckInTicket::payload). */
+        val qrPayload get() = Ops.payload(queue)
+        val pickupNumber get() = queue.order?.pickup.orEmpty()
         val isToday get() = day.offset == 0
         val time get() = doctor.time
         val checkInBy get() = clock(doctor.start - CHECK_IN_LEAD)
         val leaveBy get() = clock(doctor.start - CHECK_IN_LEAD - TRAVEL)
         val leadMinutes = CHECK_IN_LEAD
         val travelMinutes = TRAVEL
-        val active get() = stage != Stage.COMPLETED && stage != Stage.NO_SHOW && cancelReason == null
+        val active get() = queue.status.active
         val status get() = if (cancelReason != null) "cancelled" else stage.name.lowercase()
         val statusLabel get() = if (cancelReason != null) "Dibatalkan" else stage.label
     }
@@ -176,22 +184,20 @@ object Demo {
     }
     val activeVisit get() = visit?.takeIf { it.active }
 
-    private fun notify(message: String, action: String? = null) {
-        notifications.add(0, Notification(message, action, stamp()))
-    }
-
-    private var visits = 0
-
-    fun book(doctor: Doctor, day: Day) {
-        val account = Local.current ?: return
-        val v = Visit(++visits, doctor, day)
-        account.visit = v
-        account.visits.add(0, v)
-        notify("Antrean ${v.ticket} berhasil diambil.", "Check-in saat tiba di rumah sakit.")
+    /** The ticket goes into the staff data, so the desk sees it at once ([Local.attach] makes it this account's visit). */
+    fun book(doctor: Doctor, day: Day): Boolean {
+        val account = Local.current ?: return false
+        return try {
+            Ops.book(Local.Patient(account.self.name, account.phone, null), doctor.ops, Ops.today().plusDays(day.offset.toLong()), by = null)
+            true
+        } catch (e: Ops.Refused) { // e.g. the desk booked this patient a moment ago
+            warn(e.message)
+            false
+        }
     }
 
     fun cancel() {
-        visit?.cancelReason = "Dibatalkan oleh pasien"
+        visit?.let { Ops.cancel(it.queue, null, by = null) }
         Local.current?.visit = null
         flash = "Kunjungan dibatalkan."
     }
@@ -204,35 +210,24 @@ object Demo {
 
     /** Demo controls: the patient plays the staff's part (VisitController::simulate). */
     fun simulate(action: String) {
-        val v = visit ?: return
-        when (action) {
-            "check-in" -> {
-                v.stage = Stage.WAITING
-                v.checkedInAt = now()
-                notify("Check-in berhasil. Anda masuk antrean dokter.", "Tunggu di dekat ruang poliklinik.")
+        val q = visit?.queue ?: return
+        try {
+            when (action) {
+                "check-in" -> Ops.checkIn(q, by = null)
+                "examined" -> { // called out of turn, then examined at once (simulateExamination)
+                    if (q.status == Ops.Status.WAITING) Ops.serve(q, by = null)
+                    Ops.examined(q, by = null)
+                }
+                "laboratory" -> Ops.laboratoryDone(q, by = null)
+                "medicine-ready", "picked-up" -> {
+                    var order = q.order ?: throw Ops.Refused("Resep belum diterima farmasi.")
+                    val target = if (action == "picked-up") Ops.Rx.COMPLETED else Ops.Rx.READY
+                    if (target == Ops.Rx.COMPLETED && order.status != Ops.Rx.READY) throw Ops.Refused("Obat belum siap diambil.")
+                    while (order.status != target && order.status.next != null) order = Ops.advance(order, by = null)
+                }
             }
-            "examined" -> {
-                if (v.stage == Stage.WAITING) notify("Nomor ${v.ticket} dipanggil.", "Silakan masuk ke ruang pemeriksaan.")
-                v.stage = Stage.LABORATORY
-                v.examinedAt = now()
-                notify("Pemeriksaan dokter selesai. Selanjutnya ke laboratorium.", LABORATORY)
-            }
-            "laboratory" -> {
-                v.stage = Stage.PHARMACY
-                v.rx = Rx.RECEIVED
-                v.laboratoryDone = true
-                v.rxReceived = minuteOfDay()
-                notify("Resep diterima farmasi. Obat sedang diproses.", PHARMACY)
-            }
-            "medicine-ready" -> {
-                v.rx = Rx.READY
-                notify("Obat siap diambil. Nomor pengambilan ${v.pickupNumber}.", PHARMACY)
-            }
-            "picked-up" -> {
-                v.rx = Rx.COMPLETED
-                v.stage = Stage.COMPLETED
-                notify("Kunjungan selesai. Semoga lekas sehat.")
-            }
+        } catch (e: Ops.Refused) {
+            warn(e.message)
         }
     }
 

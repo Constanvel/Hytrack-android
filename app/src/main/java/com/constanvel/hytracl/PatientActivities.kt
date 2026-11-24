@@ -474,8 +474,7 @@ class DoctorsActivity : ShellActivity() {
         bar.book.isEnabled = !full
         bar.book.alpha = if (full) 0.55f else 1f
         bar.book.setOnClickListener {
-            Demo.book(doctor, day)
-            go(VisitActivity::class.java)
+            if (Demo.book(doctor, day)) go(VisitActivity::class.java) else recreate()
         }
     }
 }

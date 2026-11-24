@@ -101,6 +101,19 @@ object Local {
         return Patient(a.self.name, a.phone, v?.let { "${it.ticket} · ${it.clinic.name} · ${Ops.dateLabel(Ops.today().plusDays(it.day.offset.toLong()))}" })
     }
 
+    /** A booking in [Ops], from the app or the desk, becomes that patient's visit (Patient::queues). */
+    fun attach(q: Ops.Queue) {
+        val a = accounts.firstOrNull { it.phone == q.phone } ?: return
+        val v = Demo.Visit(q)
+        a.visit = v
+        a.visits.add(0, v)
+    }
+
+    /** QueueService::notify, for a patient who has an account on this device. */
+    fun notify(phone: String?, message: String, action: String?) {
+        accounts.firstOrNull { it.phone == phone }?.notifications?.add(0, Demo.Notification(message, action, Demo.stamp()))
+    }
+
     fun phoneTaken(normalized: String) = accounts.any { it.phone == normalized || it.self.phone == normalized }
 
     /** Sign-up after the right code: the account and its own record (name and phone only). */

@@ -415,7 +415,11 @@ abstract class DashboardActivity : AppCompatActivity() {
         main.removeAllViews()
         error?.let { main.flag(it, Tone.WARNING) }
         content(main, section)
+        rendered()
     }
+
+    /** After each render: a section that holds a device resource (the camera) releases it here. */
+    protected open fun rendered() = Unit
 
     protected open fun status() = "● Terhubung  ·  ${Ops.clock(java.time.Instant.now())} WIB"
 

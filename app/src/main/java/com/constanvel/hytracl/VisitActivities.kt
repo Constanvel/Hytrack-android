@@ -194,6 +194,8 @@ class CheckInActivity : ShellActivity() {
         val booked = v.stage == Stage.BOOKED
         ScreenCheckinBinding.inflate(layoutInflater, into).apply {
             who.text = "${v.ticket} · ${Demo.patient}"
+            qr.setImageBitmap(ticketQr(v.qrPayload, resources.getDimensionPixelSize(R.dimen.qr_size)))
+            qr.contentDescription = getString(R.string.qr_check_in_nomor, v.ticket, v.checkInCode)
             code.text = getString(R.string.nomor_check_in, v.checkInCode)
             status.text = when {
                 !booked -> getString(R.string.sudah_check_in_2)
@@ -229,4 +231,16 @@ class CheckInActivity : ShellActivity() {
             queue.setOnClickListener { go(VisitActivity::class.java) }
         }
     }
+}
+
+/** TicketQr: error correction M, a four-module quiet zone, dark modules in #173D3B on white. */
+fun ticketQr(payload: String, size: Int): android.graphics.Bitmap {
+    val hints = mapOf(
+        com.google.zxing.EncodeHintType.ERROR_CORRECTION to com.google.zxing.qrcode.decoder.ErrorCorrectionLevel.M,
+        com.google.zxing.EncodeHintType.MARGIN to 4,
+    )
+    val m = com.google.zxing.qrcode.QRCodeWriter().encode(payload, com.google.zxing.BarcodeFormat.QR_CODE, size, size, hints)
+    val dark = android.graphics.Color.parseColor("#173D3B")
+    val pixels = IntArray(size * size) { if (m[it % size, it / size]) dark else android.graphics.Color.WHITE }
+    return android.graphics.Bitmap.createBitmap(pixels, size, size, android.graphics.Bitmap.Config.ARGB_8888)
 }

@@ -76,6 +76,7 @@ object Ops {
         var cancelledAt: Instant? = null
         var cancelledBy: String? = null
         var cancelReason: String? = null
+        var upNextSent = false
         fun stage(kind: StageKind) = stages[kind.ordinal]
         val checkInClosed get() = Instant.now() > deadline
     }
@@ -250,9 +251,20 @@ object Ops {
 
     private fun line(d: Doctor, date: LocalDate = today()) = queues.filter { it.doctor === d && it.date == date }
 
-    private fun touch(q: Queue, kind: StageKind, status: StageStatus) = q.stage(kind).apply {
+    /** QueueService::notify: the message lands in the patient's account, if the visit has one. */
+    private fun notify(q: Queue, message: String, action: String? = null) = Local.notify(q.phone, message, action)
+
+    /** Smart Notification: warn the patient who is now first in line, once. */
+    private fun notifyUpNext(d: Doctor, date: LocalDate) {
+        val first = line(d, date).filter { it.status == Status.WAITING }.minWithOrNull(compareBy({ it.checkIn }, { it.id })) ?: return
+        if (first.upNextSent) return
+        first.upNextSent = true
+        notify(first, "Giliran Anda berikutnya.", "Tetap di dekat ruang pemeriksaan.")
+    }
+
+    private fun touch(q: Queue, kind: StageKind, status: StageStatus, by: String? = STAFF) = q.stage(kind).apply {
         this.status = status
-        by = STAFF
+        this.by = by
         started = started ?: Instant.now()
         if (status == StageStatus.DONE) completed = Instant.now()
     }
@@ -261,23 +273,31 @@ object Ops {
         val line = line(d)
         if (line.any { it.status == Status.SERVING }) throw Refused("Selesaikan pasien aktif sebelum memanggil berikutnya.")
         val next = waiting(d).firstOrNull() ?: throw Refused("Tidak ada pasien yang menunggu.")
-        return call(next)
+        return serve(next).also { notifyUpNext(d, next.date) }
     }
 
-    /** Call one checked-in patient from the booking detail. */
+    /** Call one checked-in patient from the booking detail (callWaiting): one patient at a time. */
     fun call(q: Queue): Queue {
         if (q.status != Status.WAITING) throw Refused("Hanya pasien yang sudah check-in dapat dipanggil.")
         if (q.date != today()) throw Refused("Pasien hanya dapat dipanggil pada tanggal layanan.")
         if (line(q.doctor).any { it.status == Status.SERVING }) throw Refused("Selesaikan pasien aktif sebelum memanggil berikutnya.")
+        return serve(q).also { notifyUpNext(q.doctor, q.date) }
+    }
+
+    /** QueueService::call. The patient's demo controls call out of turn ([by] null), as on the web. */
+    fun serve(q: Queue, by: String? = STAFF): Queue {
+        if (q.status != Status.WAITING) throw Refused("Status kunjungan tidak dapat diubah ke Dipanggil.")
         q.status = Status.SERVING
         q.calledCount = 1
-        touch(q, StageKind.CONSULTATION, StageStatus.ACTIVE)
+        touch(q, StageKind.CONSULTATION, StageStatus.ACTIVE, by)
+        notify(q, "Nomor ${q.number} dipanggil.", "Silakan masuk ke ruang pemeriksaan.")
         return q
     }
 
     fun recall(q: Queue) {
         if (q.status != Status.SERVING) throw Refused("Hanya pasien yang sedang dipanggil dapat dipanggil ulang.")
         q.calledCount++
+        notify(q, "Panggilan ulang untuk nomor ${q.number}.", "Segera menuju ruang pemeriksaan.")
     }
 
     fun noShow(q: Queue) {
@@ -285,10 +305,12 @@ object Ops {
             Status.BOOKED -> {
                 if (!q.checkInClosed) throw Refused("Pasien belum melewati batas check-in pukul ${clock(q.deadline)}. Statusnya masih Belum check-in.")
                 touch(q, StageKind.CHECK_IN, StageStatus.SKIPPED)
+                notify(q, "Anda tidak check-in sebelum batas waktu, sehingga ditandai tidak hadir.", "Hubungi petugas di meja check-in.")
             }
             Status.SERVING -> {
                 if (q.calledCount < 2) throw Refused("Tandai tidak hadir hanya setelah panggilan ulang.")
                 touch(q, StageKind.CONSULTATION, StageStatus.SKIPPED)
+                notify(q, "Anda tidak hadir saat dipanggil.", "Hubungi petugas di meja check-in.")
             }
             else -> throw Refused("Status kunjungan tidak dapat diubah ke Tidak hadir.")
         }
@@ -297,44 +319,81 @@ object Ops {
         q.noShowBy = STAFF
     }
 
-    fun examined(q: Queue) {
+    fun examined(q: Queue, by: String? = STAFF) {
         if (q.status != Status.SERVING) throw Refused("Status kunjungan tidak dapat diubah ke Laboratorium.")
         q.status = Status.LABORATORY
-        touch(q, StageKind.CONSULTATION, StageStatus.DONE)
-        touch(q, StageKind.LABORATORY, StageStatus.ACTIVE)
+        touch(q, StageKind.CONSULTATION, StageStatus.DONE, by)
+        touch(q, StageKind.LABORATORY, StageStatus.ACTIVE, by)
+        notify(q, "Pemeriksaan dokter selesai. Selanjutnya ke laboratorium.", Demo.LABORATORY)
     }
 
-    fun laboratoryDone(q: Queue) {
+    fun laboratoryDone(q: Queue, by: String? = STAFF) {
         if (q.status != Status.LABORATORY) throw Refused("Status kunjungan tidak dapat diubah ke Farmasi.")
         q.status = Status.PHARMACY
-        touch(q, StageKind.LABORATORY, StageStatus.DONE)
-        touch(q, StageKind.PHARMACY, StageStatus.ACTIVE)
-        q.order = Order(++orderIds, q, Rx.RECEIVED, Instant.now())
+        touch(q, StageKind.LABORATORY, StageStatus.DONE, by)
+        touch(q, StageKind.PHARMACY, StageStatus.ACTIVE, by)
+        q.order = Order(++orderIds, q, Rx.RECEIVED, Instant.now()).apply { this.by = by }
+        notify(q, "Resep diterima farmasi. Obat sedang diproses.", Demo.PHARMACY)
     }
 
     /** Move a prescription one step forward; handing over the medicine completes the visit. */
-    fun advance(order: Order): Order {
+    fun advance(order: Order, by: String? = STAFF): Order {
         val next = order.status.next ?: throw Refused("Obat sudah diserahkan.")
         order.status = next
-        order.by = STAFF
+        order.by = by
         when (next) {
             Rx.CHECKING -> order.prepared = Instant.now()
-            Rx.READY -> order.ready = Instant.now()
+            Rx.READY -> {
+                order.ready = Instant.now()
+                notify(order.queue, "Obat siap diambil. Nomor pengambilan ${order.pickup}.", Demo.PHARMACY)
+            }
             Rx.COMPLETED -> {
                 order.completed = Instant.now()
                 order.queue.status = Status.COMPLETED
-                touch(order.queue, StageKind.PHARMACY, StageStatus.DONE)
+                touch(order.queue, StageKind.PHARMACY, StageStatus.DONE, by)
+                notify(order.queue, "Kunjungan selesai. Semoga lekas sehat.")
             }
             else -> Unit
         }
         return order
     }
 
-    /** Check-in by the number on the ticket ("HT-000126"); the QR carries the same ticket. */
+    /**
+     * CheckInTicket: the QR carries "HT1.<id>.<yyyyMMdd>.<signature>", the typed number "HT-000126".
+     * ponytail: the signing key ships in the app, so it only rejects a hand-made QR or one for another
+     * visit; on the web the key stays on the server.
+     */
+    private const val QR_KEY = "hytrack-demo-device-key"
+
+    private fun sign(id: Int, date: String): String {
+        val mac = javax.crypto.Mac.getInstance("HmacSHA256")
+        mac.init(javax.crypto.spec.SecretKeySpec(QR_KEY.toByteArray(), "HmacSHA256"))
+        return mac.doFinal("$id.$date".toByteArray()).joinToString("") { "%02x".format(Locale.ROOT, it) }.take(20)
+    }
+
+    fun payload(q: Queue): String {
+        val date = q.date.format(DateTimeFormatter.BASIC_ISO_DATE)
+        return "HT1.${q.id}.$date.${sign(q.id, date)}"
+    }
+
+    /** "qr" or "code", stored as the check-in method (CheckInTicket::method). */
+    fun method(code: String) = if (code.trim().startsWith("HT1.")) "qr" else "code"
+
     fun identify(code: String): Queue {
-        val match = Regex("^HT-?(\\d{1,9})$", RegexOption.IGNORE_CASE).find(code.trim())
-            ?: throw Refused("Kode tidak dikenali. Pindai QR tiket HyTrack atau ketik nomor check-in.")
-        val q = queues.firstOrNull { it.id == match.groupValues[1].toInt() } ?: throw Refused("Nomor check-in tidak ditemukan.")
+        val text = code.trim()
+        val qr = Regex("^HT1\\.(\\d{1,9})\\.(\\d{8})\\.([0-9a-f]{20})$").find(text)
+        val id = if (qr != null) {
+            val (id, date, signature) = qr.destructured
+            if (sign(id.toInt(), date) != signature) throw Refused("QR tidak valid. Minta pasien membuka ulang tiket di aplikasi.")
+            queues.firstOrNull { it.id == id.toInt() }?.let {
+                if (it.date.format(DateTimeFormatter.BASIC_ISO_DATE) != date) throw Refused("QR tidak sesuai dengan sesi kunjungan.")
+            }
+            id.toInt()
+        } else {
+            Regex("^HT-?(\\d{1,9})$", RegexOption.IGNORE_CASE).find(text)?.groupValues?.get(1)?.toInt()
+                ?: throw Refused("Kode tidak dikenali. Pindai QR tiket HyTrack atau ketik nomor check-in.")
+        }
+        val q = queues.firstOrNull { it.id == id } ?: throw Refused("Nomor check-in tidak ditemukan.")
         when {
             q.status == Status.CANCELLED -> throw Refused("Booking ini sudah dibatalkan${q.cancelReason?.let { " ($it)" } ?: ""} dan tidak dapat dipakai check-in.")
             q.date < today() -> throw Refused("Tiket sudah kedaluwarsa. Tanggal kunjungannya ${dateLabel(q.date)}.")
@@ -343,22 +402,25 @@ object Ops {
         return q
     }
 
-    fun checkIn(q: Queue): Queue {
+    /** Staff confirm arrival by QR or number ([method]); the patient's demo control passes no staff. */
+    fun checkIn(q: Queue, by: String? = STAFF, method: String = "code"): Queue {
         when {
             q.status == Status.NO_SHOW -> throw Refused("Tiket ditandai tidak hadir dan tidak dapat dipakai lagi.")
             q.status != Status.BOOKED -> throw Refused("Tiket ${q.number} sudah check-in pukul ${clock(q.checkIn)}.")
+            q.date != today() -> throw Refused("Check-in hanya dapat dilakukan pada tanggal layanan.")
         }
         q.status = Status.WAITING
         q.checkIn = Instant.now()
-        q.checkInBy = STAFF
-        q.checkInMethod = "code"
-        touch(q, StageKind.CHECK_IN, StageStatus.DONE)
+        q.checkInBy = by
+        q.checkInMethod = if (by == null) "demo" else method
+        touch(q, StageKind.CHECK_IN, StageStatus.DONE, by)
+        notify(q, "Check-in berhasil. Anda masuk antrean dokter.", "Tunggu di dekat ruang poliklinik.")
         return q
     }
 
-    /** Cancelled, never removed: when, by whom and why. */
-    fun cancel(q: Queue, reason: String) {
-        val why = reason.trim()
+    /** Cancelled, never removed: when, by whom and why. A patient's own cancellation ([by] null) needs no reason. */
+    fun cancel(q: Queue, reason: String?, by: String? = STAFF) {
+        val why = reason?.trim() ?: "Dibatalkan oleh pasien"
         when {
             why.isEmpty() -> throw Refused("Tuliskan alasan pembatalan.")
             why.length < 3 -> throw Refused("Alasan pembatalan minimal 3 karakter.")
@@ -372,20 +434,28 @@ object Ops {
         }
         q.status = Status.CANCELLED
         q.cancelledAt = Instant.now()
-        q.cancelledBy = STAFF
+        q.cancelledBy = by
         q.cancelReason = why
         q.stages.filter { it.status == StageStatus.PENDING || it.status == StageStatus.ACTIVE }.forEach {
             it.status = StageStatus.SKIPPED
-            it.by = STAFF
+            it.by = by
         }
+        if (by != null) notify(q, "Booking ${q.number} dibatalkan petugas.", "Alasan: $why")
     }
 
     fun bookingDates(): List<LocalDate> = (0 until BOOKING_DAYS).map { today().plusDays(it) }
 
     fun quota(d: Doctor, date: LocalDate) = maxOf(0, DAILY_QUOTA - line(d, date).count { it.status != Status.CANCELLED })
 
-    /** A registered patient who came to the desk, booked under the patient app's rules. */
-    fun book(patient: Local.Patient, d: Doctor, date: LocalDate): Queue {
+    /** Patients ahead in the doctor's line (WaitEstimator::ahead). */
+    fun ahead(q: Queue): Int {
+        val waiting = line(q.doctor, q.date).filter { it.status == Status.WAITING }
+        if (q.status != Status.WAITING) return waiting.size
+        return waiting.count { it.checkIn!! < q.checkIn!! || (it.checkIn == q.checkIn && it.id < q.id) }
+    }
+
+    /** A booking from the patient app ([by] null) or by staff for a patient at the desk, under the same rules. */
+    fun book(patient: Local.Patient, d: Doctor, date: LocalDate, by: String? = STAFF): Queue {
         when {
             date !in bookingDates() -> throw Refused("Tanggal kunjungan tidak tersedia.")
             patient.active != null || queues.any { it.phone == patient.phone && it.status.active } ->
@@ -393,10 +463,14 @@ object Ops {
             quota(d, date) < 1 -> throw Refused("Kuota dokter pada tanggal ini sudah penuh.")
         }
         // Cancelled tickets keep their number, so the next number is simply the count + 1.
-        return Queue(++queueIds, patient.name, patient.phone, d, date, line(d, date).size + 1, Status.BOOKED).apply {
+        val q = Queue(++queueIds, patient.name, patient.phone, d, date, line(d, date).size + 1, Status.BOOKED).apply {
             bookedAt = Instant.now()
-            bookedBy = STAFF
-        }.also { queues += it }
+            bookedBy = by
+        }
+        queues += q
+        Local.attach(q)
+        notify(q, "Antrean ${q.number} berhasil diambil.", "Check-in saat tiba di rumah sakit.")
+        return q
     }
 
     // Data poliklinik (PolyclinicController) ------------------------------------------------------

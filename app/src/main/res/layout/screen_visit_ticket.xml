@@ -9,9 +9,16 @@
         style="@style/Widget.HyTrack.Notice"
         android:text="@string/antrean_berhasil_diambil" />
 
-    <!-- .card.ticket-card -->
+    <!-- .card.marked.ticket-card, with the "+" badge and the pulse line (Figma 43:2 frame 04). -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
     <LinearLayout
         style="@style/Widget.HyTrack.Card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_card_marked"
         android:paddingStart="22dp"
         android:paddingTop="22dp"
         android:paddingEnd="22dp"
@@ -53,6 +60,32 @@
             android:layout_height="wrap_content"
             tools:text="dr. Rina Kusuma, Sp.PD\nMinggu, 15 November 2026 · 09.00–12.00" />
     </LinearLayout>
+
+        <TextView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="74dp"
+            android:layout_marginEnd="27dp"
+            android:background="@drawable/bg_ticket_badge"
+            android:fontFamily="@font/inter_bold"
+            android:gravity="center"
+            android:importantForAccessibility="no"
+            android:includeFontPadding="false"
+            android:text="+"
+            android:textColor="#A8F0D9"
+            android:textSize="39.2sp"
+            tools:ignore="HardcodedText" />
+
+        <ImageView
+            android:layout_width="137dp"
+            android:layout_height="53dp"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="218.5dp"
+            android:layout_marginEnd="16.5dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ticket_pulse" />
+    </FrameLayout>
 
     <LinearLayout
         style="@style/Widget.HyTrack.WarningCard"

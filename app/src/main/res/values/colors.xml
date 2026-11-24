@@ -52,6 +52,26 @@
     <color name="danger">#B63832</color>
     <color name="danger_soft">#FCEBE9</color>
 
+    <!-- Patient cards, forms and Akun (Figma 43:2 frames 03, 13-16). -->
+    <color name="account_card">#ECF4EE</color>
+    <color name="logout">#F8ECE5</color>
+    <color name="logout_hover">#F3E0D6</color>
+    <color name="logout_border">#EED8CC</color>
+    <color name="danger_pale">#FFF4F2</color>
+    <color name="danger_pale_hover">#FDE7E3</color>
+    <color name="danger_text">#B02E29</color>
+    <color name="field_bg">#F6F9F6</color>
+    <color name="field_border">#D9E4DB</color>
+    <color name="fieldset_border">#E0EAE2</color>
+    <color name="selected_border">#08786B</color>
+    <color name="hya_large_border">#CDE1D3</color>
+    <color name="hya_large_start">#DEEEE3</color>
+    <color name="hya_large_end">#ECF4E9</color>
+    <color name="chat_heading">#183D39</color>
+    <color name="chat_muted">#607570</color>
+    <color name="chat_link">#0B7268</color>
+    <color name="chat_warning">#765218</color>
+
     <!-- Splash, from the Figma storyboard 43:2. -->
     <color name="splash_bg">#F1F9F5</color>
     <color name="splash_text">#47736D</color>

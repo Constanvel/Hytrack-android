@@ -529,4 +529,33 @@
     <string name="pastikan_data_pasien_benar">Pastikan data pasien yang dipilih sudah benar.</string>
     <string name="hapus_data">Hapus data</string>
     <string name="data_x_dihapus">Data %1$s dihapus dari daftar Anda.</string>
+    <!-- Figma 43:2 patient frames 07-21, matching the web (Laravel) copy. -->
+    <string name="ada_yang_bisa_hya_bantu_2">Ada yang bisa\nHya bantu?</string>
+    <string name="panduan_antrean_dan_arah_layanan">Panduan antrean dan arah layanan.</string>
+    <string name="perkiraan_antrean_lab">Perkiraan antrean 10–20 menit</string>
+    <string name="dimulai_setelah_lapor_lab">Dimulai setelah lapor di laboratorium.\nPermintaan pemeriksaan sudah dikirim dokter.</string>
+    <string name="lihat_denah_rute_aksesibel">Lihat denah &amp; rute aksesibel</string>
+    <string name="pemeriksaan_dokter_selesai_pukul">✓ Pemeriksaan dokter selesai · %1$s</string>
+    <string name="pembaruan_farmasi">● Pembaruan farmasi · %1$s</string>
+    <string name="perkiraan_siap">Perkiraan siap %1$s</string>
+    <string name="pukul_resep_diterima">%1$s · Resep dari dokter diterima.</string>
+    <string name="kembali_ke_beranda">Kembali ke Beranda</string>
+    <string name="kunjungan_telah_diselesaikan">✓ Kunjungan telah diselesaikan</string>
+    <string name="terima_kasih_nama">Terima kasih, %1$s.</string>
+    <string name="obat_diterima_semoga_lekas_sehat">Obat sudah diterima. Semoga lekas sehat.</string>
+    <string name="semoga_lekas_sehat_2">Semoga lekas sehat.</string>
+    <string name="ringkasan_kunjungan">Ringkasan kunjungan</string>
+    <string name="check_in_kedatangan_done">✓ Check-in kedatangan</string>
+    <string name="layanan_berikutnya_done">✓ Layanan berikutnya</string>
+    <string name="kunjungan_laboratorium_selesai">Kunjungan laboratorium selesai</string>
+    <string name="pengambilan_obat_done">✓ Pengambilan obat</string>
+    <string name="diterima_di_loket_f2">%1$s · Diterima di Loket F2</string>
+    <string name="sebelum_meninggalkan_rumah_sakit">Sebelum meninggalkan rumah sakit</string>
+    <string name="pastikan_obat_dan_aturan_pakai">Pastikan obat dan aturan pakai sudah dijelaskan oleh petugas farmasi.</string>
+    <string name="kunjungan_anda_telah_selesai">Kunjungan Anda telah selesai.</string>
+    <string name="data_pukul">Data %1$s</string>
+    <string name="hari_ini_pukul">Hari ini · %1$s</string>
+    <string name="tempat_menunggu">TEMPAT MENUNGGU</string>
+    <string name="tempat_menunggu_detail">Tempat menunggu: %1$s, %2$s. Buka petunjuk ruangan</string>
+    <string name="sumber_antrean_kunjungan">Sumber: antrean kunjungan · %1$s</string>
 </resources>

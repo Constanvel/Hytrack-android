@@ -18,9 +18,10 @@
         android:layout_height="wrap_content"
         android:text="@string/meja_check_in_gedung_a_lantai_2" />
 
-    <!-- .card.qr-card -->
+    <!-- .card.marked.qr-card (Figma 43:2 frame 05) -->
     <LinearLayout
         style="@style/Widget.HyTrack.Card"
+        android:background="@drawable/bg_card_marked"
         android:gravity="center_horizontal"
         android:tag="guide">
 

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- .ticket-badge (Figma 43:2 frame 04): deep teal tile with a translucent mint border. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#E60F4742" />
+    <stroke android:width="2dp" android:color="#8C4DB8A1" />
+    <corners android:radius="19.6dp" />
+</shape>

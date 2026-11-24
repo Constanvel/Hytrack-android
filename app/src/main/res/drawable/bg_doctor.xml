@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- .doctor-option (aria-pressed = selected) -->
+<!-- .doctor-option (Figma 43:2 frame 03): marked card; the chosen one has a 2dp #08786B border. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-<item android:state_selected="true"><shape>
-    <solid android:color="#FFFFFF" />
-    <stroke android:width="2dp" android:color="@color/primary" />
-    <corners android:radius="20dp" />
-</shape></item>
-<item><shape>
-    <solid android:color="#FFFFFF" />
-    <stroke android:width="2dp" android:color="#00000000" />
-    <corners android:radius="20dp" />
-</shape></item>
+    <item android:state_selected="true">
+        <layer-list>
+            <item><shape>
+                <solid android:color="#FFFFFF" />
+                <stroke android:width="2dp" android:color="@color/selected_border" />
+                <corners android:radius="22dp" />
+            </shape></item>
+            <item android:width="4dp" android:height="32dp" android:gravity="top|start" android:top="19dp">
+        <shape>
+            <solid android:color="@color/marker" />
+            <corners android:radius="2dp" />
+        </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item>
+        <layer-list>
+            <item android:drawable="@drawable/bg_card" />
+            <item android:width="4dp" android:height="32dp" android:gravity="top|start" android:top="21dp">
+        <shape>
+            <solid android:color="@color/marker" />
+            <corners android:radius="2dp" />
+        </shape>
+            </item>
+        </layer-list>
+    </item>
 </selector>

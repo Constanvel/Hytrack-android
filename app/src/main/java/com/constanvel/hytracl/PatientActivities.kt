@@ -102,7 +102,7 @@ class HomeActivity : ShellActivity() {
     }
 }
 
-/** Akun (Figma 27:248): the account card, then Data pasien first among the actions. */
+/** Akun (Figma 43:2 frame 16): the mint account card, the actions, then the large Hya card. */
 class AccountActivity : ShellActivity() {
     override val tab = Tab.ACCOUNT
 
@@ -119,18 +119,19 @@ class AccountActivity : ShellActivity() {
     override fun content(into: LinearLayout) {
         into.dividerDrawable = ContextCompat.getDrawable(this, R.drawable.gap_24)
         (into.layoutParams as? ViewGroup.MarginLayoutParams)?.topMargin = into.dp(12)
-        into.column(12, R.color.white, 22).apply {
-            setPadding(dp(22), dp(20), dp(22), dp(20))
+        into.column(12).apply {
+            background = marked(R.color.account_card, markerTop = 21)
+            setPadding(dp(20), dp(18), dp(20), dp(28))
             inter(getString(R.string.akun_pasien), 12f, 17f, Weight.SEMIBOLD, R.color.brand_muted)
             inter(Demo.patient, 26f, 38f, Weight.BOLD)
             inter(getString(R.string.telp, Demo.phone), 16f, 23f, color = R.color.brand_muted)
             inter(getString(R.string.kelola_data_anda), 15f, 22f)
         }
         into.column(16).apply {
-            button(getString(R.string.data_pasien), height = 56, radius = 12) { go(PatientDataActivity::class.java) }
-            button(getString(R.string.riwayat_kunjungan), Look.PALE, 56, 12) { go(HistoryActivity::class.java) }
-            button(getString(R.string.bantuan_panduan_kunjungan), Look.PALE, 56, 12) { go(HelpActivity::class.java) }
-            button(getString(R.string.ask_hya), Look.PALE, 56, 12) { go(HyaActivity::class.java) }
+            button(getString(R.string.data_pasien), height = 56, radius = 14) { go(PatientDataActivity::class.java) }
+            button(getString(R.string.riwayat_kunjungan), Look.SECONDARY, 56, 12) { go(HistoryActivity::class.java) }
+            button(getString(R.string.bantuan_panduan_kunjungan), Look.SECONDARY, 56, 12) { go(HelpActivity::class.java) }
+            button(getString(R.string.ask_hya), Look.SECONDARY, 56, 12) { go(HyaActivity::class.java) }
             if (Demo.activeVisit != null) {
                 ViewDemoControlsBinding.inflate(layoutInflater, this, true).apply {
                     bind(getString(R.string.kontrol_demo), getString(R.string.reset_data_kunjungan_demo)) { visit { Demo.cancel() } }
@@ -138,22 +139,24 @@ class AccountActivity : ShellActivity() {
                     demoAction.setTextColor(ContextCompat.getColor(this@AccountActivity, R.color.warning_text))
                 }
             }
-            button(getString(R.string.keluar), Look.PALE, 56, 12) {
+            button(getString(R.string.keluar), Look.LOGOUT, 56, 12) {
                 Demo.signOut()
                 startActivity(Intent(this@AccountActivity, LoginActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
             }
+            // The large Hya card replaces the bubble here (Shell hides the fab when it finds R.id.hyaHelp).
+            add(R.layout.view_hya_help_large)
         }
     }
 }
 
-/** Riwayat kunjungan (Figma 31:3): every ticket of this account (VisitView::history). */
+/** Riwayat kunjungan (Figma 43:2): every ticket of this account (VisitView::history), as marked cards. */
 class HistoryActivity : ShellActivity() {
     override val tab = Tab.ACCOUNT
     private var open: Int? = null
 
     override fun spec() = Spec(getString(R.string.riwayat_kunjungan),
         SimpleDateFormat("EEEE, d MMMM yyyy", Locale.forLanguageTag("id-ID")).format(Date()).uppercase(),
-        back = AccountActivity::class.java, bare = true)
+        back = AccountActivity::class.java, bare = true, nav = true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -188,7 +191,8 @@ class HistoryActivity : ShellActivity() {
         }
     }
 
-    private fun card(into: LinearLayout, item: JSONObject, first: Boolean) = into.column(0, R.color.white, 22).apply {
+    private fun card(into: LinearLayout, item: JSONObject, first: Boolean) = into.column(0).apply {
+        background = marked(markerTop = 21)
         setPadding(dp(20), dp(16), dp(20), dp(28))
         if (first) (layoutParams as LinearLayout.LayoutParams).topMargin = dp(4)
         val id = item.getInt("id")

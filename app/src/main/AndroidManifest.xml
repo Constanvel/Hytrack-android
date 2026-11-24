@@ -59,6 +59,8 @@
         <activity android:name=".CheckInGuideActivity" />
         <activity android:name=".QueueGuideActivity" />
         <activity android:name=".DirectionsActivity" />
+        <activity android:name=".StaffActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ManagementActivity" android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

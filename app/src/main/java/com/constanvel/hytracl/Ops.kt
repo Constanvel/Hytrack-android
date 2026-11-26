@@ -7,7 +7,6 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import kotlin.math.roundToInt
 
 /**
  * Staff and management data of the web dashboards, kept in memory like Local and Demo:
@@ -76,18 +75,12 @@ object Ops {
         var cancelledAt: Instant? = null
         var cancelledBy: String? = null
         var cancelReason: String? = null
-        var upNextSent = false
         fun stage(kind: StageKind) = stages[kind.ordinal]
         val checkInClosed get() = Instant.now() > deadline
     }
 
-    class Activity(val at: Instant, val key: String, val activity: String, val patient: String, val staff: String?, val unit: String, val result: String) {
-        val time get() = clock(at)
-    }
-
-    /** Every action on Android is Dina's, the seeded clerk (the only staff account). */
+    /** Default actor of the local demo actions; staff work itself runs on the Laravel API (Api). */
     const val STAFF = "Dina"
-    const val TARGET = 30 // config hytrack.wait_target_minutes
     private const val CONSULT_MINUTES = 5L
     private const val CHECK_IN_LEAD = 15L
     private const val DAILY_QUOTA = 30
@@ -123,9 +116,6 @@ object Ops {
 
     /** "24 Nov 2026" (dashboard-shell shortDate). */
     fun shortDate(date: LocalDate): String = DateTimeFormatter.ofPattern("d MMM yyyy", ID).format(date).replace(".", "")
-
-    /** "24 Nov 2026 · 08.35" (StaffController::stamp). */
-    fun stamp(at: Instant?) = at?.let { "${shortDate(it.atZone(zone).toLocalDate())} · ${clock(it)}" }
 
     val clinics = mutableListOf<Clinic>()
     val doctors = mutableListOf<Doctor>()
@@ -247,41 +237,18 @@ object Ops {
         queues += q
     }
 
-    // Queue actions (QueueService), each recorded as Dina's ----------------------------------------
+    // Queue actions (QueueService) behind the patient's demo controls and bookings ------------------
 
     private fun line(d: Doctor, date: LocalDate = today()) = queues.filter { it.doctor === d && it.date == date }
 
     /** QueueService::notify: the message lands in the patient's account, if the visit has one. */
     private fun notify(q: Queue, message: String, action: String? = null) = Local.notify(q.phone, message, action)
 
-    /** Smart Notification: warn the patient who is now first in line, once. */
-    private fun notifyUpNext(d: Doctor, date: LocalDate) {
-        val first = line(d, date).filter { it.status == Status.WAITING }.minWithOrNull(compareBy({ it.checkIn }, { it.id })) ?: return
-        if (first.upNextSent) return
-        first.upNextSent = true
-        notify(first, "Giliran Anda berikutnya.", "Tetap di dekat ruang pemeriksaan.")
-    }
-
     private fun touch(q: Queue, kind: StageKind, status: StageStatus, by: String? = STAFF) = q.stage(kind).apply {
         this.status = status
         this.by = by
         started = started ?: Instant.now()
         if (status == StageStatus.DONE) completed = Instant.now()
-    }
-
-    fun callNext(d: Doctor): Queue {
-        val line = line(d)
-        if (line.any { it.status == Status.SERVING }) throw Refused("Selesaikan pasien aktif sebelum memanggil berikutnya.")
-        val next = waiting(d).firstOrNull() ?: throw Refused("Tidak ada pasien yang menunggu.")
-        return serve(next).also { notifyUpNext(d, next.date) }
-    }
-
-    /** Call one checked-in patient from the booking detail (callWaiting): one patient at a time. */
-    fun call(q: Queue): Queue {
-        if (q.status != Status.WAITING) throw Refused("Hanya pasien yang sudah check-in dapat dipanggil.")
-        if (q.date != today()) throw Refused("Pasien hanya dapat dipanggil pada tanggal layanan.")
-        if (line(q.doctor).any { it.status == Status.SERVING }) throw Refused("Selesaikan pasien aktif sebelum memanggil berikutnya.")
-        return serve(q).also { notifyUpNext(q.doctor, q.date) }
     }
 
     /** QueueService::call. The patient's demo controls call out of turn ([by] null), as on the web. */
@@ -292,31 +259,6 @@ object Ops {
         touch(q, StageKind.CONSULTATION, StageStatus.ACTIVE, by)
         notify(q, "Nomor ${q.number} dipanggil.", "Silakan masuk ke ruang pemeriksaan.")
         return q
-    }
-
-    fun recall(q: Queue) {
-        if (q.status != Status.SERVING) throw Refused("Hanya pasien yang sedang dipanggil dapat dipanggil ulang.")
-        q.calledCount++
-        notify(q, "Panggilan ulang untuk nomor ${q.number}.", "Segera menuju ruang pemeriksaan.")
-    }
-
-    fun noShow(q: Queue) {
-        when (q.status) {
-            Status.BOOKED -> {
-                if (!q.checkInClosed) throw Refused("Pasien belum melewati batas check-in pukul ${clock(q.deadline)}. Statusnya masih Belum check-in.")
-                touch(q, StageKind.CHECK_IN, StageStatus.SKIPPED)
-                notify(q, "Anda tidak check-in sebelum batas waktu, sehingga ditandai tidak hadir.", "Hubungi petugas di meja check-in.")
-            }
-            Status.SERVING -> {
-                if (q.calledCount < 2) throw Refused("Tandai tidak hadir hanya setelah panggilan ulang.")
-                touch(q, StageKind.CONSULTATION, StageStatus.SKIPPED)
-                notify(q, "Anda tidak hadir saat dipanggil.", "Hubungi petugas di meja check-in.")
-            }
-            else -> throw Refused("Status kunjungan tidak dapat diubah ke Tidak hadir.")
-        }
-        q.status = Status.NO_SHOW
-        q.noShowAt = Instant.now()
-        q.noShowBy = STAFF
     }
 
     fun examined(q: Queue, by: String? = STAFF) {
@@ -374,32 +316,6 @@ object Ops {
     fun payload(q: Queue): String {
         val date = q.date.format(DateTimeFormatter.BASIC_ISO_DATE)
         return "HT1.${q.id}.$date.${sign(q.id, date)}"
-    }
-
-    /** "qr" or "code", stored as the check-in method (CheckInTicket::method). */
-    fun method(code: String) = if (code.trim().startsWith("HT1.")) "qr" else "code"
-
-    fun identify(code: String): Queue {
-        val text = code.trim()
-        val qr = Regex("^HT1\\.(\\d{1,9})\\.(\\d{8})\\.([0-9a-f]{20})$").find(text)
-        val id = if (qr != null) {
-            val (id, date, signature) = qr.destructured
-            if (sign(id.toInt(), date) != signature) throw Refused("QR tidak valid. Minta pasien membuka ulang tiket di aplikasi.")
-            queues.firstOrNull { it.id == id.toInt() }?.let {
-                if (it.date.format(DateTimeFormatter.BASIC_ISO_DATE) != date) throw Refused("QR tidak sesuai dengan sesi kunjungan.")
-            }
-            id.toInt()
-        } else {
-            Regex("^HT-?(\\d{1,9})$", RegexOption.IGNORE_CASE).find(text)?.groupValues?.get(1)?.toInt()
-                ?: throw Refused("Kode tidak dikenali. Pindai QR tiket HyTrack atau ketik nomor check-in.")
-        }
-        val q = queues.firstOrNull { it.id == id } ?: throw Refused("Nomor check-in tidak ditemukan.")
-        when {
-            q.status == Status.CANCELLED -> throw Refused("Booking ini sudah dibatalkan${q.cancelReason?.let { " ($it)" } ?: ""} dan tidak dapat dipakai check-in.")
-            q.date < today() -> throw Refused("Tiket sudah kedaluwarsa. Tanggal kunjungannya ${dateLabel(q.date)}.")
-            q.date > today() -> throw Refused("Tiket untuk ${dateLabel(q.date)}. Check-in dibuka pada tanggal tersebut.")
-        }
-        return q
     }
 
     /** Staff confirm arrival by QR or number ([method]); the patient's demo control passes no staff. */
@@ -473,165 +389,4 @@ object Ops {
         return q
     }
 
-    // Data poliklinik (PolyclinicController) ------------------------------------------------------
-
-    fun saveClinic(current: Clinic?, name: String, room: String): Clinic {
-        val n = name.trim()
-        when {
-            n.isEmpty() -> throw Refused("Nama poliklinik wajib diisi.")
-            n.length < 3 -> throw Refused("Nama poliklinik minimal 3 karakter.")
-            n.length > 100 -> throw Refused("Nama poliklinik maksimal 100 karakter.")
-            room.trim().length > 100 -> throw Refused("Lokasi ruangan maksimal 100 karakter.")
-            clinics.any { it !== current && it.name.equals(n, ignoreCase = true) } -> throw Refused("Nama poliklinik sudah digunakan.")
-        }
-        val clinic = current ?: Clinic(++clinicIds, n, null).also { clinics += it }
-        clinic.name = n
-        clinic.room = room.trim().ifEmpty { null }
-        return clinic
-    }
-
-    fun doctorsOf(c: Clinic) = doctors.count { it.clinic === c }
-    fun queuesOf(c: Clinic) = queues.count { it.clinic === c }
-
-    fun deleteClinic(c: Clinic) {
-        val d = doctorsOf(c)
-        val q = queuesOf(c)
-        if (d > 0 || q > 0) throw Refused("Poliklinik ${c.name} tidak dapat dihapus: masih dipakai $d dokter dan $q antrean.")
-        clinics.remove(c)
-    }
-
-    // Read models (StaffController::index) ----------------------------------------------------------
-
-    /** Today's line of one doctor, by check-in time. */
-    fun waiting(d: Doctor) = line(d).filter { it.status == Status.WAITING }.sortedWith(compareBy({ it.checkIn }, { it.id }))
-
-    fun serving(d: Doctor) = line(d).firstOrNull { it.status == Status.SERVING }
-
-    fun minutesSince(at: Instant?) = at?.let { Duration.between(it, Instant.now()).toMinutes().toInt() }
-
-    /** Alur pelayanan: every visit still open today, by the stage it is in. */
-    fun flow(): List<Queue> = queues.filter { it.date == today() && it.status.active }
-        .sortedWith(compareBy<Queue>({ it.checkIn == null }, { it.checkIn }, { it.id }))
-
-    fun late(q: Queue) = q.status == Status.WAITING && (minutesSince(q.checkIn) ?: 0) > TARGET
-
-    fun note(q: Queue) = when (q.status) {
-        Status.BOOKED -> "Belum check-in · batas ${clock(q.deadline)}"
-        Status.SERVING -> "Sedang dilayani · ${q.clinic.room ?: q.clinic.name}"
-        Status.WAITING -> "Menunggu · ${q.clinic.name} · ${minutesSince(q.checkIn) ?: 0} mnt"
-        Status.LABORATORY -> "Laboratorium · menunggu hasil"
-        else -> q.order?.status?.label ?: "Farmasi"
-    }
-
-    fun todayOrders() = queues.filter { it.date == today() }.mapNotNull { it.order }.sortedBy { it.id }
-
-    fun pharmacyAverage(): Int? = todayOrders().mapNotNull { o -> o.ready?.let { Duration.between(o.received, it).seconds / 60.0 } }
-        .takeIf { it.isNotEmpty() }?.average()?.roundToInt()
-
-    /** Riwayat aktivitas: today's staff actions, newest first (StaffController::history). */
-    fun history(): List<Activity> {
-        val today = queues.filter { it.date == today() }
-        val who = { q: Queue -> "${q.patient.substringBefore(' ')} · ${q.number}" }
-        val stages = today.flatMap { q ->
-            q.stages.filter { it.by != null }.mapNotNull { s ->
-                val at = s.completed ?: s.started ?: return@mapNotNull null
-                val done = s.status == StageStatus.DONE
-                val unit = when (s.kind) {
-                    StageKind.CHECK_IN -> "Kedatangan"
-                    StageKind.CONSULTATION -> q.clinic.name
-                    StageKind.LABORATORY -> "Laboratorium"
-                    StageKind.PHARMACY -> "Farmasi"
-                }
-                val (activity, result) = if (s.status == StageStatus.SKIPPED) "${s.kind.label} dilewati" to "Dilewati" else when (s.kind) {
-                    StageKind.CHECK_IN -> "Check-in dikonfirmasi" to "Berhasil"
-                    StageKind.CONSULTATION -> if (done) "Pemeriksaan dokter selesai" to "Selesai" else "Pemeriksaan dimulai" to "Dilayani"
-                    StageKind.LABORATORY -> if (done) "Laboratorium selesai" to "Selesai" else "Laboratorium dimulai" to "Diperiksa"
-                    StageKind.PHARMACY -> if (done) "Obat diserahkan" to "Diserahkan" else "Resep diterima" to "Verifikasi"
-                }
-                Activity(at, "j%08d".format(Locale.ROOT, s.journeyId), activity, who(q), s.by, unit, result)
-            }
-        }
-        val pharmacy = today.mapNotNull { it.order }.filter { it.by != null && (it.status == Rx.CHECKING || it.status == Rx.READY) }.mapNotNull { o ->
-            val key = "p%08d".format(Locale.ROOT, o.id)
-            if (o.status == Rx.READY) o.ready?.let { Activity(it, key, "Resep siap diambil", who(o.queue), o.by, "Farmasi", "Siap diambil") }
-            else o.prepared?.let { Activity(it, key, "Resep selesai disiapkan", who(o.queue), o.by, "Farmasi", "Pemeriksaan akhir") }
-        }
-        val noShows = today.filter { it.noShowBy != null && it.noShowAt != null }.map { q ->
-            Activity(q.noShowAt!!, "n%08d".format(Locale.ROOT, q.id), "Ditandai tidak hadir", who(q), q.noShowBy, q.clinic.name, "Tidak hadir")
-        }
-        return (stages + pharmacy + noShows).sortedWith(compareByDescending<Activity> { it.at }.thenByDescending { it.key })
-    }
-
-    /** Latest "✓ 08.25 · A-006 pemeriksaan dimulai oleh Dina" line (staff.tsx sentence). */
-    fun sentence(row: Activity) =
-        "${row.time} · ${row.patient.substringAfter(" · ")} ${row.activity.replaceFirstChar { it.lowercase() }}${row.staff?.let { " oleh $it" } ?: ""}"
-
-    // Service Insights (ServiceInsights::report): aggregates only, never patient identities --------
-
-    class Hour(val hour: String, val wait: Int)
-    class StageReport(val label: String, val minutes: Int?, val hourly: List<Hour>)
-    class ClinicReport(val clinic: String, val complete: Int, val wait: Int?)
-    class Report(
-        val registered: Int, val completed: Int, val active: Int, val notArrived: Int,
-        val averageWait: Int?, val withinTarget: Int?, val onTime: Int?, val updatedAt: String?,
-        val clinics: List<ClinicReport>, val stages: List<StageReport>,
-    ) {
-        val hourly get() = stages[0].hourly
-    }
-
-    private fun minutes(from: Instant?, to: Instant?) = if (from != null && to != null) Duration.between(from, to).seconds / 60.0 else null
-    private fun average(values: List<Double>) = values.takeIf { it.isNotEmpty() }?.average()?.roundToInt()
-    private fun percent(part: Int, whole: Int) = if (whole == 0) null else (part * 100.0 / whole).roundToInt()
-    private fun doctorWait(q: Queue) = minutes(q.checkIn, q.stage(StageKind.CONSULTATION).started)
-
-    fun report(date: LocalDate, clinic: Clinic? = null): Report {
-        val list = queues.filter { it.date == date && it.status != Status.CANCELLED && (clinic == null || it.clinic === clinic) }
-        val waits = list.mapNotNull(::doctorWait)
-        val arrived = list.filter { it.checkIn != null }
-        fun count(vararg s: Status) = list.count { it.status in s }
-        val spans = listOf<Pair<String, (Queue) -> Pair<Instant?, Instant?>>>(
-            "Check-in → dokter" to { q -> q.checkIn to q.stage(StageKind.CONSULTATION).started },
-            "Dokter → laboratorium" to { q -> q.stage(StageKind.LABORATORY).started to q.stage(StageKind.LABORATORY).completed },
-            "Resep → obat siap" to { q -> q.order?.received to q.order?.ready },
-        )
-        val hourOf = DateTimeFormatter.ofPattern("HH", Locale.ROOT)
-        val stages = spans.map { (label, span) ->
-            val found = list.map(span).filter { minutes(it.first, it.second) != null }
-            StageReport(
-                label,
-                average(found.map { minutes(it.first, it.second)!! }),
-                found.groupBy { hourOf.format(it.first!!.atZone(zone)) + ".00" }.toSortedMap()
-                    .map { (hour, rows) -> Hour(hour, average(rows.map { minutes(it.first, it.second)!! })!!) },
-            )
-        }
-        val latest = list.flatMap { q ->
-            listOf(q.checkIn, q.order?.received, q.order?.completed) + q.stages.flatMap { listOf(it.started, it.completed) }
-        }.filterNotNull().maxOrNull()
-        return Report(
-            registered = list.size,
-            completed = count(Status.COMPLETED),
-            active = count(Status.WAITING, Status.SERVING, Status.LABORATORY, Status.PHARMACY),
-            notArrived = count(Status.BOOKED),
-            averageWait = average(waits),
-            withinTarget = percent(waits.count { it <= TARGET }, waits.size),
-            onTime = percent(arrived.count { it.checkIn!! <= it.deadline }, arrived.size),
-            updatedAt = clock(latest),
-            clinics = list.groupBy { it.clinic.id }.values.map { rows ->
-                ClinicReport(rows.first().clinic.name, rows.count { it.status == Status.COMPLETED }, average(rows.mapNotNull(::doctorWait)))
-            }.sortedByDescending { it.wait ?: -1 },
-            stages = stages,
-        )
-    }
-
-    /** CSV of the per-clinic table (ServiceInsights::csv). */
-    fun csv(date: LocalDate, clinic: Clinic?): String {
-        val r = report(date, clinic)
-        val lines = listOf(
-            "Laporan layanan HyTrack $date - data agregat tanpa identitas pasien",
-            "Poliklinik,Selesai,Rata-rata tunggu (menit),Target $TARGET menit",
-        ) + r.clinics.map { row ->
-            listOf("\"${row.clinic.replace("\"", "\"\"")}\"", row.complete, row.wait ?: "", row.wait?.let { if (it <= TARGET) "Sesuai" else "Di atas" } ?: "").joinToString(",")
-        }
-        return "\uFEFF" + lines.joinToString("\r\n") + "\r\n"
-    }
 }

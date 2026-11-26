@@ -299,6 +299,10 @@ abstract class DashboardActivity : AppCompatActivity() {
     protected abstract val sections: List<String>
     protected abstract fun crumb(section: String): String
     protected abstract fun content(into: LinearLayout, section: String)
+    /** The section a fresh session opens on. */
+    protected open fun home() = sections[if (role == Local.Role.STAFF) 1 else 0]
+    /** Rail eyebrow: the staff member's room or the management area. */
+    protected open fun roomLabel() = if (role == Local.Role.STAFF) "RUANG PETUGAS" else "MANAJEMEN LAYANAN"
 
     protected var section = ""
     private lateinit var scroll: ScrollView
@@ -312,11 +316,8 @@ abstract class DashboardActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (Local.role != role) {
-            startActivity(Intent(this, LoginActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
-            return finish()
-        }
-        section = savedInstanceState?.getString("section") ?: sections[if (role == Local.Role.STAFF) 1 else 0]
+        if (Local.role != role) return signedOut()
+        section = savedInstanceState?.getString("section") ?: home()
         enableEdgeToEdge()
         scroll = ScrollView(this).apply { setBackgroundColor(Hex.PAGE); isFillViewport = true }
         val page = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -379,7 +380,7 @@ abstract class DashboardActivity : AppCompatActivity() {
     protected fun render() {
         rail.removeAllViews()
         rail.label("HyTrack", 25f, Weight.BOLD, Color.WHITE)
-        rail.label(if (role == Local.Role.STAFF) "RUANG PETUGAS" else "MANAJEMEN LAYANAN", 10f, Weight.SEMIBOLD, Color.parseColor("#B8DED1"))
+        rail.label(roomLabel(), 10f, Weight.SEMIBOLD, Color.parseColor("#B8DED1"))
         val grid = rail.stack(8)
         sections.chunked(2).forEach { pair ->
             val r = grid.row(8)
@@ -403,7 +404,7 @@ abstract class DashboardActivity : AppCompatActivity() {
             it.gravity = Gravity.CENTER_VERTICAL
             it.setOnClickListener {
                 Demo.signOut()
-                startActivity(Intent(this, LoginActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
+                signedOut()
             }
         }
 
@@ -416,6 +417,12 @@ abstract class DashboardActivity : AppCompatActivity() {
         error?.let { main.flag(it, Tone.WARNING) }
         content(main, section)
         rendered()
+    }
+
+    /** Back to Login · Petugas dan Manajemen (signed out, or the API ended the session). */
+    protected fun signedOut() {
+        startActivity(Intent(this, InternalLoginActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
+        finish()
     }
 
     /** After each render: a section that holds a device resource (the camera) releases it here. */

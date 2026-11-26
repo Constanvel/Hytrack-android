@@ -1,6 +1,7 @@
 package com.constanvel.hytracl
 
 import android.graphics.Color
+import android.os.Bundle
 import android.print.PrintAttributes
 import android.print.PrintManager
 import android.view.Gravity
@@ -11,41 +12,107 @@ import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.activity.result.contract.ActivityResultContracts
+import org.json.JSONObject
+import java.io.File
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-/** Management dashboard (web features/operations/management.tsx): aggregates only, from Ops. */
+/**
+ * Management dashboard (web features/operations/management.tsx) on GET /api/manajemen: the same
+ * ServiceInsights aggregates as the web, never patient identities. The CSV is /api/manajemen/ekspor.
+ */
 class ManagementActivity : DashboardActivity() {
     override val role = Local.Role.MANAGER
     override val sections = listOf("Ringkasan layanan", "Waktu tunggu", "Kinerja poliklinik", "Laporan")
     override fun crumb(section: String) = "Analitik / $section"
 
-    /** Today plus the most recent service dates that have tickets (ManagementController::index). */
-    private val dates get() = (listOf(Ops.today()) + Ops.queues.map { it.date }.filter { it < Ops.today() }.distinct().sortedDescending().take(6))
+    private class Clinic(val id: Int, val name: String)
+    private class Hour(val hour: String, val wait: Int)
+    private class StageReport(val label: String, val minutes: Int?, val hourly: List<Hour>)
+    private class ClinicReport(val clinic: String, val complete: Int, val wait: Int?)
+    private class Report(
+        val registered: Int, val completed: Int, val active: Int, val notArrived: Int,
+        val averageWait: Int?, val withinTarget: Int?, val onTime: Int?, val updatedAt: String?,
+        val clinics: List<ClinicReport>, val stages: List<StageReport>,
+    ) {
+        val hourly get() = stages[0].hourly
+    }
+
+    private var data: JSONObject? = null
+    private var loadError: String? = null
     private var date = Ops.today()
     private var clinicId = 0
-    private val clinic get() = Ops.clinics.firstOrNull { it.id == clinicId }
-    private val report get() = Ops.report(date, clinic)
+    /** Today plus the most recent service dates that have tickets (ManagementController::index). */
+    private val dates get() = data?.list("dates")?.map { LocalDate.parse(it.getString("value")) } ?: listOf(Ops.today())
+    private val clinics get() = data?.list("clinics")?.map { Clinic(it.optInt("id"), it.optString("name")) }.orEmpty()
+    private val clinic get() = clinics.firstOrNull { it.id == clinicId }
+    private var report = blank()
+    private var target = 30
     private val empty get() = report.registered == 0
-    private val todayWord get() = if (date == Ops.today()) "hari ini" else "pada tanggal ini"
+    private val todayWord get() = if (date == dates.first()) "hari ini" else "pada tanggal ini"
 
     override fun status() = report.updatedAt?.let { "Pembaruan terakhir $it WIB" } ?: "Belum ada pembaruan"
 
-    override fun content(into: LinearLayout, section: String) = when (section) {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (!isFinishing) load()
+    }
+
+    private fun filter() = Api.query("tanggal" to date, "poli" to clinicId.takeIf { it != 0 })
+
+    private fun load() {
+        request({ Api.call("GET", "manajemen" + filter()) }) { result ->
+            result.onSuccess {
+                data = it
+                loadError = null
+                date = LocalDate.parse(it.getString("date"))
+                clinicId = it.int("clinicId") ?: 0
+                read(it.getJSONObject("report"))
+            }.onFailure { e ->
+                if ((e as? Api.Failure)?.status == 401) return@request signedOut()
+                loadError = e.message ?: Api.OFFLINE
+            }
+            render()
+        }
+    }
+
+    /** ServiceInsights::report as the Ops report the screens already draw. */
+    private fun read(r: JSONObject) {
+        target = r.optInt("target", 30)
+        fun hours(list: List<JSONObject>) = list.map { Hour(it.getString("hour"), it.optInt("wait")) }
+        report = Report(
+            registered = r.optInt("registered"), completed = r.optInt("completed"), active = r.optInt("active"), notArrived = r.optInt("notArrived"),
+            averageWait = r.int("averageWait"), withinTarget = r.int("withinTarget"), onTime = r.int("onTime"), updatedAt = r.str("updatedAt"),
+            clinics = r.list("clinics").map { ClinicReport(it.optString("clinic"), it.optInt("complete"), it.int("wait")) },
+            stages = r.list("stages").map { StageReport(it.optString("label"), it.int("minutes"), hours(it.list("hourly"))) },
+        )
+    }
+
+    private fun blank() = Report(0, 0, 0, 0, null, null, null, null, emptyList(),
+        listOf("Check-in → dokter", "Dokter → laboratorium", "Resep → obat siap").map { StageReport(it, null, emptyList()) })
+
+    override fun content(into: LinearLayout, section: String) = if (data == null) into.waiting() else when (section) {
         "Waktu tunggu" -> into.waits()
         "Kinerja poliklinik" -> into.performance()
         "Laporan" -> into.reports()
         else -> into.summary()
     }
 
+    private fun LinearLayout.waiting() {
+        val c = card(10, 18)
+        c.label(if (loadError == null) "Memuat analitik layanan…" else "Data belum dapat dimuat", 18f, Weight.BOLD)
+        c.label(loadError ?: "Mengambil data agregat dari server HyTrack.", 13f, color = Hex.MUTED)
+        if (loadError != null) c.action("Coba lagi") { loadError = null; render(); load() }
+    }
+
     private fun minutes(value: Int?) = value?.let { "$it mnt" } ?: if (empty) "0 mnt" else "—"
     private fun percent(value: Int?) = value?.let { "$it%" } ?: if (empty) "0%" else "—"
     private fun nextHour(hour: String) = "%02d.00".format(Locale.ROOT, hour.take(2).toInt() + 1)
-    private fun peakOf(hourly: List<Ops.Hour>) = hourly.maxByOrNull { it.wait }?.let { top -> hourly.first { it.wait == top.wait } }
+    private fun peakOf(hourly: List<Hour>) = hourly.maxByOrNull { it.wait }?.let { top -> hourly.first { it.wait == top.wait } }
     private fun gap(wait: Int) = when {
-        wait > Ops.TARGET -> "+${wait - Ops.TARGET} mnt"
-        wait < Ops.TARGET -> "−${Ops.TARGET - wait} mnt"
+        wait > target -> "+${wait - target} mnt"
+        wait < target -> "−${target - wait} mnt"
         else -> "0 mnt"
     }
     private fun names(list: List<String>) = if (list.size < 2) list.firstOrNull().orEmpty() else list.dropLast(1).joinToString(", ") + " dan " + list.last()
@@ -59,11 +126,12 @@ class ManagementActivity : DashboardActivity() {
         val list = dates
         select("Tanggal laporan", list.mapIndexed { i, d -> if (i == 0) "Hari ini · ${dateLabel(d)}" else dateLabel(d) }, list.indexOf(date)) {
             date = list[it]
-            render()
+            load()
         }
-        select("Filter poliklinik", listOf("Semua poliklinik") + Ops.clinics.map { it.name }, Ops.clinics.indexOfFirst { it.id == clinicId } + 1) {
-            clinicId = if (it == 0) 0 else Ops.clinics[it - 1].id
-            render()
+        val clinics = clinics
+        select("Filter poliklinik", listOf("Semua poliklinik") + clinics.map { it.name }, clinics.indexOfFirst { it.id == clinicId } + 1) {
+            clinicId = if (it == 0) 0 else clinics[it - 1].id
+            load()
         }
         extra?.invoke(this)
         action(if (flat) "Ekspor data" else "↓  Ekspor laporan", if (flat) Btn.SECONDARY else Btn.PRIMARY, !empty) { exportCsv() }
@@ -75,12 +143,12 @@ class ManagementActivity : DashboardActivity() {
         val r = report
         heading("Ringkasan layanan", "Dari kedatangan hingga obat: lihat di mana pasien paling lama menunggu.") { pill() }
         filters(flat = false)
-        val over = r.averageWait?.let { it - Ops.TARGET }
+        val over = r.averageWait?.let { it - target }
         stat("Pasien terdaftar", "${r.registered}", "${r.completed} selesai · ${r.active} aktif · ${r.notArrived} belum tiba", Hex.MINT, stacked = true)
         stat("Rata-rata tunggu", minutes(r.averageWait), when {
             over == null -> "Belum ada data waktu tunggu"
-            over > 0 -> "$over menit di atas target ${Ops.TARGET} menit"
-            else -> "Sesuai target ${Ops.TARGET} menit"
+            over > 0 -> "$over menit di atas target ${target} menit"
+            else -> "Sesuai target ${target} menit"
         }, valueColor = if (over != null && over > 0) Hex.WARM else Hex.TEXT, stacked = true)
         stat("Sesuai target tunggu", percent(r.withinTarget), if (r.withinTarget == null) "Belum dinilai · target ≥85%" else "Target layanan: minimal 85%", Hex.SLATE, stacked = true)
         stat("Check-in tepat waktu", percent(r.onTime), if (r.onTime == null) "Belum ada pasien check-in" else "Dari pasien yang sudah tiba", Color.parseColor("#8AA16C"), Hex.PRIMARY, stacked = true)
@@ -94,8 +162,8 @@ class ManagementActivity : DashboardActivity() {
         val t = panel.table(400)
         t.cells(listOf("Poliklinik", "Selesai", "Rata-rata tunggu", "Target"), w, header = true)
         r.clinics.forEach { row ->
-            val cells = t.cells(listOf(row.clinic, "${row.complete}", row.wait?.let { "$it menit" } ?: "—", row.wait?.let { if (it > Ops.TARGET) "Di atas" else "Sesuai" } ?: "—"), w)
-            (cells.getChildAt(3) as android.widget.TextView).setTextColor(if ((row.wait ?: 0) > Ops.TARGET) Hex.WARNING_TEXT else Hex.PRIMARY)
+            val cells = t.cells(listOf(row.clinic, "${row.complete}", row.wait?.let { "$it menit" } ?: "—", row.wait?.let { if (it > target) "Di atas" else "Sesuai" } ?: "—"), w)
+            (cells.getChildAt(3) as android.widget.TextView).setTextColor(if ((row.wait ?: 0) > target) Hex.WARNING_TEXT else Hex.PRIMARY)
         }
         if (r.clinics.isEmpty()) panel.emptyState("Belum ada data poliklinik", "Data muncul setelah ada aktivitas pelayanan.")
 
@@ -116,7 +184,7 @@ class ManagementActivity : DashboardActivity() {
     }
 
     /** "Waktu tunggu per jam" (frames 12, 24, 27, 28): 07.00–15.00 plus any hour with data. */
-    private fun LinearLayout.chart(hourly: List<Ops.Hour>, label: String) {
+    private fun LinearLayout.chart(hourly: List<Hour>, label: String) {
         val panel = card(10)
         val head = panel.row(12, Gravity.TOP)
         head.label("Waktu tunggu per jam", 16f, Weight.BOLD).weight()
@@ -142,16 +210,16 @@ class ManagementActivity : DashboardActivity() {
             bars.addView(col, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f))
             wait[hour]?.let { v ->
                 col.label("$v", 11f, Weight.SEMIBOLD).apply { gravity = Gravity.CENTER }
-                col.addView(View(context).apply { background = shape(if (v > Ops.TARGET) Hex.ABOVE else Hex.PRIMARY, 4) },
+                col.addView(View(context).apply { background = shape(if (v > target) Hex.ABOVE else Hex.PRIMARY, 4) },
                     LinearLayout.LayoutParams(dp(18), dp(minOf(v, 60) * 2.6f)).apply { topMargin = dp(4) })
             }
             col.label(hour, 8f, color = Hex.MUTED).apply { gravity = Gravity.CENTER; setPadding(0, dp(8), 0, 0) }
         }
         if (hourly.isEmpty()) panel.emptyState("Belum ada data waktu tunggu", "Grafik akan terisi setelah pasien mulai dilayani.")
         val legend = panel.row(10)
-        legend.label("■ ≤${Ops.TARGET} menit", 9f, color = Hex.PRIMARY).weight()
-        legend.label("■ >${Ops.TARGET} menit", 9f, color = Hex.ABOVE).weight()
-        legend.label("— Target ${Ops.TARGET} menit", 9f, color = Hex.WARNING_TEXT).weight()
+        legend.label("■ ≤${target} menit", 9f, color = Hex.PRIMARY).weight()
+        legend.label("■ >${target} menit", 9f, color = Hex.ABOVE).weight()
+        legend.label("— Target ${target} menit", 9f, color = Hex.WARNING_TEXT).weight()
         if (hourly.isNotEmpty()) {
             panel.label("Data grafik", 12f, Weight.SEMIBOLD, Hex.MUTED)
             panel.cells(listOf("Jam", "Menit"), listOf(1f, 1f), header = true)
@@ -159,7 +227,7 @@ class ManagementActivity : DashboardActivity() {
         }
     }
 
-    private fun LinearLayout.attention(r: Ops.Report, idle: List<String>) {
+    private fun LinearLayout.attention(r: Report, idle: List<String>) {
         val slowest = r.clinics.firstOrNull { it.wait != null }
         val peak = peakOf(r.hourly)
         if (slowest?.wait == null) {
@@ -173,13 +241,13 @@ class ManagementActivity : DashboardActivity() {
             return
         }
         val wait = slowest.wait
-        val above = wait > Ops.TARGET
+        val above = wait > target
         val hours = peak?.let { " pada jam ${it.hour}–${nextHour(it.hour)}" }.orEmpty()
         val c = card(6, 20, Hex.WARNING, Color.parseColor("#ECDBB7"))
         c.eyebrow(if (above) "PERLU PERHATIAN" else "TUNGGU TERLAMA", Hex.WARNING_TEXT)
         c.label(slowest.clinic, 18f, Weight.BOLD, Hex.WARNING_TEXT)
         c.label("$wait menit", 32f, Weight.BOLD, Hex.WARNING_TEXT)
-        c.label("Rata-rata tunggu tertinggi $todayWord.\n" + if (above) "${wait - Ops.TARGET} menit di atas target." else "Masih sesuai target ${Ops.TARGET} menit.", 13f, color = Hex.WARNING_TEXT)
+        c.label("Rata-rata tunggu tertinggi $todayWord.\n" + if (above) "${wait - target} menit di atas target." else "Masih sesuai target ${target} menit.", 13f, color = Hex.WARNING_TEXT)
         c.rule()
         c.label(if (above) "Tinjau kapasitas layanan$hours sebelum menambah kuota." else "Pertahankan kapasitas layanan$hours.", 12f, color = Hex.WARNING_TEXT)
     }
@@ -192,7 +260,7 @@ class ManagementActivity : DashboardActivity() {
         val r = report
         val stage = r.stages[stageIndex]
         val peak = peakOf(stage.hourly)
-        val over = stage.minutes?.let { it - Ops.TARGET }
+        val over = stage.minutes?.let { it - target }
         val firstPeak = peakOf(r.stages[0].hourly)
         heading("Waktu tunggu", "Telusuri jam sibuk dan waktu tunggu pada setiap tahap pelayanan.") { pill() }
         filters(flat = true) {
@@ -201,8 +269,8 @@ class ManagementActivity : DashboardActivity() {
         stat("Rata-rata tunggu", minutes(stage.minutes), when {
             over == null -> "Belum ada data waktu tunggu"
             stageIndex > 0 -> stage.label
-            over > 0 -> "$over menit di atas target ${Ops.TARGET} menit"
-            else -> "Sesuai target ${Ops.TARGET} menit"
+            over > 0 -> "$over menit di atas target ${target} menit"
+            else -> "Sesuai target ${target} menit"
         }, valueColor = if (stageIndex == 0 && over != null && over > 0) Hex.WARM else Hex.TEXT, stacked = true)
         stat("Sesuai target tunggu", percent(r.withinTarget), if (r.withinTarget == null) "Belum dinilai · target ≥85%" else "Target layanan minimal 85%", stacked = true)
         stat("Jam tunggu tertinggi", peak?.hour ?: "—", peak?.let { "Rata-rata tunggu ${it.wait} menit" } ?: "Belum ada jam layanan tercatat", stacked = true)
@@ -211,13 +279,13 @@ class ManagementActivity : DashboardActivity() {
         attention(r, listOf("Belum ada antrean", "0 menit", "Waktu tunggu belum dapat dihitung karena belum ada pelayanan.",
             "Analisis jam sibuk tersedia setelah aktivitas pelayanan tercatat."))
         r.stages.forEachIndexed { i, item ->
-            val warm = i == 0 && item.minutes != null && item.minutes > Ops.TARGET
+            val warm = i == 0 && item.minutes != null && item.minutes > target
             val (kind, note, idle) = STAGE_NOTES[i]
             val c = if (warm) card(4, 16, Hex.WARM_BG, null, 16) else if (i > 0) card(4, 16, Hex.PALE, null, 16) else card(4, 16)
             val tone = if (warm) Hex.WARM else Hex.TEXT
             c.label("0${i + 1} · ${item.label}", 14f, Weight.BOLD, tone)
             c.label(minutes(item.minutes), 28f, Weight.BOLD, tone)
-            c.label(if (i == 0) "Target ≤${Ops.TARGET} menit" else kind, 12f, Weight.SEMIBOLD, if (warm) Hex.WARM else Hex.MUTED)
+            c.label(if (i == 0) "Target ≤${target} menit" else kind, 12f, Weight.SEMIBOLD, if (warm) Hex.WARM else Hex.MUTED)
             c.label(when {
                 item.minutes == null -> idle
                 i == 0 -> if (warm && firstPeak != null) "Prioritaskan peninjauan kapasitas pada jam ${firstPeak.hour}–${nextHour(firstPeak.hour)}." else "Waktu tunggu dokter masih sesuai target."
@@ -243,8 +311,8 @@ class ManagementActivity : DashboardActivity() {
             1 -> r.clinics.sortedByDescending { it.complete }
             else -> r.clinics.sortedByDescending { it.wait ?: -1 }
         }
-        val above = r.clinics.filter { (it.wait ?: 0) > Ops.TARGET }
-        val share = { row: Ops.ClinicReport -> if (r.completed > 0) Math.round(row.complete * 100.0 / r.completed).toInt() else 0 }
+        val above = r.clinics.filter { (it.wait ?: 0) > target }
+        val share = { row: ClinicReport -> if (r.completed > 0) Math.round(row.complete * 100.0 / r.completed).toInt() else 0 }
         val focused = rows.firstOrNull { it.clinic == focus } ?: rows.firstOrNull()
         val slowest = r.clinics.firstOrNull { it.wait != null }
         val peak = peakOf(r.hourly)
@@ -254,14 +322,14 @@ class ManagementActivity : DashboardActivity() {
         stat("Di atas target tunggu", "${above.size} poli",
             if (empty) "Belum dapat dievaluasi" else if (above.isNotEmpty()) names(above.map { it.clinic }) else "Seluruh poliklinik sesuai target",
             valueColor = if (above.isNotEmpty()) Hex.WARM else Hex.TEXT, stacked = true)
-        stat("Rata-rata tunggu", minutes(r.averageWait), r.averageWait?.let { "Target maksimal ${Ops.TARGET} menit" } ?: "Belum ada data · target ≤${Ops.TARGET} menit", stacked = true)
+        stat("Rata-rata tunggu", minutes(r.averageWait), r.averageWait?.let { "Target maksimal ${target} menit" } ?: "Belum ada data · target ≤${target} menit", stacked = true)
 
         val panel = card()
         val head = panel.row(12, Gravity.TOP)
         head.label("Perbandingan poliklinik", 18f, Weight.BOLD).weight()
-        head.label("Target waktu tunggu ≤${Ops.TARGET} menit", 11f, color = Hex.MUTED).wrap()
+        head.label("Target waktu tunggu ≤${target} menit", 11f, color = Hex.MUTED).wrap()
         rows.forEach { row ->
-            val late = (row.wait ?: 0) > Ops.TARGET
+            val late = (row.wait ?: 0) > target
             val tone = if (late) Hex.WARNING_TEXT else Hex.PRIMARY
             val item = panel.stack(6, 12).apply { if (row === focused) background = shape(Hex.PALE, 12) }
             val top = item.row(8)
@@ -288,14 +356,14 @@ class ManagementActivity : DashboardActivity() {
         f.label("${focused?.complete ?: 0} pasien selesai", 22f, Weight.BOLD)
         f.label(focused?.let { "${share(it)}% dari seluruh layanan selesai $todayWord." } ?: "Belum ada kontribusi layanan untuk dihitung.", 13f, color = Hex.MUTED)
         val sw = slowest?.wait
-        if (sw != null && sw > Ops.TARGET) {
+        if (sw != null && sw > target) {
             val w = card(6, 16, Hex.WARM_BG, null, 16)
             w.label("Prioritas evaluasi kapasitas", 16f, Weight.BOLD, Hex.WARM)
             w.label("${slowest.clinic} memiliki rata-rata tunggu $sw menit. Tinjau kapasitas layanan${peak?.let { " pada jam ${it.hour}–${nextHour(it.hour)}" }.orEmpty()} sebelum menambah kuota.", 13f, color = Hex.WARM)
         } else {
             val ok = card(6, 16, Color.WHITE, Hex.CARD_BORDER, 16)
             ok.label(if (slowest != null) "Seluruh poliklinik sesuai target" else "Evaluasi menunggu data", 16f, Weight.BOLD)
-            ok.label(if (slowest != null) "Rata-rata tunggu tertinggi ${slowest.clinic} ${slowest.wait} menit, masih dalam target ${Ops.TARGET} menit."
+            ok.label(if (slowest != null) "Rata-rata tunggu tertinggi ${slowest.clinic} ${slowest.wait} menit, masih dalam target ${target} menit."
                 else "Perbandingan dan rekomendasi akan tersedia setelah ada aktivitas pelayanan. Belum ada poliklinik yang perlu diprioritaskan.", 13f, color = Hex.MUTED)
         }
         footnote("Perbandingan menggunakan periode yang sama. Data agregat tidak memuat identitas pasien.")
@@ -303,7 +371,7 @@ class ManagementActivity : DashboardActivity() {
 
     // Laporan (Figma 43:2 frames 26 / 30) -----------------------------------------------------------
 
-    private class Download(val kind: Int, val date: LocalDate, val clinic: Ops.Clinic?, val format: String, val at: String)
+    private class Download(val kind: Int, val date: LocalDate, val clinic: Clinic?, val format: String, val at: String)
 
     private var kind = 0
     private var format = "PDF"
@@ -313,7 +381,7 @@ class ManagementActivity : DashboardActivity() {
         store.getString("downloads", null).orEmpty().lines().mapNotNull { line ->
             val p = line.split('|')
             if (p.size != 5) return@mapNotNull null
-            runCatching { Download(p[0].toInt(), LocalDate.parse(p[1]), Ops.clinics.firstOrNull { it.id == p[2].toInt() }, p[3], p[4]) }.getOrNull()
+            runCatching { Download(p[0].toInt(), LocalDate.parse(p[1]), p[2].toInt().takeIf { it != 0 }?.let { id -> Clinic(id, "") }, p[3], p[4]) }.getOrNull()
         }.toMutableList()
     }
 
@@ -327,11 +395,12 @@ class ManagementActivity : DashboardActivity() {
         form.select("Jenis laporan", KINDS.map { it.first }, kind) { kind = it; render() }
         form.label("Periode", 12f, Weight.SEMIBOLD, Hex.MUTED)
         val list = dates
-        form.select("Periode", list.map { "${dateLabel(it)} – ${dateLabel(it)}" }, list.indexOf(date)) { date = list[it]; render() }
+        form.select("Periode", list.map { "${dateLabel(it)} – ${dateLabel(it)}" }, list.indexOf(date)) { date = list[it]; load() }
         form.label("Poliklinik", 12f, Weight.SEMIBOLD, Hex.MUTED)
-        form.select("Poliklinik", listOf("Semua poliklinik") + Ops.clinics.map { it.name }, Ops.clinics.indexOfFirst { it.id == clinicId } + 1) {
-            clinicId = if (it == 0) 0 else Ops.clinics[it - 1].id
-            render()
+        val clinics = clinics
+        form.select("Poliklinik", listOf("Semua poliklinik") + clinics.map { it.name }, clinics.indexOfFirst { it.id == clinicId } + 1) {
+            clinicId = if (it == 0) 0 else clinics[it - 1].id
+            load()
         }
         form.label("Format unduhan", 12f, Weight.SEMIBOLD, Hex.MUTED)
         val formats = form.row(10)
@@ -360,7 +429,7 @@ class ManagementActivity : DashboardActivity() {
         val t = preview.table(380)
         t.cells(listOf("Poliklinik", "Selesai", "Tunggu", "Target"), w, header = true)
         r.clinics.forEach { row ->
-            t.cells(listOf(row.clinic, "${row.complete}", row.wait?.let { "$it mnt" } ?: "—", row.wait?.let { if (it > Ops.TARGET) "Di atas" else "Sesuai" } ?: "—"), w)
+            t.cells(listOf(row.clinic, "${row.complete}", row.wait?.let { "$it mnt" } ?: "—", row.wait?.let { if (it > target) "Di atas" else "Sesuai" } ?: "—"), w)
         }
         if (r.clinics.isEmpty()) preview.emptyState("Belum ada data laporan", "Tidak ada aktivitas layanan pada periode ini.\nCoba pilih periode lain atau tunggu pelayanan tercatat.")
         preview.label(if (r.withinTarget == null && r.onTime == null) "Belum ada data · pencapaian target belum dapat dinilai."
@@ -377,7 +446,8 @@ class ManagementActivity : DashboardActivity() {
             row.link("Unduh") {
                 date = d.date
                 clinicId = d.clinic?.id ?: 0
-                if (d.format == "CSV") exportCsv() else printPreview()
+                load()
+                if (d.format == "CSV") exportCsv()
             }.weight(hw.last())
         }
         if (downloads.isEmpty()) history.emptyState("Belum ada riwayat unduhan", "Laporan yang sudah dibuat akan tampil di sini.")
@@ -396,17 +466,21 @@ class ManagementActivity : DashboardActivity() {
         render()
     }
 
-    private var pendingCsv: String? = null
+    private var pendingCsv: File? = null
 
-    /** Same file as /manajemen/ekspor: the per-clinic table, aggregates only. */
+    /** GET /api/manajemen/ekspor: the server's per-clinic CSV, aggregates only. */
     private fun exportCsv() {
-        pendingCsv = Ops.csv(date, clinic)
-        saveCsv.launch("hytrack-laporan-$date.csv")
+        val name = "hytrack-laporan-$date.csv"
+        request({ Api.download("manajemen/ekspor" + filter(), File(cacheDir, name)) }) { result ->
+            result.onSuccess { pendingCsv = it; saveCsv.launch(name) }
+                .onFailure { e -> error = e.message; render() }
+        }
     }
 
     private val saveCsv = registerForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
-        val csv = pendingCsv ?: return@registerForActivityResult
-        uri?.let { contentResolver.openOutputStream(it)?.use { out -> out.write(csv.toByteArray()) } }
+        val file = pendingCsv ?: return@registerForActivityResult
+        uri?.let { contentResolver.openOutputStream(it)?.use { out -> file.inputStream().use { input -> input.copyTo(out) } } }
+        file.delete()
         pendingCsv = null
     }
 
@@ -418,7 +492,7 @@ class ManagementActivity : DashboardActivity() {
         val r = report
         val esc = { s: String -> s.replace("&", "&amp;").replace("<", "&lt;") }
         val rows = r.clinics.joinToString("") { row ->
-            "<tr><td>${esc(row.clinic)}</td><td>${row.complete}</td><td>${row.wait?.let { "$it mnt" } ?: "—"}</td><td>${row.wait?.let { if (it > Ops.TARGET) "Di atas" else "Sesuai" } ?: "—"}</td></tr>"
+            "<tr><td>${esc(row.clinic)}</td><td>${row.complete}</td><td>${row.wait?.let { "$it mnt" } ?: "—"}</td><td>${row.wait?.let { if (it > target) "Di atas" else "Sesuai" } ?: "—"}</td></tr>"
         }
         val html = """<html><body style="font-family:sans-serif;color:#173d3b">
             <h2>Pratinjau · ${KINDS[kind].first}</h2><p>${longDate(date)} · ${esc(clinic?.name ?: "Semua poliklinik")}</p>

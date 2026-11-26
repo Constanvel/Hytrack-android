@@ -49,11 +49,14 @@ object Local {
     var current: Account? = null
         private set
 
-    /** Staff and managers sign in with their username (AuthController::accountName); they have no patient account. */
+    /** Staff and managers sign in through the Laravel API (InternalLoginActivity); they have no patient account. */
     enum class Role { STAFF, MANAGER }
-    private val STAFF_ACCOUNTS = mapOf("dina" to Role.STAFF, "manajer" to Role.MANAGER)
-    var role: Role? = null
-        private set
+    val role: Role?
+        get() = when (Api.account?.optString("role")) {
+            "staff" -> Role.STAFF
+            "manager" -> Role.MANAGER
+            else -> null
+        }
 
     init {
         seed("Siti Aminah", "6281255500842", "00-08-42", "1988-05-12", "female")
@@ -83,9 +86,8 @@ object Local {
     // Accounts ----------------------------------------------------------------------
 
     fun login(phone: String, password: String): Boolean {
-        role = STAFF_ACCOUNTS[phone.trim().lowercase()]?.takeIf { password == Demo.DEMO_PASSWORD }
-        current = if (role != null) null else accounts.firstOrNull { it.phone == Demo.normalizePhone(phone) && it.password == password }
-        return current != null || role != null
+        current = accounts.firstOrNull { it.phone == Demo.normalizePhone(phone) && it.password == password }
+        return current != null
     }
 
     /** A registered patient found by phone at the booking desk (StaffController::findPatient). */
@@ -123,7 +125,7 @@ object Local {
 
     fun signOut() {
         current = null
-        role = null
+        Api.logout()
     }
 
     // Data pasien (PatientRecords) ------------------------------------------------------

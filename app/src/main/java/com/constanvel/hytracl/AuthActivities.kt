@@ -198,6 +198,7 @@ class LoginActivity : AppCompatActivity() {
         b.forgot.setOnClickListener { b.forgotNotice.isVisible = true }
         b.contact.setOnClickListener { b.contactNotice.isVisible = true }
         b.switchLink.setOnClickListener { startActivity(Intent(this, RegisterActivity::class.java)) }
+        b.internalLink.setOnClickListener { startActivity(Intent(this, InternalLoginActivity::class.java)) }
         b.submit.setOnClickListener {
             val phone = b.phone.value.trim()
             val password = b.password.value
@@ -208,8 +209,74 @@ class LoginActivity : AppCompatActivity() {
                 Demo.companion = role == "companion"
                 enterSignedIn()
             } else {
-                b.phone.error(getString(R.string.nomor_ponsel_atau_kata_sandi_salah))
+                // A username, not a phone number: staff and managers use the internal sign-in.
+                b.phone.error(getString(if (phone.any(Char::isLetter)) R.string.akun_internal_di_sini else R.string.nomor_ponsel_atau_kata_sandi_salah))
                 b.password.input.text.clear()
+            }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("role", role)
+    }
+}
+
+/**
+ * Login · Petugas dan Manajemen (Figma 47:2345, web InternalLogin): the chosen role must match the
+ * account, checked by POST /api/masuk with "as". There is no self-service reset; accounts are
+ * issued and reset by the hospital's administrator.
+ */
+class InternalLoginActivity : AppCompatActivity() {
+    private var role = "staff"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (Local.role != null) return enterSignedIn()
+        val b = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(b.root)
+        authFrame(b.scroll, b.main)
+        b.identity.authTitle.text = getString(R.string.masuk_ke_hytrack)
+        b.identity.authIntro.text = getString(R.string.internal_intro)
+        b.phone.setup(getString(R.string.id_pengguna_atau_email), getString(R.string.masukkan_id_pengguna), username = true)
+        b.password.setup(getString(R.string.kata_sandi), getString(R.string.masukkan_kata_sandi), password = true)
+        b.password.input.imeOptions = EditorInfo.IME_ACTION_DONE
+        role = savedInstanceState?.getString("role") ?: role
+        val cards = mutableMapOf<String, FrameLayout>()
+        fun choose(value: String) {
+            role = value
+            cards.forEach { (key, card) -> card.pick(key == role) }
+        }
+        // Same artwork as public/assets/role-staff.svg and role-manager.svg.
+        cards["staff"] = b.roles.roleCard(R.drawable.ic_role_patient, getString(R.string.role_petugas), getString(R.string.role_petugas_detail)) { choose("staff") }
+        cards["manager"] = b.roles.roleCard(R.drawable.ic_role_companion, getString(R.string.role_manajemen), getString(R.string.role_manajemen_detail)) { choose("manager") }
+        choose(role)
+        b.forgotNotice.text = getString(R.string.internal_recovery)
+        b.forgot.setOnClickListener { b.forgotNotice.isVisible = true; b.contactNotice.isVisible = false }
+        b.switchPrompt.text = getString(R.string.belum_memiliki_akses)
+        b.switchLink.text = getString(R.string.hubungi_administrator)
+        b.contactNotice.text = getString(R.string.internal_access)
+        b.switchLink.setOnClickListener { b.contactNotice.isVisible = true; b.forgotNotice.isVisible = false }
+        b.benefit.isVisible = false
+        b.contact.isVisible = false
+        b.internalLink.isVisible = false
+        b.submit.setOnClickListener {
+            val username = b.phone.value.trim()
+            val password = b.password.value
+            b.phone.error(if (username.isEmpty()) getString(R.string.id_pengguna_wajib_diisi) else null)
+            b.password.error(if (password.isEmpty()) getString(R.string.kata_sandi_wajib_diisi) else null)
+            if (username.isEmpty() || password.isEmpty()) return@setOnClickListener
+            b.submit.isEnabled = false
+            b.submit.text = getString(R.string.memeriksa)
+            request({ Api.login(username, password, role) }) { result ->
+                b.submit.isEnabled = true
+                b.submit.text = getString(R.string.masuk)
+                result.onSuccess { enterSignedIn() }.onFailure { e ->
+                    val failure = e as? Api.Failure
+                    // The role mismatch comes back on "as"; wrong credentials on "username".
+                    b.phone.error(failure?.message ?: Api.OFFLINE)
+                    b.password.input.text.clear()
+                }
             }
         }
     }

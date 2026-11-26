@@ -558,4 +558,23 @@
     <string name="tempat_menunggu">TEMPAT MENUNGGU</string>
     <string name="tempat_menunggu_detail">Tempat menunggu: %1$s, %2$s. Buka petunjuk ruangan</string>
     <string name="sumber_antrean_kunjungan">Sumber: antrean kunjungan · %1$s</string>
+    <!-- Login · Petugas dan Manajemen (Figma 47:2345). -->
+    <string name="masuk_petugas_manajemen">Petugas atau manajemen? Masuk di sini</string>
+    <string name="masuk_ke_hytrack">Masuk ke HyTrack</string>
+    <string name="internal_intro">Selamat datang kembali. Pilih peran dan masuk untuk mengakses ruang kerja Anda.</string>
+    <string name="role_petugas">Petugas</string>
+    <string name="role_petugas_detail">Kelola antrean dan
+pelayanan pasien</string>
+    <string name="role_manajemen">Manajemen</string>
+    <string name="role_manajemen_detail">Pantau analitik dan
+kinerja pelayanan</string>
+    <string name="id_pengguna_atau_email">ID pengguna atau email</string>
+    <string name="masukkan_id_pengguna">Masukkan ID pengguna atau email</string>
+    <string name="id_pengguna_wajib_diisi">ID pengguna wajib diisi.</string>
+    <string name="belum_memiliki_akses">Belum memiliki akses?</string>
+    <string name="hubungi_administrator">Hubungi administrator</string>
+    <string name="internal_recovery">Kata sandi akun internal diatur ulang oleh administrator rumah sakit. Hubungi administrator dengan menyebutkan ID pengguna Anda.</string>
+    <string name="internal_access">Akun petugas dan manajemen dibuat oleh administrator rumah sakit. Hubungi administrator untuk mendapatkan akses.</string>
+    <string name="memeriksa">Memeriksa…</string>
+    <string name="akun_internal_di_sini">Akun petugas dan manajemen masuk melalui tautan “Petugas atau manajemen?” di bawah.</string>
 </resources>

@@ -19,6 +19,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // The HyTrack Laravel API for the staff and management area; 10.0.2.2 is the host
+        // machine from the emulator. Override with -PapiUrl=https://…/api/.
+        val apiUrl = providers.gradleProperty("apiUrl").getOrElse("http://10.0.2.2:8000/api/")
+        buildConfigField("String", "API_URL", "\"$apiUrl\"")
     }
 
     buildTypes {
@@ -30,6 +35,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

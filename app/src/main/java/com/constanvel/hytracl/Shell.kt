@@ -317,17 +317,19 @@ abstract class ShellActivity : AppCompatActivity() {
                     bottomMargin = decorInset
                 }
             }
-            // right -32px bottom -12px / 250px 354px, opacity .8
+            // Figma 43:2 frame 01, on its 412dp width: 192x272 flush right, ending 73dp under the
+            // bar's top edge, layer opacity 12% x image 80%. Narrower screens scale it down.
             Decor.CORNER -> {
                 view.setImageResource(R.drawable.decor_corner)
                 view.scaleType = android.widget.ImageView.ScaleType.FIT_XY
-                view.alpha = 0.8f
+                view.alpha = 0.096f
+                val art = minOf(view.dp(192), resources.displayMetrics.widthPixels * 192 / 412)
                 view.updateLayoutParams<FrameLayout.LayoutParams> {
-                    width = view.dp(250)
-                    height = view.dp(354)
+                    width = art
+                    height = art * 272 / 192
                     gravity = android.view.Gravity.BOTTOM or android.view.Gravity.END
-                    marginEnd = -view.dp(32)
-                    bottomMargin = decorInset - view.dp(12)
+                    marginEnd = 0
+                    bottomMargin = decorInset - art * 73 / 192
                 }
             }
             null -> Unit

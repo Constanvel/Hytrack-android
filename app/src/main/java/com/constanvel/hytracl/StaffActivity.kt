@@ -3,6 +3,7 @@ package com.constanvel.hytracl
 import android.Manifest
 import android.app.DatePickerDialog
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Canvas
 import android.graphics.Color
@@ -85,6 +86,7 @@ class StaffActivity : DashboardActivity() {
 
     override fun content(into: LinearLayout, section: String) {
         if (board == null) return into.waiting()
+        if (Prototype.active) into.rooms()
         flash?.let { if (section != "Antrean poli" && section != "Alur pelayanan") into.flag("✓ $it") }
         when (section) {
             SCAN -> into.scanner()
@@ -96,6 +98,20 @@ class StaffActivity : DashboardActivity() {
             BOOKINGS -> into.bookings()
             CLINICS -> into.clinicAdmin()
             else -> into.queue()
+        }
+    }
+
+    /** Mode prototype only: one sample account per room, so every staff flow can be tried. */
+    private fun LinearLayout.rooms() {
+        val c = card(8, 12, Hex.PALE, Hex.PALE_BORDER, 16)
+        c.eyebrow("MODE PROTOTYPE · PILIH RUANG", Hex.PRIMARY)
+        val rooms = Prototype.ROOMS
+        c.select("Ruang petugas", rooms.map { it.second }, rooms.indexOfFirst { it.first == room }) {
+            if (rooms[it].first != room) {
+                Prototype.room(rooms[it].first)
+                startActivity(Intent(this@StaffActivity, StaffActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
+                finish()
+            }
         }
     }
 
@@ -1297,7 +1313,8 @@ class StaffActivity : DashboardActivity() {
         val filters = b.optJSONObject("bookingFilters") ?: JSONObject()
         val clinics = b.list("clinics")
         val statuses = b.list("statuses")
-        heading(BOOKINGS, "Buat, cari, perbarui, dan batalkan booking pasien. Semua perubahan tersimpan di server.") { sample() }
+        val kept = if (Prototype.active) "Perubahan hanya berlaku di mode prototype." else "Semua perubahan tersimpan di server."
+        heading(BOOKINGS, "Buat, cari, perbarui, dan batalkan booking pasien. $kept") { sample() }
         label("Tanggal layanan", 12f, Weight.SEMIBOLD, Hex.MUTED)
         val date = filters.str("date")?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
         box(date?.let { Ops.dateLabel(it) } ?: "Semua tanggal").setOnClickListener {

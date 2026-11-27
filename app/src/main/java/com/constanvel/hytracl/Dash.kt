@@ -420,16 +420,20 @@ abstract class DashboardActivity : AppCompatActivity() {
         rendered()
     }
 
-    /** Back to Login · Petugas dan Manajemen (signed out, or the API ended the session). */
+    /**
+     * Back to Login · Petugas dan Manajemen (signed out, or the API ended the session); in
+     * Mode prototype to the first sign-in screen, where the sample roles are.
+     */
     protected fun signedOut() {
-        startActivity(Intent(this, InternalLoginActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
+        val login = if (Prototype.active) LoginActivity::class.java else InternalLoginActivity::class.java
+        startActivity(Intent(this, login).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
         finish()
     }
 
     /** After each render: a section that holds a device resource (the camera) releases it here. */
     protected open fun rendered() = Unit
 
-    protected open fun status() = "● Terhubung  ·  ${Ops.clock(java.time.Instant.now())} WIB"
+    protected open fun status() = "● ${if (Prototype.active) "Prototype" else "Terhubung"}  ·  ${Ops.clock(java.time.Instant.now())} WIB"
 
     /** DashboardTitle: 25sp title, 12sp subtitle, and its pill or button. */
     protected fun LinearLayout.heading(title: String, subtitle: String, aside: (LinearLayout.() -> Unit)? = null) {

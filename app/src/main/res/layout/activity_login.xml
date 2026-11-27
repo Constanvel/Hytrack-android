@@ -219,6 +219,10 @@
                 <TextView
                     style="@style/Widget.HyTrack.Notice.Info"
                     android:text="@string/akun_demo_pasien_0812_5550_0842_kata" />
+
+                <include
+                    android:id="@+id/prototype"
+                    layout="@layout/view_prototype" />
             </LinearLayout>
         </LinearLayout>
     </FrameLayout>

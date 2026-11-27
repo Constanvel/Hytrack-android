@@ -380,7 +380,7 @@ class ManagementActivity : DashboardActivity() {
     private var kind = 0
     private var format = "PDF"
     /** On this device across restarts, as the web keeps it in the browser (localStorage). */
-    private val store by lazy { getSharedPreferences("laporan", MODE_PRIVATE) }
+    private val store by lazy { getSharedPreferences(if (Prototype.active) PROTOTYPE_REPORTS else "laporan", MODE_PRIVATE) }
     private val downloads by lazy {
         store.getString("downloads", null).orEmpty().lines().mapNotNull { line ->
             val p = line.split('|')
@@ -514,7 +514,10 @@ class ManagementActivity : DashboardActivity() {
         web.loadDataWithBaseURL(null, html, "text/html", "utf-8", null)
     }
 
-    private companion object {
+    companion object {
+        /** Download history of Mode prototype, apart from the real one. */
+        const val PROTOTYPE_REPORTS = "laporan-prototype"
+
         /** Figma 43:2 frames 12 and 24 always show 07.00–15.00. */
         val HOURS = (7..15).map { "%02d.00".format(Locale.ROOT, it) }
         val SORTS = listOf("Urutkan: tunggu tertinggi", "Urutkan: selesai terbanyak", "Urutkan: nama poliklinik")

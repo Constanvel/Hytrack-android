@@ -21,6 +21,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioButton
+import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -37,6 +38,7 @@ import com.constanvel.hytracl.databinding.ActivityLoginBinding
 import com.constanvel.hytracl.databinding.ActivityRegisterBinding
 import com.constanvel.hytracl.databinding.ActivityRegisterOtpBinding
 import com.constanvel.hytracl.databinding.ViewAuthFieldBinding
+import com.constanvel.hytracl.databinding.ViewPrototypeBinding
 
 /** Shared field setup for AuthInput / PasswordInput. */
 private fun ViewAuthFieldBinding.setup(label: String, hint: String, phone: Boolean = false, password: Boolean = false, username: Boolean = false) {
@@ -170,9 +172,80 @@ private fun FrameLayout.pick(chosen: Boolean) {
     })
 }
 
+/**
+ * The web's "Mode prototype" card: a switch, and while it is on, the sample roles to enter as
+ * without credentials ([Prototype]). Switching it off brings the normal sign-in back.
+ */
+private fun AppCompatActivity.prototypeCard(card: ViewPrototypeBinding, hint: Int, roles: List<Pair<Int, Prototype.As>>) {
+    card.hint.setText(hint)
+    card.toggle.contentDescription = "${getString(R.string.mode_prototype)}. ${getString(hint)}"
+    ViewCompat.setAccessibilityDelegate(card.toggle, object : AccessibilityDelegateCompat() {
+        override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
+            super.onInitializeAccessibilityNodeInfo(host, info)
+            info.className = android.widget.Switch::class.java.name
+        }
+    })
+    card.caption.setOnClickListener { card.toggle.toggle() }
+    card.choices.removeAllViews()
+    roles.chunked(2).forEach { pair ->
+        val row = LinearLayout(this).apply {
+            showDividers = LinearLayout.SHOW_DIVIDER_MIDDLE
+            dividerDrawable = ContextCompat.getDrawable(context, R.drawable.gap_8)
+        }
+        card.choices.addView(row)
+        pair.forEach { (label, role) ->
+            val button = TextView(this).apply {
+                text = getString(label)
+                textSize = 14f
+                typeface = ResourcesCompat.getFont(context, R.font.inter_semibold)
+                includeFontPadding = false
+                setTextColor(ContextCompat.getColor(context, R.color.brand))
+                gravity = Gravity.CENTER
+                minHeight = dp(40)
+                setBackgroundResource(R.drawable.bg_prototype_role)
+                setOnClickListener {
+                    Prototype.signIn(role)
+                    enterSignedIn()
+                }
+            }
+            ViewCompat.setAccessibilityDelegate(button, object : AccessibilityDelegateCompat() {
+                override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
+                    super.onInitializeAccessibilityNodeInfo(host, info)
+                    info.className = android.widget.Button::class.java.name
+                }
+            })
+            row.addView(button, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        }
+    }
+    card.toggle.setOnCheckedChangeListener(null)
+    card.toggle.isChecked = Prototype.active
+    card.toggle.jumpDrawablesToCurrentState()
+    card.choices.isVisible = Prototype.active
+    card.toggle.setOnCheckedChangeListener { _, on ->
+        if (on) {
+            Prototype.enter()
+            // Report downloads of an earlier prototype session belong to data that is gone.
+            getSharedPreferences(ManagementActivity.PROTOTYPE_REPORTS, Context.MODE_PRIVATE).edit().clear().apply()
+        } else Prototype.exit()
+        card.choices.isVisible = on
+    }
+}
+
 class LoginActivity : AppCompatActivity() {
     /** Masuk sebagai: "patient" or "companion"; both sign in a patient account. */
     private var role = "patient"
+    private var card: ViewPrototypeBinding? = null
+
+    /** The switch may have changed on the internal sign-in screen above this one. */
+    override fun onResume() {
+        super.onResume()
+        card?.let {
+            prototypeCard(it, R.string.mode_prototype_pasien, listOf(
+                R.string.role_pasien to Prototype.As.PATIENT, R.string.pendamping to Prototype.As.COMPANION,
+                R.string.role_petugas to Prototype.As.STAFF, R.string.role_manajemen to Prototype.As.MANAGER,
+            ))
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -180,6 +253,7 @@ class LoginActivity : AppCompatActivity() {
         val b = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(b.root)
         authFrame(b.scroll, b.main)
+        card = b.prototype
         b.identity.authTitle.text = getString(R.string.selamat_datang_kembali)
         b.identity.authIntro.text = getString(R.string.masuk_untuk_melanjutkan_kunjungan_ndan)
         b.phone.setup(getString(R.string.nomor_ponsel), getString(R.string.phone_hint), phone = true, username = true)
@@ -259,6 +333,8 @@ class InternalLoginActivity : AppCompatActivity() {
         b.benefit.isVisible = false
         b.contact.isVisible = false
         b.internalLink.isVisible = false
+        prototypeCard(b.prototype, R.string.mode_prototype_internal,
+            listOf(R.string.role_petugas to Prototype.As.STAFF, R.string.role_manajemen to Prototype.As.MANAGER))
         b.submit.setOnClickListener {
             val username = b.phone.value.trim()
             val password = b.password.value

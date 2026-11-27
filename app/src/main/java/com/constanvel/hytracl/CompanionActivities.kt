@@ -202,7 +202,8 @@ class CompanionMonitorActivity : ShellActivity() {
         shell.header.addView(LinearLayout(this).apply {
             inter(getString(R.string.pendamping), 12f, 18f, Weight.SEMIBOLD, R.color.brand).apply {
                 gravity = Gravity.CENTER
-                minWidth = dp(116)
+                // Below 360dp the badge only takes its text, so "HyTrack" stays on one line.
+                minWidth = if (resources.configuration.screenWidthDp >= 360) dp(116) else 0
                 setPadding(dp(16), dp(6), dp(16), dp(6))
                 background = rounded(R.color.auth_benefit, 15)
             }
@@ -280,8 +281,10 @@ class CompanionMonitorActivity : ShellActivity() {
             ).forEachIndexed { i, (label, value) ->
                 metrics.column(6).apply {
                     layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply { if (i > 0) marginStart = dp(12) }
-                    inter(label, 11f, 16f, color = R.color.companion_soft)
-                    inter(value, 19f, 27f, Weight.SEMIBOLD, R.color.white).maxLines = 1
+                    // "Di depan Anda" takes two lines below 360dp: the three values stay level.
+                    inter(label, 11f, 16f, color = R.color.companion_soft).minLines = if (resources.configuration.screenWidthDp >= 360) 1 else 2
+                    // The unit ("pasien", "mnt") wraps rather than disappearing on a narrow card.
+                    inter(value, if (resources.configuration.screenWidthDp >= 360) 19f else 15f, 27f, Weight.SEMIBOLD, R.color.white)
                 }
             }
             inter(getString(R.string.perbarui_antrean), 13f, 20f, Weight.SEMIBOLD, R.color.brand).apply {

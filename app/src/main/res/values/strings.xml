@@ -577,4 +577,7 @@ kinerja pelayanan</string>
     <string name="internal_access">Akun petugas dan manajemen dibuat oleh administrator rumah sakit. Hubungi administrator untuk mendapatkan akses.</string>
     <string name="memeriksa">Memeriksa…</string>
     <string name="akun_internal_di_sini">Akun petugas dan manajemen masuk melalui tautan “Petugas atau manajemen?” di bawah.</string>
+    <string name="mode_prototype">Mode prototype</string>
+    <string name="mode_prototype_pasien">Coba alur aplikasi dengan data contoh, tanpa database.</string>
+    <string name="mode_prototype_internal">Coba ruang kerja petugas dan manajemen dengan data contoh.</string>
 </resources>

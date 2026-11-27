@@ -183,12 +183,18 @@ class ManagementActivity : DashboardActivity() {
         label(text, 12f, color = Hex.MUTED)
     }
 
+    /** A card title and its note; below 360dp the note goes underneath, so the title keeps whole words. */
+    private fun LinearLayout.titled(title: String, size: Float, note: String) {
+        val narrow = resources.configuration.screenWidthDp < 360
+        val head = if (narrow) stack(4) else row(12, Gravity.TOP)
+        head.label(title, size, Weight.BOLD).also { if (!narrow) it.weight() }
+        head.label(note, 11f, color = Hex.MUTED).also { if (!narrow) it.wrap() }
+    }
+
     /** "Waktu tunggu per jam" (frames 12, 24, 27, 28): 07.00–15.00 plus any hour with data. */
     private fun LinearLayout.chart(hourly: List<Hour>, label: String) {
         val panel = card(10)
-        val head = panel.row(12, Gravity.TOP)
-        head.label("Waktu tunggu per jam", 16f, Weight.BOLD).weight()
-        head.label("Menit · $label", 11f, color = Hex.MUTED).wrap()
+        panel.titled("Waktu tunggu per jam", 16f, "Menit · $label")
         val hours = (HOURS + hourly.map { it.hour }).distinct().sorted()
         val wait = hourly.associate { it.hour to it.wait }
         val plot = FrameLayout(context)
@@ -325,9 +331,7 @@ class ManagementActivity : DashboardActivity() {
         stat("Rata-rata tunggu", minutes(r.averageWait), r.averageWait?.let { "Target maksimal ${target} menit" } ?: "Belum ada data · target ≤${target} menit", stacked = true)
 
         val panel = card()
-        val head = panel.row(12, Gravity.TOP)
-        head.label("Perbandingan poliklinik", 18f, Weight.BOLD).weight()
-        head.label("Target waktu tunggu ≤${target} menit", 11f, color = Hex.MUTED).wrap()
+        panel.titled("Perbandingan poliklinik", 18f, "Target waktu tunggu ≤${target} menit")
         rows.forEach { row ->
             val late = (row.wait ?: 0) > target
             val tone = if (late) Hex.WARNING_TEXT else Hex.PRIMARY
@@ -376,7 +380,7 @@ class ManagementActivity : DashboardActivity() {
     private var kind = 0
     private var format = "PDF"
     /** On this device across restarts, as the web keeps it in the browser (localStorage). */
-    private val store by lazy { getSharedPreferences("laporan", MODE_PRIVATE) }
+    private val store by lazy { getSharedPreferences(if (Prototype.active) PROTOTYPE_REPORTS else "laporan", MODE_PRIVATE) }
     private val downloads by lazy {
         store.getString("downloads", null).orEmpty().lines().mapNotNull { line ->
             val p = line.split('|')
@@ -510,7 +514,10 @@ class ManagementActivity : DashboardActivity() {
         web.loadDataWithBaseURL(null, html, "text/html", "utf-8", null)
     }
 
-    private companion object {
+    companion object {
+        /** Download history of Mode prototype, apart from the real one. */
+        const val PROTOTYPE_REPORTS = "laporan-prototype"
+
         /** Figma 43:2 frames 12 and 24 always show 07.00–15.00. */
         val HOURS = (7..15).map { "%02d.00".format(Locale.ROOT, it) }
         val SORTS = listOf("Urutkan: tunggu tertinggi", "Urutkan: selesai terbanyak", "Urutkan: nama poliklinik")

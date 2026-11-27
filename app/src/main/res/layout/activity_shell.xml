@@ -220,6 +220,22 @@
         </FrameLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <!-- Behind the status bar: the colour the page's mint atmosphere starts with, so no seam shows. -->
+    <View
+        android:id="@+id/statusBar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/page_start" />
+
+    <!-- Behind Android's navigation buttons (Figma 43:2 "Sistem Android"): the page's closing mint,
+         so scrolled content never runs under them and the bottom nav ends above them. -->
+    <View
+        android:id="@+id/systemBar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="bottom"
+        android:background="@color/page_end" />
+
     <!-- .hya-fab -->
     <FrameLayout
         android:id="@+id/fab"

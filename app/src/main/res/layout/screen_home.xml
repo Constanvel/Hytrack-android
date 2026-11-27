@@ -116,11 +116,12 @@
             tools:text="Ulangi panduan dari awal" />
     </LinearLayout>
 
-    <!-- .inline-link -->
+    <!-- .inline-link, pulled up 12dp: under the 44dp text button the 20dp gap reads as twice that. -->
     <LinearLayout
         android:id="@+id/helpLink"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="-12dp"
         android:clickable="true"
         android:focusable="true"
         android:gravity="center_vertical"

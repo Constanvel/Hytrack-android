@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- .bottom-nav: white, #CFE3D8 border, 24px top corners -->
+<!-- Figma 43:2 "Navigasi dan aksi": white, #CFE3D8 border, 24px top and 18px bottom corners -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <solid android:color="#FFFFFF" />
     <stroke android:width="1dp" android:color="@color/pale_border" />
-    <corners android:topLeftRadius="24dp" android:topRightRadius="24dp" />
+    <corners android:topLeftRadius="24dp" android:topRightRadius="24dp"
+        android:bottomLeftRadius="18dp" android:bottomRightRadius="18dp" />
 </shape>

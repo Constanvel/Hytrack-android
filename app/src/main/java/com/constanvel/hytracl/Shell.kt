@@ -3,7 +3,9 @@ package com.constanvel.hytracl
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -12,6 +14,8 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.LayoutRes
 import androidx.annotation.StyleRes
@@ -50,6 +54,16 @@ class Spec(
     val guide: GuideStep? = null,
     /** The screen pins its own action bar in the footer in place of the bottom nav. */
     val action: Boolean = false,
+)
+
+/**
+ * Edge to edge with dark system bar icons. The app is light-only, so the default (which follows
+ * the device's dark mode) would draw white icons on the pale pages.
+ */
+fun ComponentActivity.lightEdgeToEdge() = enableEdgeToEdge(
+    SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+    // "auto" keeps the system scrim behind three-button navigation; the detector pins it light.
+    SystemBarStyle.auto(Color.argb(0xE6, 0xFF, 0xFF, 0xFF), Color.argb(0x80, 0x1B, 0x1B, 0x1B)) { false },
 )
 
 /** Navigates like a web link: returns to the screen if it is already in the stack. */
@@ -195,7 +209,9 @@ abstract class ShellActivity : AppCompatActivity() {
             finish()
             return
         }
-        enableEdgeToEdge()
+        lightEdgeToEdge()
+        // The shell paints its own band behind the navigation buttons; no system scrim on top.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) window.isNavigationBarContrastEnforced = false
         shell = ActivityShellBinding.inflate(layoutInflater)
         setContentView(shell.root)
         applyInsets()
@@ -246,8 +262,10 @@ abstract class ShellActivity : AppCompatActivity() {
                 else -> bars.bottom
             }
             shell.page.updatePadding(bottom = bar)
-            shell.bottomNav.updateLayoutParams { height = navBase + bars.bottom }
-            shell.bottomNav.updatePadding(bottom = shell.root.dp(6) + bars.bottom)
+            // The 80dp nav sits on top of the system bar rather than stretching behind it.
+            shell.bottomNav.updateLayoutParams<FrameLayout.LayoutParams> { bottomMargin = bars.bottom }
+            shell.statusBar.updateLayoutParams { height = bars.top }
+            shell.systemBar.updateLayoutParams { height = bars.bottom }
             shell.fab.updateLayoutParams<FrameLayout.LayoutParams> { bottomMargin = shell.root.dp(95) + bars.bottom }
             shell.footer.updatePadding(bottom = bottom)
             shell.scroll.updatePadding(bottom = if (shell.footer.isVisible) ime.bottom else 0)
@@ -266,18 +284,24 @@ abstract class ShellActivity : AppCompatActivity() {
         shell.root.addOnLayoutChangeListener { v, l, _, r, _, ol, _, or, _ -> if (r - l != or - ol) ViewCompat.requestApplyInsets(v) }
         shell.footer.addOnLayoutChangeListener { _, _, t, _, b, _, ot, _, ob -> if (b - t != ob - ot) ViewCompat.requestApplyInsets(shell.root) }
         shell.scroll.setOnScrollChangeListener { _: View, _: Int, _: Int, _: Int, _: Int -> tuckFab() }
-        shell.content.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> tuckFab() }
+        // Posted: the bubble is a later sibling, not yet placed while the content is being laid out.
+        shell.content.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ -> v.post(::tuckFab) }
     }
 
     private var tucked = false
 
-    /** At the page end the Hya bubble gives way to the link or button under it. */
+    /**
+     * The Hya bubble gives way to whatever it would hide for good (a button, a link or words at
+     * the page end), and to the check-in QR wherever it is, so the code stays scannable.
+     */
     private fun tuckFab() {
         val fab = shell.fab
         if (fab.visibility == View.GONE) return
         val box = fab.screenRect()
-        val covers = !shell.scroll.canScrollVertically(1) &&
-            shell.content.controls().any { Rect.intersects(it.screenRect(), box) }
+        fun under(area: Rect) = Rect.intersects(area, box)
+        val qr = shell.content.findViewById<View>(R.id.qr)
+        val covers = qr != null && qr.isShown && under(qr.screenRect()) ||
+            !shell.scroll.canScrollVertically(1) && shell.content.occupied().any(::under)
         if (covers == tucked) return
         tucked = covers
         fab.animate().cancel()
@@ -291,11 +315,23 @@ abstract class ShellActivity : AppCompatActivity() {
         return Rect(at[0], at[1], at[0] + width, at[1] + height)
     }
 
-    private fun View.controls(): Sequence<View> = when {
+    /** Where the screen holds controls, and the written part of each line of plain text. */
+    private fun View.occupied(): Sequence<Rect> = when {
         !isShown -> emptySequence()
-        isClickable -> sequenceOf(this)
-        this is ViewGroup -> (0 until childCount).asSequence().flatMap { getChildAt(it).controls() }
+        isClickable -> sequenceOf(screenRect())
+        this is TextView -> lineRects()
+        this is ViewGroup -> (0 until childCount).asSequence().flatMap { getChildAt(it).occupied() }
         else -> emptySequence()
+    }
+
+    private fun TextView.lineRects(): Sequence<Rect> {
+        val text = layout ?: return emptySequence()
+        val box = screenRect()
+        val x = box.left + totalPaddingLeft
+        val y = box.top + totalPaddingTop
+        return (0 until text.lineCount).asSequence().map {
+            Rect(x + text.getLineLeft(it).toInt(), y + text.getLineTop(it), x + text.getLineRight(it).toInt(), y + text.getLineBottom(it))
+        }
     }
 
     private var decorInset = 0
@@ -317,17 +353,19 @@ abstract class ShellActivity : AppCompatActivity() {
                     bottomMargin = decorInset
                 }
             }
-            // right -32px bottom -12px / 250px 354px, opacity .8
+            // Figma 43:2 frame 01, on its 412dp width: 192x272 flush right, ending 73dp under the
+            // bar's top edge, layer opacity 12% x image 80%. Narrower screens scale it down.
             Decor.CORNER -> {
                 view.setImageResource(R.drawable.decor_corner)
                 view.scaleType = android.widget.ImageView.ScaleType.FIT_XY
-                view.alpha = 0.8f
+                view.alpha = 0.096f
+                val art = minOf(view.dp(192), resources.displayMetrics.widthPixels * 192 / 412)
                 view.updateLayoutParams<FrameLayout.LayoutParams> {
-                    width = view.dp(250)
-                    height = view.dp(354)
+                    width = art
+                    height = art * 272 / 192
                     gravity = android.view.Gravity.BOTTOM or android.view.Gravity.END
-                    marginEnd = -view.dp(32)
-                    bottomMargin = decorInset - view.dp(12)
+                    marginEnd = 0
+                    bottomMargin = decorInset - art * 73 / 192
                 }
             }
             null -> Unit
@@ -399,15 +437,19 @@ abstract class ShellActivity : AppCompatActivity() {
         val guiding = Guide.visible(this, s.guide)
         if (guiding) guideHint(content, s.guide!!)
         content(content)
+        var besideBubble = false
         content.findViewById<View>(R.id.hyaHelp)?.let { card ->
             card.setOnClickListener { go(HyaActivity::class.java) }
-            // The Hya card already shows Hya (Figma 43:2 frame 04): no bubble on top of it.
-            if (card.isVisible) shell.fab.isVisible = false
+            // The plain card leaves room for the floating bubble; a card with its own portrait
+            // (Akun, the check-in guide) takes the bubble's place.
+            besideBubble = card.isVisible && card.tag == "beside_bubble"
+            if (card.isVisible && !besideBubble) shell.fab.isVisible = false
         }
-        if (guiding) {
-            highlight(content)
-            highlight(shell.footer)
-        }
+        // 16dp under a closing Hya card puts it level with the bubble at the end of the page.
+        val closesPage = besideBubble && content.getChildAt(content.childCount - 1)?.id == R.id.hyaHelp
+        content.updatePadding(bottom = shell.root.dp(if (closesPage) 16 else 28))
+        highlight(content, guiding)
+        highlight(shell.footer, guiding)
         cssLeading(shell.root)
     }
 
@@ -426,9 +468,13 @@ abstract class ShellActivity : AppCompatActivity() {
         hint.guideSkip.setOnClickListener { Guide.skip(this); render() }
     }
 
-    /** `.guide-active [data-guide]`: orange outline that pulses three times. */
-    private fun highlight(root: View) {
-        if (root.tag == "guide") {
+    /**
+     * `.guide-active [data-guide]`: orange outline that pulses three times while the step is active.
+     * Cleared otherwise: the pinned footer outlives a render, so its outline would stay behind.
+     */
+    private fun highlight(root: View, active: Boolean) {
+        if (root.tag == "guide" && !active) root.foreground = null
+        if (root.tag == "guide" && active) {
             // The outline sits 7dp outside the view (outline-offset), so ancestors must not clip it.
             var parent = root.parent
             while (parent is ViewGroup && parent !== shell.scroll && parent !== shell.root) {
@@ -443,6 +489,6 @@ abstract class ShellActivity : AppCompatActivity() {
                 start()
             }
         }
-        if (root is ViewGroup) for (i in 0 until root.childCount) highlight(root.getChildAt(i))
+        if (root is ViewGroup) for (i in 0 until root.childCount) highlight(root.getChildAt(i), active)
     }
 }

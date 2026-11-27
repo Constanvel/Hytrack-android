@@ -15,7 +15,6 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -318,7 +317,7 @@ abstract class DashboardActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         if (Local.role != role) return signedOut()
         section = savedInstanceState?.getString("section") ?: home()
-        enableEdgeToEdge()
+        lightEdgeToEdge()
         scroll = ScrollView(this).apply { setBackgroundColor(Hex.PAGE); isFillViewport = true }
         val page = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         scroll.addView(page)
@@ -410,8 +409,10 @@ abstract class DashboardActivity : AppCompatActivity() {
 
         topbar.removeAllViews()
         topbar.label(crumb(section), 10f, Weight.MEDIUM, Hex.MUTED).weight()
-        topbar.label(status(), 10f, Weight.SEMIBOLD, Hex.PRIMARY).wrap()
-        topbar.label(Ops.dateLabel(Ops.today()).substringAfter(", "), 10f, Weight.MEDIUM, Hex.MUTED).wrap()
+        // Below 400dp the date goes under the status: side by side they leave the crumb a letter per line.
+        val meta = if (resources.configuration.screenWidthDp >= 400) topbar else topbar.stack(2).also { it.wrap(); it.gravity = Gravity.END }
+        meta.label(status(), 10f, Weight.SEMIBOLD, Hex.PRIMARY).wrap()
+        meta.label(Ops.dateLabel(Ops.today()).substringAfter(", "), 10f, Weight.MEDIUM, Hex.MUTED).wrap()
 
         main.removeAllViews()
         error?.let { main.flag(it, Tone.WARNING) }
@@ -419,16 +420,20 @@ abstract class DashboardActivity : AppCompatActivity() {
         rendered()
     }
 
-    /** Back to Login · Petugas dan Manajemen (signed out, or the API ended the session). */
+    /**
+     * Back to Login · Petugas dan Manajemen (signed out, or the API ended the session); in
+     * Mode prototype to the first sign-in screen, where the sample roles are.
+     */
     protected fun signedOut() {
-        startActivity(Intent(this, InternalLoginActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
+        val login = if (Prototype.active) LoginActivity::class.java else InternalLoginActivity::class.java
+        startActivity(Intent(this, login).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
         finish()
     }
 
     /** After each render: a section that holds a device resource (the camera) releases it here. */
     protected open fun rendered() = Unit
 
-    protected open fun status() = "● Terhubung  ·  ${Ops.clock(java.time.Instant.now())} WIB"
+    protected open fun status() = "● ${if (Prototype.active) "Prototype" else "Terhubung"}  ·  ${Ops.clock(java.time.Instant.now())} WIB"
 
     /** DashboardTitle: 25sp title, 12sp subtitle, and its pill or button. */
     protected fun LinearLayout.heading(title: String, subtitle: String, aside: (LinearLayout.() -> Unit)? = null) {

@@ -36,7 +36,10 @@ object Ops {
     enum class StageKind(val label: String) { CHECK_IN("Check-in"), CONSULTATION("Pemeriksaan dokter"), LABORATORY("Laboratorium"), PHARMACY("Farmasi") }
     enum class StageStatus(val label: String) { PENDING("Belum"), ACTIVE("Berlangsung"), DONE("Selesai"), SKIPPED("Dilewati") }
 
-    class Clinic(val id: Int, var name: String, var room: String?)
+    class Clinic(val id: Int, var name: String, var room: String?) {
+        /** Deleted in "Data poliklinik" (Mode prototype): no new bookings, history stays. */
+        var archived = false
+    }
 
     class Doctor(val id: Int, val clinic: Clinic, val name: String, val start: LocalTime, val end: LocalTime, val prefix: Char) {
         val time get() = "${clock(start)}–${clock(end)}"
@@ -244,7 +247,7 @@ object Ops {
     /** QueueService::notify: the message lands in the patient's account, if the visit has one. */
     private fun notify(q: Queue, message: String, action: String? = null) = Local.notify(q.phone, message, action)
 
-    private fun touch(q: Queue, kind: StageKind, status: StageStatus, by: String? = STAFF) = q.stage(kind).apply {
+    fun touch(q: Queue, kind: StageKind, status: StageStatus, by: String? = STAFF) = q.stage(kind).apply {
         this.status = status
         this.by = by
         started = started ?: Instant.now()
@@ -374,6 +377,7 @@ object Ops {
     fun book(patient: Local.Patient, d: Doctor, date: LocalDate, by: String? = STAFF): Queue {
         when {
             date !in bookingDates() -> throw Refused("Tanggal kunjungan tidak tersedia.")
+            d.clinic.archived -> throw Refused("Poliklinik ini sudah tidak menerima antrean.")
             patient.active != null || queues.any { it.phone == patient.phone && it.status.active } ->
                 throw Refused("Pasien ini sudah memiliki satu kunjungan aktif.")
             quota(d, date) < 1 -> throw Refused("Kuota dokter pada tanggal ini sudah penuh.")
@@ -389,4 +393,37 @@ object Ops {
         return q
     }
 
+    /** The doctor's confirmation sends a prescription to the pharmacy. */
+    fun prescribe(q: Queue, by: String?) = Order(++orderIds, q, Rx.RECEIVED, Instant.now()).also { it.by = by; q.order = it }
+
+    fun addClinic(name: String, room: String?) {
+        clinics += Clinic(++clinicIds, name, room)
+    }
+
+    /** Mode prototype: sets these visits aside and seeds a fresh set; the result puts them back. */
+    fun isolate(): () -> Unit {
+        val keptClinics = clinics.toList()
+        val keptDoctors = doctors.toList()
+        val keptQueues = queues.toList()
+        val ids = Triple(clinicIds, queueIds, orderIds)
+        fun clear() {
+            clinics.clear()
+            doctors.clear()
+            queues.clear()
+        }
+        clear()
+        clinicIds = 0
+        queueIds = 0
+        orderIds = 0
+        seed()
+        return {
+            clear()
+            clinics += keptClinics
+            doctors += keptDoctors
+            queues += keptQueues
+            clinicIds = ids.first
+            queueIds = ids.second
+            orderIds = ids.third
+        }
+    }
 }

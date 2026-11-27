@@ -22,6 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.isVisible
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeView
 import com.journeyapps.barcodescanner.CameraPreview
@@ -195,10 +196,10 @@ class StaffActivity : DashboardActivity() {
     }
 
     /** The two buttons of an action row: mint secondary, #086f65 primary. */
-    private fun LinearLayout.buttons(footnote: String, secondary: Pair<String, Boolean>?, primary: Pair<String, Boolean>, onSecondary: () -> Unit = {}, onPrimary: () -> Unit) {
+    private fun LinearLayout.buttons(footnote: String, secondary: Pair<String, Boolean>?, primary: Pair<String, Boolean>, onSecondary: () -> Unit = {}, onPrimary: () -> Unit): TextView {
         label(footnote, 12f, color = Hex.MUTED)
         secondary?.let { (text, enabled) -> action(text, Btn.SECONDARY, enabled && !busy, onSecondary) }
-        action(primary.first, Btn.PRIMARY, primary.second && !busy, onPrimary)
+        return action(primary.first, Btn.PRIMARY, primary.second && !busy, onPrimary)
     }
 
     /** Medicine rows of a prescription (Nama obat & sediaan · Jumlah · Aturan pakai). */
@@ -641,10 +642,12 @@ class StaffActivity : DashboardActivity() {
         if (state == "returned") row.optJSONObject("order")?.let { note("Resep ${it.optString("pickup")} dikembalikan farmasi: ${it.str("returnReason") ?: "—"}. Perbaiki resep lalu konfirmasi ulang.", true) }
         if (state == "support" && support != null) note("Pasien sedang di ${support.optString("unitLabel")} (${support.optString("number")} · ${support.optString("test")}). Konfirmasi dapat dilakukan setelah hasil dikirim kembali.", true)
 
+        // The confirm button follows the note as it is typed; a render would drop the keyboard.
+        var noted: () -> Unit = {}
         val notesCard = card(8, 18, Color.WHITE, null, 16)
         notesCard.label("Catatan pemeriksaan", 20f, Weight.BOLD)
         notesCard.label("Keluhan dan hasil pemeriksaan · data contoh", 12f, Weight.MEDIUM, Hex.MUTED)
-        notesCard.field("Tuliskan keluhan dan hasil pemeriksaan pasien.", notes, InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES) { notes = it.take(2000) }
+        notesCard.field("Tuliskan keluhan dan hasil pemeriksaan pasien.", notes, InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES) { notes = it.take(2000); noted() }
             .apply { minLines = 3; isEnabled = !locked; background = shape(Hex.PAGE, 10) }
 
         val recipe = card(10, 18, Color.WHITE, null, 16)
@@ -682,11 +685,18 @@ class StaffActivity : DashboardActivity() {
         panel.label("Resep dikirim setelah dokter mengonfirmasi. Petugas poli tidak dapat mengesahkan resep.", 12f, color = Hex.MUTED)
         panel.label("Dokter: ${me?.str("name") ?: row.optString("doctor")}", 12f, Weight.MEDIUM, Hex.PRIMARY)
 
-        buttons("*Penunjang bila dirujuk · resep contoh, bukan instruksi klinis.", "Simpan draf" to !locked,
-            (if (pharmacy) "Konfirmasi & kirim resep" else "Konfirmasi pemeriksaan") to (!locked && examined && notes.isNotBlank() && (state == "serving" || state == "review" || state == "returned")),
+        val may = !locked && examined && (state == "serving" || state == "review" || state == "returned")
+        val confirm = buttons("*Penunjang bila dirujuk · resep contoh, bukan instruksi klinis.", "Simpan draf" to !locked,
+            (if (pharmacy) "Konfirmasi & kirim resep" else "Konfirmasi pemeriksaan") to (may && notes.isNotBlank()),
             onSecondary = { examPick = id; send("pemeriksaan/$id", examPayload()) { formFor = null } },
         ) { confirmExam(row, pharmacy) }
-        if (notes.isBlank() && !locked) footnote("Tuliskan catatan pemeriksaan terlebih dahulu untuk mengonfirmasi.")
+        val missing = footnote("Tuliskan catatan pemeriksaan terlebih dahulu untuk mengonfirmasi.")
+        noted = {
+            confirm.isEnabled = may && notes.isNotBlank() && !busy
+            confirm.alpha = if (confirm.isEnabled) 1f else 0.55f
+            missing.isVisible = notes.isBlank() && !locked
+        }
+        noted()
     }
 
     /** Tambah / ubah obat: name, form, quantity, dosage and timing; three are required. */

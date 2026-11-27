@@ -284,18 +284,23 @@ abstract class ShellActivity : AppCompatActivity() {
         shell.root.addOnLayoutChangeListener { v, l, _, r, _, ol, _, or, _ -> if (r - l != or - ol) ViewCompat.requestApplyInsets(v) }
         shell.footer.addOnLayoutChangeListener { _, _, t, _, b, _, ot, _, ob -> if (b - t != ob - ot) ViewCompat.requestApplyInsets(shell.root) }
         shell.scroll.setOnScrollChangeListener { _: View, _: Int, _: Int, _: Int, _: Int -> tuckFab() }
-        shell.content.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> tuckFab() }
+        // Posted: the bubble is a later sibling, not yet placed while the content is being laid out.
+        shell.content.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ -> v.post(::tuckFab) }
     }
 
     private var tucked = false
 
-    /** At the page end the Hya bubble gives way to the link or button under it. */
+    /**
+     * The Hya bubble gives way to the link or button under it at the page end, and to the
+     * check-in QR wherever it is, so the code stays scannable.
+     */
     private fun tuckFab() {
         val fab = shell.fab
         if (fab.visibility == View.GONE) return
         val box = fab.screenRect()
-        val covers = !shell.scroll.canScrollVertically(1) &&
-            shell.content.controls().any { Rect.intersects(it.screenRect(), box) }
+        fun under(view: View) = view.isShown && Rect.intersects(view.screenRect(), box)
+        val covers = shell.content.findViewById<View>(R.id.qr)?.let(::under) == true ||
+            !shell.scroll.canScrollVertically(1) && shell.content.controls().any(::under)
         if (covers == tucked) return
         tucked = covers
         fab.animate().cancel()

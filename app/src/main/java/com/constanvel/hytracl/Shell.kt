@@ -291,16 +291,17 @@ abstract class ShellActivity : AppCompatActivity() {
     private var tucked = false
 
     /**
-     * The Hya bubble gives way to the link or button under it at the page end, and to the
-     * check-in QR wherever it is, so the code stays scannable.
+     * The Hya bubble gives way to whatever it would hide for good (a button, a link or words at
+     * the page end), and to the check-in QR wherever it is, so the code stays scannable.
      */
     private fun tuckFab() {
         val fab = shell.fab
         if (fab.visibility == View.GONE) return
         val box = fab.screenRect()
-        fun under(view: View) = view.isShown && Rect.intersects(view.screenRect(), box)
-        val covers = shell.content.findViewById<View>(R.id.qr)?.let(::under) == true ||
-            !shell.scroll.canScrollVertically(1) && shell.content.controls().any(::under)
+        fun under(area: Rect) = Rect.intersects(area, box)
+        val qr = shell.content.findViewById<View>(R.id.qr)
+        val covers = qr != null && qr.isShown && under(qr.screenRect()) ||
+            !shell.scroll.canScrollVertically(1) && shell.content.occupied().any(::under)
         if (covers == tucked) return
         tucked = covers
         fab.animate().cancel()
@@ -314,11 +315,23 @@ abstract class ShellActivity : AppCompatActivity() {
         return Rect(at[0], at[1], at[0] + width, at[1] + height)
     }
 
-    private fun View.controls(): Sequence<View> = when {
+    /** Where the screen holds controls, and the written part of each line of plain text. */
+    private fun View.occupied(): Sequence<Rect> = when {
         !isShown -> emptySequence()
-        isClickable -> sequenceOf(this)
-        this is ViewGroup -> (0 until childCount).asSequence().flatMap { getChildAt(it).controls() }
+        isClickable -> sequenceOf(screenRect())
+        this is TextView -> lineRects()
+        this is ViewGroup -> (0 until childCount).asSequence().flatMap { getChildAt(it).occupied() }
         else -> emptySequence()
+    }
+
+    private fun TextView.lineRects(): Sequence<Rect> {
+        val text = layout ?: return emptySequence()
+        val box = screenRect()
+        val x = box.left + totalPaddingLeft
+        val y = box.top + totalPaddingTop
+        return (0 until text.lineCount).asSequence().map {
+            Rect(x + text.getLineLeft(it).toInt(), y + text.getLineTop(it), x + text.getLineRight(it).toInt(), y + text.getLineBottom(it))
+        }
     }
 
     private var decorInset = 0

@@ -353,8 +353,9 @@ abstract class ShellActivity : AppCompatActivity() {
                     bottomMargin = decorInset
                 }
             }
-            // Figma 43:2 frame 01, on its 412dp width: 192x272 flush right, ending 73dp under the
-            // bar's top edge, layer opacity 12% x image 80%. Narrower screens scale it down.
+            // Figma 43:2 frame 01, on its 412dp width: a 192x272 layer ending 73dp under the bar's
+            // top edge, layer opacity 12% x image 80%. Narrower screens scale it down. The art's
+            // right 44 of 346px are blank or soft: pushed out, so the shape meets the screen edge.
             Decor.CORNER -> {
                 view.setImageResource(R.drawable.decor_corner)
                 view.scaleType = android.widget.ImageView.ScaleType.FIT_XY
@@ -364,7 +365,7 @@ abstract class ShellActivity : AppCompatActivity() {
                     width = art
                     height = art * 272 / 192
                     gravity = android.view.Gravity.BOTTOM or android.view.Gravity.END
-                    marginEnd = 0
+                    marginEnd = -(art * 44 / 346)
                     bottomMargin = decorInset - art * 73 / 192
                 }
             }

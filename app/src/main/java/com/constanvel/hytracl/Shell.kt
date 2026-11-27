@@ -404,10 +404,8 @@ abstract class ShellActivity : AppCompatActivity() {
             // The Hya card already shows Hya (Figma 43:2 frame 04): no bubble on top of it.
             if (card.isVisible) shell.fab.isVisible = false
         }
-        if (guiding) {
-            highlight(content)
-            highlight(shell.footer)
-        }
+        highlight(content, guiding)
+        highlight(shell.footer, guiding)
         cssLeading(shell.root)
     }
 
@@ -426,9 +424,13 @@ abstract class ShellActivity : AppCompatActivity() {
         hint.guideSkip.setOnClickListener { Guide.skip(this); render() }
     }
 
-    /** `.guide-active [data-guide]`: orange outline that pulses three times. */
-    private fun highlight(root: View) {
-        if (root.tag == "guide") {
+    /**
+     * `.guide-active [data-guide]`: orange outline that pulses three times while the step is active.
+     * Cleared otherwise: the pinned footer outlives a render, so its outline would stay behind.
+     */
+    private fun highlight(root: View, active: Boolean) {
+        if (root.tag == "guide" && !active) root.foreground = null
+        if (root.tag == "guide" && active) {
             // The outline sits 7dp outside the view (outline-offset), so ancestors must not clip it.
             var parent = root.parent
             while (parent is ViewGroup && parent !== shell.scroll && parent !== shell.root) {
@@ -443,6 +445,6 @@ abstract class ShellActivity : AppCompatActivity() {
                 start()
             }
         }
-        if (root is ViewGroup) for (i in 0 until root.childCount) highlight(root.getChildAt(i))
+        if (root is ViewGroup) for (i in 0 until root.childCount) highlight(root.getChildAt(i), active)
     }
 }

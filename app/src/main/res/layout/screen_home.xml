@@ -116,12 +116,15 @@
             tools:text="Ulangi panduan dari awal" />
     </LinearLayout>
 
-    <!-- .inline-link, pulled up 12dp: under the 44dp text button the 20dp gap reads as twice that. -->
+    <!-- .inline-link, pulled up 12dp: under the 44dp text button the 20dp gap reads as twice that.
+         It closes the page beside the floating Hya bubble (Figma 43:2 frame 01), so it only takes
+         its own width and stops 66dp short of the edge: under the bubble, the bubble would hide. -->
     <LinearLayout
         android:id="@+id/helpLink"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="-12dp"
+        android:layout_marginEnd="66dp"
         android:clickable="true"
         android:focusable="true"
         android:gravity="center_vertical"
@@ -143,8 +146,4 @@
             android:text="@string/butuh_bantuan_hubungi_petugas"
             android:textColor="@color/primary" />
     </LinearLayout>
-
-    <include
-        android:id="@+id/hyaHelp"
-        layout="@layout/view_hya_help" />
 </merge>

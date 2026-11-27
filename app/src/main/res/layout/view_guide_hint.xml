@@ -57,16 +57,17 @@
             style="@style/Widget.HyTrack.Button"
             android:layout_width="wrap_content"
             android:minHeight="44dp"
-            android:paddingStart="24dp"
+            android:paddingStart="20dp"
             android:paddingTop="0dp"
-            android:paddingEnd="24dp"
+            android:paddingEnd="20dp"
             android:paddingBottom="0dp"
             android:text="@string/mengerti" />
 
+        <!-- 20dp + 12dp keep "Lewati panduan" on one line on a 320dp screen. -->
         <TextView
             android:id="@+id/guideSkip"
             style="@style/Widget.HyTrack.TextButton"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="12dp"
             android:text="@string/lewati_panduan" />
     </LinearLayout>
 </LinearLayout>

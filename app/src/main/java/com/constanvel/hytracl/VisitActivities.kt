@@ -97,6 +97,9 @@ class VisitActivity : ShellActivity() {
             getString(R.string.perjalanan_menit_adalah_perkiraan_umum, v.travelMinutes)
         ahead.text = getString(R.string.pasien, v.ahead)
         wait.text = getString(R.string.wait_minutes, v.waitRange ?: "—")
+        // Placed for the 412dp frame: on a narrower screen or with large text they cover the words.
+        val roomy = resources.configuration.let { it.screenWidthDp / it.fontScale >= 380 }
+        listOf(ticketBadge, ticketPulse, ticketDots).forEach { it.isVisible = roomy }
         showQr.setOnClickListener { go(CheckInActivity::class.java) }
         cancel.setOnClickListener { visit { Demo.cancel() } }
     }

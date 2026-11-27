@@ -9,7 +9,8 @@
         style="@style/Widget.HyTrack.Notice"
         android:text="@string/antrean_berhasil_diambil" />
 
-    <!-- .card.marked.ticket-card, with the "+" badge and the pulse line (Figma 43:2 frame 04). -->
+    <!-- .card.marked.ticket-card, with the "+" badge and the pulse line (Figma 43:2 frame 04).
+         The badge, pulse and dots are placed for the wide frame; code hides them when text needs the room. -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -62,6 +63,7 @@
     </LinearLayout>
 
         <TextView
+            android:id="@+id/ticketBadge"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="top|end"
@@ -78,6 +80,7 @@
             tools:ignore="HardcodedText" />
 
         <ImageView
+            android:id="@+id/ticketPulse"
             android:layout_width="137dp"
             android:layout_height="53dp"
             android:layout_gravity="top|end"
@@ -118,6 +121,7 @@
         android:clipChildren="false">
 
         <ImageView
+            android:id="@+id/ticketDots"
             android:layout_width="86dp"
             android:layout_height="121dp"
             android:layout_gravity="top|end"

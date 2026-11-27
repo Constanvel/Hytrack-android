@@ -1,65 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- HyaHelp (.hya-help, Figma 43:2 frame 04): 65dp card with an arrow, and Hya's portrait
-     flush with the card's height at its right end, 13dp past the edge (into the gutter). -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- HyaHelp (.hya-help, Figma 43:2 frame 04): title, "Tanya Hya" and an arrow. Hya herself is
+     the floating bubble; the card ends 66dp early (bubble 67dp + 15dp margin - 24dp gutter,
+     plus 8dp of air) so the two never overlap. The tag tells the shell to keep the bubble. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="65dp"
-    android:layout_marginEnd="-13dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="66dp"
+    android:background="@drawable/bg_hya_help"
     android:clickable="true"
     android:contentDescription="@string/ask_hya"
-    android:focusable="true">
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:minHeight="65dp"
+    android:orientation="horizontal"
+    android:paddingStart="20dp"
+    android:paddingTop="12dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="12dp"
+    android:tag="beside_bubble">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginEnd="13dp"
-        android:background="@drawable/bg_hya_help"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="21dp">
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="0dp"
+        <TextView
+            style="@style/Text.Strong"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:breakStrategy="balanced"
+            android:lineHeight="19.6sp"
+            android:text="@string/ada_yang_bisa_hya_bantu" />
 
-            <TextView
-                style="@style/Text.Strong"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ada_yang_bisa_hya_bantu" />
-
-            <TextView
-                style="@style/Text.Link"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/ask_hya"
-                android:textSize="13sp" />
-        </LinearLayout>
-
-        <!-- Arrow at x 233–251 of the 364dp card. -->
-        <ImageView
-            android:layout_width="17.8dp"
-            android:layout_height="13.8dp"
-            android:layout_marginEnd="113dp"
-            android:importantForAccessibility="no"
-            android:src="@drawable/ic_arrow" />
+        <TextView
+            style="@style/Text.Link"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/ask_hya"
+            android:textSize="13sp" />
     </LinearLayout>
 
-    <!-- .avatar-large: white border and hairline ring, like the Hya bubble. -->
-    <FrameLayout
-        android:layout_width="65dp"
-        android:layout_height="65dp"
-        android:layout_gravity="end"
-        android:background="@drawable/bg_fab_ring"
-        android:importantForAccessibility="noHideDescendants">
-
-        <include
-            layout="@layout/view_avatar_large"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
-            android:layout_gravity="center" />
-    </FrameLayout>
-</FrameLayout>
+    <ImageView
+        android:layout_width="17.8dp"
+        android:layout_height="13.8dp"
+        android:layout_marginStart="12dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_arrow" />
+</LinearLayout>

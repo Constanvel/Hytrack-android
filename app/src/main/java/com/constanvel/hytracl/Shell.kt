@@ -401,11 +401,17 @@ abstract class ShellActivity : AppCompatActivity() {
         val guiding = Guide.visible(this, s.guide)
         if (guiding) guideHint(content, s.guide!!)
         content(content)
+        var besideBubble = false
         content.findViewById<View>(R.id.hyaHelp)?.let { card ->
             card.setOnClickListener { go(HyaActivity::class.java) }
-            // The Hya card already shows Hya (Figma 43:2 frame 04): no bubble on top of it.
-            if (card.isVisible) shell.fab.isVisible = false
+            // The plain card leaves room for the floating bubble; a card with its own portrait
+            // (Akun, the check-in guide) takes the bubble's place.
+            besideBubble = card.isVisible && card.tag == "beside_bubble"
+            if (card.isVisible && !besideBubble) shell.fab.isVisible = false
         }
+        // 16dp under a closing Hya card puts it level with the bubble at the end of the page.
+        val closesPage = besideBubble && content.getChildAt(content.childCount - 1)?.id == R.id.hyaHelp
+        content.updatePadding(bottom = shell.root.dp(if (closesPage) 16 else 28))
         highlight(content, guiding)
         highlight(shell.footer, guiding)
         cssLeading(shell.root)

@@ -3,7 +3,9 @@ package com.constanvel.hytracl
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -12,6 +14,8 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.LayoutRes
 import androidx.annotation.StyleRes
@@ -50,6 +54,16 @@ class Spec(
     val guide: GuideStep? = null,
     /** The screen pins its own action bar in the footer in place of the bottom nav. */
     val action: Boolean = false,
+)
+
+/**
+ * Edge to edge with dark system bar icons. The app is light-only, so the default (which follows
+ * the device's dark mode) would draw white icons on the pale pages.
+ */
+fun ComponentActivity.lightEdgeToEdge() = enableEdgeToEdge(
+    SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+    // "auto" keeps the system scrim behind three-button navigation; the detector pins it light.
+    SystemBarStyle.auto(Color.argb(0xE6, 0xFF, 0xFF, 0xFF), Color.argb(0x80, 0x1B, 0x1B, 0x1B)) { false },
 )
 
 /** Navigates like a web link: returns to the screen if it is already in the stack. */
@@ -195,7 +209,9 @@ abstract class ShellActivity : AppCompatActivity() {
             finish()
             return
         }
-        enableEdgeToEdge()
+        lightEdgeToEdge()
+        // The shell paints its own band behind the navigation buttons; no system scrim on top.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) window.isNavigationBarContrastEnforced = false
         shell = ActivityShellBinding.inflate(layoutInflater)
         setContentView(shell.root)
         applyInsets()
@@ -246,8 +262,10 @@ abstract class ShellActivity : AppCompatActivity() {
                 else -> bars.bottom
             }
             shell.page.updatePadding(bottom = bar)
-            shell.bottomNav.updateLayoutParams { height = navBase + bars.bottom }
-            shell.bottomNav.updatePadding(bottom = shell.root.dp(6) + bars.bottom)
+            // The 80dp nav sits on top of the system bar rather than stretching behind it.
+            shell.bottomNav.updateLayoutParams<FrameLayout.LayoutParams> { bottomMargin = bars.bottom }
+            shell.statusBar.updateLayoutParams { height = bars.top }
+            shell.systemBar.updateLayoutParams { height = bars.bottom }
             shell.fab.updateLayoutParams<FrameLayout.LayoutParams> { bottomMargin = shell.root.dp(95) + bars.bottom }
             shell.footer.updatePadding(bottom = bottom)
             shell.scroll.updatePadding(bottom = if (shell.footer.isVisible) ime.bottom else 0)

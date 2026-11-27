@@ -22,7 +22,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import androidx.activity.addCallback
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -77,7 +76,7 @@ private val ViewAuthFieldBinding.value get() = input.text.toString()
 
 /** Edge-to-edge insets plus the 412px column of auth.css on wide screens. */
 private fun AppCompatActivity.authFrame(scroll: View, main: LinearLayout, gutterDp: Int = 24) {
-    enableEdgeToEdge()
+    lightEdgeToEdge()
     val gutter = main.dp(gutterDp)
     val bottom = main.paddingBottom
     ViewCompat.setOnApplyWindowInsetsListener(scroll) { _, insets ->

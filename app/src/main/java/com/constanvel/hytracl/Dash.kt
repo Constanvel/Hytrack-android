@@ -15,7 +15,6 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -318,7 +317,7 @@ abstract class DashboardActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         if (Local.role != role) return signedOut()
         section = savedInstanceState?.getString("section") ?: home()
-        enableEdgeToEdge()
+        lightEdgeToEdge()
         scroll = ScrollView(this).apply { setBackgroundColor(Hex.PAGE); isFillViewport = true }
         val page = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         scroll.addView(page)

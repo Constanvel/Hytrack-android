@@ -5,6 +5,10 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="bg">#F6F8F4</color>
+    <!-- Where atmos_mint starts. -->
+    <color name="page_start">#DDEFE7</color>
+    <!-- Where bg_page's closing fade ends (#CCE0EFE6 over bg). -->
+    <color name="page_end">#E4F1E9</color>
     <color name="text">#173D3B</color>
     <color name="muted">#5C706C</color>
     <color name="primary">#086F65</color>

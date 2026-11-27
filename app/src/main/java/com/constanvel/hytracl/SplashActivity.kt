@@ -7,7 +7,6 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.provider.Settings
 import android.view.animation.PathInterpolator
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
@@ -30,7 +29,7 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         // Already signed in (the app was only closed): no brand moment, straight back in.
         if (Demo.inSession) return route()
-        enableEdgeToEdge()
+        lightEdgeToEdge()
         val b = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(b.root)
 

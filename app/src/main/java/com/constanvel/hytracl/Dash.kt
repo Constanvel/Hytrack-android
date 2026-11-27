@@ -409,8 +409,10 @@ abstract class DashboardActivity : AppCompatActivity() {
 
         topbar.removeAllViews()
         topbar.label(crumb(section), 10f, Weight.MEDIUM, Hex.MUTED).weight()
-        topbar.label(status(), 10f, Weight.SEMIBOLD, Hex.PRIMARY).wrap()
-        topbar.label(Ops.dateLabel(Ops.today()).substringAfter(", "), 10f, Weight.MEDIUM, Hex.MUTED).wrap()
+        // Below 400dp the date goes under the status: side by side they leave the crumb a letter per line.
+        val meta = if (resources.configuration.screenWidthDp >= 400) topbar else topbar.stack(2).also { it.wrap(); it.gravity = Gravity.END }
+        meta.label(status(), 10f, Weight.SEMIBOLD, Hex.PRIMARY).wrap()
+        meta.label(Ops.dateLabel(Ops.today()).substringAfter(", "), 10f, Weight.MEDIUM, Hex.MUTED).wrap()
 
         main.removeAllViews()
         error?.let { main.flag(it, Tone.WARNING) }

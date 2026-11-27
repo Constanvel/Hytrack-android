@@ -33,6 +33,8 @@ object Api {
 
     /** Calls the API and returns the JSON body; a non-2xx answer throws [Failure] with Laravel's message. */
     fun call(method: String, path: String, body: JSONObject? = null, upload: Upload? = null, bearer: String? = token): JSONObject {
+        // Mode prototype never reaches the network: its sample data answers instead.
+        if (Prototype.active) return Prototype.call(method, path, body, upload)
         val connection = open(path) ?: throw Failure(0, OFFLINE)
         try {
             connection.requestMethod = method
@@ -59,6 +61,7 @@ object Api {
 
     /** Downloads a protected file (a support result) into [into]; the server decides who may read it. */
     fun download(path: String, into: File): File {
+        if (Prototype.active) return Prototype.download(path, into)
         val connection = open(path) ?: throw Failure(0, OFFLINE)
         try {
             token?.let { connection.setRequestProperty("Authorization", "Bearer $it") }
@@ -135,9 +138,17 @@ object Api {
 
     /** Retires the token on the server too; signing out works offline as well. */
     fun logout() {
-        val current = token ?: return
+        val current = token
         clear()
+        if (current == null) return
         thread { runCatching { call("POST", "keluar", bearer = current) } }
+    }
+
+    /** Mode prototype's sample staff or manager account; there is no token behind it. */
+    fun become(sample: JSONObject) {
+        check(Prototype.active)
+        clear()
+        account = sample
     }
 
     private fun clear() {
@@ -145,7 +156,7 @@ object Api {
         account = null
     }
 
-    fun query(vararg pairs: Pair<String, Any?>) = pairs.filter { it.second != null && it.second.toString().isNotEmpty() }
+    fun query(vararg pairs: Pair<String, Any?>) = pairs.filter { it.second != null }
         .joinToString("&", prefix = "?") { (k, v) -> "$k=" + URLEncoder.encode(v.toString(), "UTF-8") }
 
     const val OFFLINE = "Tidak dapat terhubung ke server HyTrack. Periksa koneksi lalu coba lagi."

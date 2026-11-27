@@ -59,10 +59,39 @@ object Local {
         }
 
     init {
+        seedAccounts()
+    }
+
+    private fun seedAccounts() {
         seed("Siti Aminah", "6281255500842", "00-08-42", "1988-05-12", "female")
         // A second patient account to accept Siti's companion invitation in the demo.
         seed("Ahmad Fauzi", "6281255500843", null, "1985-02-20", "male")
     }
+
+    /** Mode prototype: sets the accounts aside and seeds fresh ones; the result puts them back. */
+    fun isolate(): () -> Unit {
+        val keptAccounts = accounts.toList()
+        val keptShares = shares.toList()
+        val keptIds = ids
+        val signedIn = current
+        accounts.clear()
+        shares.clear()
+        ids = 0
+        current = null
+        seedAccounts()
+        return {
+            accounts.clear()
+            accounts += keptAccounts
+            shares.clear()
+            shares += keptShares
+            ids = keptIds
+            current = signedIn
+        }
+    }
+
+    /** "•••• 0842": the end of the medical record number, for a patient with an account here. */
+    fun recordNumber(phone: String?) = accounts.firstOrNull { it.phone == phone }?.self?.medicalRecord
+        ?.filter(Char::isDigit)?.takeLast(4)?.let { "•••• $it" }
 
     private fun seed(name: String, phone: String, rm: String?, birth: String, gender: String) {
         val record = Record(++ids, name, phone, rm).apply {
